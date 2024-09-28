@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,6 +15,7 @@
             --shadow-light: rgba(255, 255, 255, 0.9);
             --shadow-dark: rgba(0, 0, 0, 0.15);
         }
+
 
         body, html {
             font-family: 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
@@ -391,6 +393,8 @@
     const resultsContainer = document.getElementById('resultsContainer');
     const autocompleteList = document.getElementById('autocomplete-list');
     const didYouMeanDiv = document.getElementById('didYouMean');
+    const advancedSearchBtn = document.getElementById('advancedSearchBtn');
+    const advancedSearchModal = document.getElementById('advancedSearchModal');
 
     let selectedAuthorities = new Set();
     let selectedClasses = new Set();
@@ -405,14 +409,19 @@
     const termFrequency = new Map();
     const bigramIndex = new Map();
     const soundexIndex = new Map();
+    const trigramIndex = new Map();
+    const metaphoneIndex = new Map();
 
     // Precompute indices
+    console.time('Indexing');
     drugs.forEach((drug, index) => {
         const name = drug.Name.toLowerCase();
         nameIndex.set(name, index);
         updateTermFrequency(name);
         updateBigramIndex(name);
+        updateTrigramIndex(name);
         updateSoundexIndex(name);
+        updateMetaphoneIndex(name);
 
         drug.class.toLowerCase().split(' , ').forEach(cls => {
             if (!classIndex.has(cls)) {
@@ -421,9 +430,12 @@
             classIndex.get(cls).add(index);
             updateTermFrequency(cls);
             updateBigramIndex(cls);
+            updateTrigramIndex(cls);
             updateSoundexIndex(cls);
+            updateMetaphoneIndex(cls);
         });
     });
+    console.timeEnd('Indexing');
 
     function updateTermFrequency(term) {
         termFrequency.set(term, (termFrequency.get(term) || 0) + 1);
@@ -439,12 +451,30 @@
         }
     }
 
+    function updateTrigramIndex(term) {
+        for (let i = 0; i < term.length - 2; i++) {
+            const trigram = term.slice(i, i + 3);
+            if (!trigramIndex.has(trigram)) {
+                trigramIndex.set(trigram, new Set());
+            }
+            trigramIndex.get(trigram).add(term);
+        }
+    }
+
     function updateSoundexIndex(term) {
         const soundex = getSoundex(term);
         if (!soundexIndex.has(soundex)) {
             soundexIndex.set(soundex, new Set());
         }
         soundexIndex.get(soundex).add(term);
+    }
+
+    function updateMetaphoneIndex(term) {
+        const metaphone = getMetaphone(term);
+        if (!metaphoneIndex.has(metaphone)) {
+            metaphoneIndex.set(metaphone, new Set());
+        }
+        metaphoneIndex.get(metaphone).add(term);
     }
 
     function getSoundex(str) {
@@ -463,6 +493,31 @@
             .filter((v, i, arr) => i === 0 || v !== arr[i - 1])
             .filter(v => v !== '0');
         return (firstLetter + soundex.join('')).padEnd(4, '0').slice(0, 4).toUpperCase();
+    }
+
+    function getMetaphone(word) {
+        const rules = [
+            { regex: /^kn|gn|pn|ae|wr/, replace: '' },
+            { regex: /^x/, replace: 's' },
+            { regex: /^wh/, replace: 'w' },
+            { regex: /mb$/, replace: 'm' },
+            { regex: /ck/, replace: 'k' },
+            { regex: /ph/, replace: 'f' },
+            { regex: /[aeiou]/g, replace: '' },
+            { regex: /[bfpv]+/, replace: 'b' },
+            { regex: /[cgjkqsxz]+/, replace: 'k' },
+            { regex: /[dt]+/, replace: 't' },
+            { regex: /[l]+/, replace: 'l' },
+            { regex: /[mn]+/, replace: 'm' },
+            { regex: /[r]+/, replace: 'r' }
+        ];
+
+        let metaphone = word.toLowerCase();
+        rules.forEach(rule => {
+            metaphone = metaphone.replace(rule.regex, rule.replace);
+        });
+
+        return metaphone.slice(0, 4).toUpperCase();
     }
 
     function populateDropdown(dropdown, items, type) {
@@ -626,6 +681,7 @@
     searchBar.addEventListener('input', debouncedUpdateResults);
 
     function filterDrugs(searchTerm) {
+        console.time('Filtering');
         const matchingIndexes = new Set();
         // Search by name
         for (const [name, index] of nameIndex) {
@@ -639,13 +695,15 @@
                 indexes.forEach(index => matchingIndexes.add(index));
             }
         }
-        return Array.from(matchingIndexes)
+        const filteredDrugs = Array.from(matchingIndexes)
             .map(index => drugs[index])
             .filter(drug =>
                 (selectedAuthorities.size === 0 || selectedAuthorities.has(drug.Authority)) &&
                 (selectedClasses.size === 0 || drug.class.split(' , ').some(c => selectedClasses.has(c))) &&
                 (selectedForms.size === 0 || selectedForms.has(drug.form))
             );
+        console.timeEnd('Filtering');
+        return filteredDrugs;
     }
 
     function showResults(matches) {
@@ -693,7 +751,7 @@
             for (let j = 1; j <= a.length; j++) {
                 if (b.charAt(i - 1) === a.charAt(j - 1)) {
                     matrix[i][j] = matrix[i - 1][j - 1];
-                } else {
+              } else {
                     matrix[i][j] = Math.min(
                         matrix[i - 1][j - 1] + 1, // substitution
                         matrix[i][j - 1] + 1,     // insertion
@@ -741,7 +799,7 @@
     function getBigramSimilarity(term1, term2) {
         const getBigrams = str => {
             const bigrams = new Set();
-            for (let i =0; i < str.length - 1; i++) {
+            for (let i = 0; i < str.length - 1; i++) {
                 bigrams.add(str.slice(i, i + 2));
             }
             return bigrams;
@@ -752,11 +810,27 @@
         return (2 * intersection.size) / (bigrams1.size + bigrams2.size);
     }
 
+    function getTrigramSimilarity(term1, term2) {
+        const getTrigrams = str => {
+            const trigrams = new Set();
+            for (let i = 0; i < str.length - 2; i++) {
+                trigrams.add(str.slice(i, i + 3));
+            }
+            return trigrams;
+        };
+        const trigrams1 = getTrigrams(term1);
+        const trigrams2 = getTrigrams(term2);
+        const intersection = new Set([...trigrams1].filter(x => trigrams2.has(x)));
+        return (2 * intersection.size) / (trigrams1.size + trigrams2.size);
+    }
+
     function findSimilarTerms(searchTerm) {
+        console.time('Finding similar terms');
         const searchTermLower = searchTerm.toLowerCase();
         const searchTermSoundex = getSoundex(searchTermLower);
+        const searchTermMetaphone = getMetaphone(searchTermLower);
         
-        // Get potential matches using bigram and soundex indices
+        // Get potential matches using bigram, trigram, soundex, and metaphone indices
         const potentialMatches = new Set();
         for (let i = 0; i < searchTermLower.length - 1; i++) {
             const bigram = searchTermLower.slice(i, i + 2);
@@ -764,23 +838,35 @@
                 bigramIndex.get(bigram).forEach(term => potentialMatches.add(term));
             }
         }
+        for (let i = 0; i < searchTermLower.length - 2; i++) {
+            const trigram = searchTermLower.slice(i, i + 3);
+            if (trigramIndex.has(trigram)) {
+                trigramIndex.get(trigram).forEach(term => potentialMatches.add(term));
+            }
+        }
         if (soundexIndex.has(searchTermSoundex)) {
             soundexIndex.get(searchTermSoundex).forEach(term => potentialMatches.add(term));
         }
+        if (metaphoneIndex.has(searchTermMetaphone)) {
+            metaphoneIndex.get(searchTermMetaphone).forEach(term => potentialMatches.add(term));
+        }
 
-        return [...potentialMatches].map(term => {
+        const results = [...potentialMatches].map(term => {
             const termLower = term.toLowerCase();
             const editDistance = levenshteinDistance(searchTermLower, termLower);
             const jaroWinklerSimilarity = getJaroWinklerSimilarity(searchTermLower, termLower);
             const bigramSimilarity = getBigramSimilarity(searchTermLower, termLower);
+            const trigramSimilarity = getTrigramSimilarity(searchTermLower, termLower);
             const frequency = termFrequency.get(termLower) || 0;
             
             // Calculate a comprehensive similarity score
             const similarityScore = 
                 (1 / (editDistance + 1)) * 10 +
                 (getSoundex(termLower) === searchTermSoundex ? 5 : 0) +
+                (getMetaphone(termLower) === searchTermMetaphone ? 5 : 0) +
                 jaroWinklerSimilarity * 20 +
                 bigramSimilarity * 15 +
+                trigramSimilarity * 10 +
                 Math.log(frequency + 1) * 2 -
                 Math.abs(termLower.length - searchTermLower.length) * 0.5;
             
@@ -788,6 +874,9 @@
         }).filter(({ similarityScore }) => similarityScore > 0)
           .sort((a, b) => b.similarityScore - a.similarityScore)
           .slice(0, 5);
+
+        console.timeEnd('Finding similar terms');
+        return results;
     }
 
     function showDidYouMean(searchTerm) {
@@ -811,6 +900,7 @@
     }
 
     function updateResults() {
+        console.time('Updating results');
         const searchTerm = searchBar.value.trim().toLowerCase();
         didYouMeanDiv.innerHTML = '';
         
@@ -824,6 +914,7 @@
         } else {
             resultsContainer.innerHTML = '';
         }
+        console.timeEnd('Updating results');
     }
 
     function debounce(func, delay) {
@@ -836,8 +927,45 @@
         }
     }
 
+    // Advanced search functionality
+    advancedSearchBtn.addEventListener('click', () => {
+        advancedSearchModal.style.display = 'block';
+    });
+
+    document.querySelector('.close-modal').addEventListener('click', () => {
+        advancedSearchModal.style.display = 'none';
+    });
+
+    document.getElementById('advancedSearchForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('advancedName').value.toLowerCase();
+        const authority = document.getElementById('advancedAuthority').value;
+        const drugClass = document.getElementById('advancedClass').value.toLowerCase();
+        const form = document.getElementById('advancedForm').value;
+        const concentration = document.getElementById('advancedConcentration').value;
+
+        const advancedResults = drugs.filter(drug => 
+            (!name || drug.Name.toLowerCase().includes(name)) &&
+            (!authority || drug.Authority === authority) &&
+            (!drugClass || drug.class.toLowerCase().includes(drugClass)) &&
+            (!form || drug.form === form) &&
+            (!concentration || drug.Conc.includes(concentration))
+        );
+
+        showResults(advancedResults);
+        advancedSearchModal.style.display = 'none';
+    });
+
     // Initialize the search interface
     updateResults();
+
+    // Performance monitoring
+    const observer = new PerformanceObserver((list) => {
+        list.getEntries().forEach((entry) => {
+            console.log('Long task:', entry.name, 'Duration:', entry.duration);
+        });
+    });
+    observer.observe({entryTypes: ['longtask']});
 });
     </script>
 </body>
