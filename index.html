@@ -1,11 +1,9 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RxExplorer</title>
+    <title>Lx Search F1</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
 :root {
@@ -132,6 +130,19 @@ h1::after {
         10px 10px 20px var(--shadow-dark),
         -10px -10px 20px var(--shadow-light);
 }
+
+.filter-btn.filter-applied:not(.active) {
+    font-weight: 600; 
+    box-shadow: 
+        inset 5px 5px 10px var(--shadow-dark), 
+        inset -5px -5px 10px var(--shadow-light);
+    color: var(--secondary-color); 
+}
+
+.filter-btn.filter-applied {
+    font-weight: 600;
+}
+
 
 .filter-dropdown {
     background-color: var(--bg-color);
@@ -379,6 +390,7 @@ h1::after {
             <button class="filter-btn" id="authorityBtn"><i class="fas fa-shield-alt"></i> Authority</button>
             <button class="filter-btn" id="classBtn"><i class="fas fa-pills"></i> Class</button>
             <button class="filter-btn" id="formBtn"><i class="fas fa-prescription-bottle"></i> Form</button>
+            <button class="filter-btn" id="resetFiltersBtn"><i class="fas fa-undo"></i> Reset Filters</button>
         </div>
         <div class="filter-dropdown" id="authorityDropdown"></div>
         <div class="filter-dropdown" id="classDropdown"></div>
@@ -404,14 +416,16 @@ h1::after {
     const authorityBtn = document.getElementById('authorityBtn');
     const classBtn = document.getElementById('classBtn');
     const formBtn = document.getElementById('formBtn');
+    const resetFiltersBtn = document.getElementById('resetFiltersBtn');
     const authorityDropdown = document.getElementById('authorityDropdown');
     const classDropdown = document.getElementById('classDropdown');
     const formDropdown = document.getElementById('formDropdown');
     const resultsContainer = document.getElementById('resultsContainer');
     const autocompleteList = document.getElementById('autocomplete-list');
     const didYouMeanDiv = document.getElementById('didYouMean');
-    const advancedSearchBtn = document.getElementById('advancedSearchBtn');
-    const advancedSearchModal = document.getElementById('advancedSearchModal');
+    const advancedSearchBtn = document.getElementById('advancedSearchBtn'); 
+    const advancedSearchModal = document.getElementById('advancedSearchModal'); 
+
 
     let selectedAuthorities = new Set();
     let selectedClasses = new Set();
@@ -429,7 +443,6 @@ h1::after {
     const trigramIndex = new Map();
     const metaphoneIndex = new Map();
 
-    // Precompute indices
     console.time('Indexing');
     drugs.forEach((drug, index) => {
         const name = drug.Name.toLowerCase();
@@ -537,6 +550,12 @@ h1::after {
         return metaphone.slice(0, 4).toUpperCase();
     }
 
+    function updateFilterButtonStates() {
+        authorityBtn.classList.toggle('filter-applied', selectedAuthorities.size > 0);
+        classBtn.classList.toggle('filter-applied', selectedClasses.size > 0);
+        formBtn.classList.toggle('filter-applied', selectedForms.size > 0);
+    }
+
     function populateDropdown(dropdown, items, type) {
         const fragment = document.createDocumentFragment();
         items.forEach(item => {
@@ -614,7 +633,29 @@ h1::after {
         } else {
             selectedItems.add(item);
         }
+        updateFilterButtonStates(); 
     }
+
+    resetFiltersBtn.addEventListener('click', () => {
+        selectedAuthorities.clear();
+        selectedClasses.clear();
+        selectedForms.clear();
+
+        document.querySelectorAll('.filter-dropdown input[type="checkbox"]').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+
+        updateFilterButtonStates();
+        updateResults();
+
+        authorityDropdown.style.display = 'none';
+        classDropdown.style.display = 'none';
+        formDropdown.style.display = 'none';
+        authorityBtn.classList.remove('active');
+        classBtn.classList.remove('active');
+        formBtn.classList.remove('active');
+    });
+
 
     function autocomplete(inp) {
         let currentFocus;
@@ -623,14 +664,20 @@ h1::after {
             closeAllLists();
             if (!val) { return false; }
             currentFocus = -1;
+            let a = document.getElementById('autocomplete-list'); 
+            if (!a) { 
+                a = document.createElement("DIV");
+                a.setAttribute("id", "autocomplete-list"); 
+                a.setAttribute("class", "autocomplete-items");
+                this.parentNode.appendChild(a);
+            }
+            
             const matchingDrugs = new Set();
-            // Search by name
             for (const [name, index] of nameIndex) {
                 if (name.includes(val)) {
                     matchingDrugs.add(drugs[index]);
                 }
             }
-            // Search by class
             for (const [cls, indexes] of classIndex) {
                 if (cls.includes(val)) {
                     indexes.forEach(index => matchingDrugs.add(drugs[index]));
@@ -639,9 +686,20 @@ h1::after {
             const fragment = document.createDocumentFragment();
             matchingDrugs.forEach(drug => {
                 const div = document.createElement("DIV");
-                div.innerHTML = `<strong>${drug.Name.substr(0, val.length)}</strong>`;
-                div.innerHTML += drug.Name.substr(val.length);
-                div.innerHTML += `<input type='hidden' value='${drug.Name}'>`;
+                const drugName = drug.Name;
+                const valLower = val.toLowerCase();
+                const nameLower = drugName.toLowerCase();
+                const startIndex = nameLower.indexOf(valLower);
+
+                if (startIndex !== -1) {
+                    div.innerHTML = drugName.substring(0, startIndex) +
+                                    `<strong>${drugName.substring(startIndex, startIndex + val.length)}</strong>` +
+                                    drugName.substring(startIndex + val.length);
+                } else { 
+                    div.innerHTML = `<strong>${drugName.substr(0, val.length)}</strong>`;
+                    div.innerHTML += drugName.substr(val.length);
+                }
+                div.innerHTML += `<input type='hidden' value='${drug.Name.replace(/'/g, "'")}'>`; 
                 div.addEventListener("click", function(e) {
                     inp.value = this.getElementsByTagName("input")[0].value;
                     closeAllLists();
@@ -649,26 +707,30 @@ h1::after {
                 });
                 fragment.appendChild(div);
             });
-            autocompleteList.appendChild(fragment);
+            a.innerHTML = ''; 
+            a.appendChild(fragment);
         });
         inp.addEventListener("keydown", function(e) {
-            let x = document.getElementById(this.id + "autocomplete-list");
+            let x = document.getElementById('autocomplete-list'); 
             if (x) x = x.getElementsByTagName("div");
             if (e.keyCode == 40) {
                 currentFocus++;
                 addActive(x);
-            } else if (e.keyCode == 38) {
+            } else if (e.keyCode == 38) { 
                 currentFocus--;
                 addActive(x);
-            } else if (e.keyCode == 13) {
+            } else if (e.keyCode == 13) { 
                 e.preventDefault();
                 if (currentFocus > -1) {
                     if (x) x[currentFocus].click();
+                } else { 
+                    updateResults();
+                    closeAllLists();
                 }
             }
         });
         function addActive(x) {
-            if (!x) return false;
+            if (!x || x.length === 0) return false;
             removeActive(x);
             if (currentFocus >= x.length) currentFocus = 0;
             if (currentFocus < 0) currentFocus = (x.length - 1);
@@ -682,31 +744,35 @@ h1::after {
         function closeAllLists(elmnt) {
             const x = document.getElementsByClassName("autocomplete-items");
             for (let i = 0; i < x.length; i++) {
-                if (elmnt != x[i] && elmnt != inp) {
-                    x[i].parentNode.removeChild(x[i]);
+                if (elmnt != x[i] && elmnt != inp && x[i].id === 'autocomplete-list') { 
+                     x[i].innerHTML = ''; 
                 }
             }
         }
         document.addEventListener("click", function (e) {
-            closeAllLists(e.target);
+            if (e.target !== inp && !e.target.closest('.autocomplete-items')) {
+                const list = document.getElementById('autocomplete-list');
+                if (list) list.innerHTML = ''; 
+            }
         });
     }
 
+
     autocomplete(searchBar);
 
-    const debouncedUpdateResults = debounce(updateResults, 100);
-    searchBar.addEventListener('input', debouncedUpdateResults);
+    const debouncedUpdateResults = debounce(updateResults, 100); 
+    searchBar.addEventListener('input', function() {
+    });
+
 
     function filterDrugs(searchTerm) {
         console.time('Filtering');
         const matchingIndexes = new Set();
-        // Search by name
         for (const [name, index] of nameIndex) {
             if (name.includes(searchTerm)) {
                 matchingIndexes.add(index);
             }
         }
-        // Search by class
         for (const [cls, indexes] of classIndex) {
             if (cls.includes(searchTerm)) {
                 indexes.forEach(index => matchingIndexes.add(index));
@@ -753,26 +819,23 @@ h1::after {
 
         const matrix = [];
 
-        // Initialize first row
         for (let i = 0; i <= b.length; i++) {
             matrix[i] = [i];
         }
 
-        // Initialize first column
         for (let j = 0; j <= a.length; j++) {
             matrix[0][j] = j;
         }
 
-        // Fill in the rest of the matrix
         for (let i = 1; i <= b.length; i++) {
             for (let j = 1; j <= a.length; j++) {
                 if (b.charAt(i - 1) === a.charAt(j - 1)) {
                     matrix[i][j] = matrix[i - 1][j - 1];
               } else {
                     matrix[i][j] = Math.min(
-                        matrix[i - 1][j - 1] + 1, // substitution
-                        matrix[i][j - 1] + 1,     // insertion
-                        matrix[i - 1][j] + 1      // deletion
+                        matrix[i - 1][j - 1] + 1, 
+                        matrix[i][j - 1] + 1,     
+                        matrix[i - 1][j] + 1      
                     );
                 }
             }
@@ -792,22 +855,22 @@ h1::after {
             return false;
         };
         const matches = (s1, s2) => {
-            const matches = [];
+            const matchesArr = []; 
             let t = 0;
             for (let i = 0; i < s1.length; i++) {
                 if (match(s1[i], s2, Math.max(0, i - m), Math.min(s2.length - 1, i + m))) {
-                    matches.push(s1[i]);
+                    matchesArr.push(s1[i]);
                     t++;
                 }
             }
-            return [matches, t];
+            return [matchesArr, t];
         };
         const [m1, t1] = matches(s1, s2);
         const [m2, t2] = matches(s2, s1);
         if (t1 === 0 || t2 === 0) {
             return 0;
         }
-        const transpositions = m1.reduce((t, c, i) => t + (c !== m2[i] ? 1 : 0), 0) / 2;
+        const transpositions = m1.reduce((tr, c, i) => tr + (c !== m2[i] ? 1 : 0), 0) / 2;
         const jaro = (t1 / s1.length + t2 / s2.length + (t1 - transpositions) / t1) / 3;
         const commonPrefix = s1.slice(0, Math.min(4, Math.min(s1.length, s2.length))).split('').reduce((p, c, i) => p + (s1[i] === s2[i] ? 1 : 0), 0);
         return jaro + commonPrefix * 0.1 * (1 - jaro);
@@ -847,7 +910,6 @@ h1::after {
         const searchTermSoundex = getSoundex(searchTermLower);
         const searchTermMetaphone = getMetaphone(searchTermLower);
         
-        // Get potential matches using bigram, trigram, soundex, and metaphone indices
         const potentialMatches = new Set();
         for (let i = 0; i < searchTermLower.length - 1; i++) {
             const bigram = searchTermLower.slice(i, i + 2);
@@ -876,7 +938,6 @@ h1::after {
             const trigramSimilarity = getTrigramSimilarity(searchTermLower, termLower);
             const frequency = termFrequency.get(termLower) || 0;
             
-            // Calculate a comprehensive similarity score
             const similarityScore = 
                 (1 / (editDistance + 1)) * 10 +
                 (getSoundex(termLower) === searchTermSoundex ? 5 : 0) +
@@ -929,10 +990,16 @@ h1::after {
                 showDidYouMean(searchTerm);
             }
         } else {
-            resultsContainer.innerHTML = '';
+            const matches = filterDrugs(''); 
+            showResults(matches);
+             if (selectedAuthorities.size === 0 && selectedClasses.size === 0 && selectedForms.size === 0) {
+                resultsContainer.innerHTML = ''; 
+            }
         }
         console.timeEnd('Updating results');
     }
+    
+    searchBar.addEventListener('input', debouncedUpdateResults); 
 
     function debounce(func, delay) {
         let debounceTimer;
@@ -944,39 +1011,44 @@ h1::after {
         }
     }
 
-    // Advanced search functionality
-    advancedSearchBtn.addEventListener('click', () => {
-        advancedSearchModal.style.display = 'block';
-    });
+    if (advancedSearchBtn) { 
+        advancedSearchBtn.addEventListener('click', () => {
+            if (advancedSearchModal) advancedSearchModal.style.display = 'block';
+        });
+    }
 
-    document.querySelector('.close-modal').addEventListener('click', () => {
-        advancedSearchModal.style.display = 'none';
-    });
+    const closeModalBtn = document.querySelector('.close-modal'); 
+    if (closeModalBtn) { 
+        closeModalBtn.addEventListener('click', () => {
+            if (advancedSearchModal) advancedSearchModal.style.display = 'none';
+        });
+    }
+    
+    const advSearchForm = document.getElementById('advancedSearchForm'); 
+    if (advSearchForm) { 
+        advSearchForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('advancedName').value.toLowerCase();
+            const authority = document.getElementById('advancedAuthority').value;
+            const drugClass = document.getElementById('advancedClass').value.toLowerCase();
+            const form = document.getElementById('advancedForm').value;
+            const concentration = document.getElementById('advancedConcentration').value;
 
-    document.getElementById('advancedSearchForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const name = document.getElementById('advancedName').value.toLowerCase();
-        const authority = document.getElementById('advancedAuthority').value;
-        const drugClass = document.getElementById('advancedClass').value.toLowerCase();
-        const form = document.getElementById('advancedForm').value;
-        const concentration = document.getElementById('advancedConcentration').value;
+            const advancedResults = drugs.filter(drug => 
+                (!name || drug.Name.toLowerCase().includes(name)) &&
+                (!authority || drug.Authority === authority) &&
+                (!drugClass || drug.class.toLowerCase().includes(drugClass)) &&
+                (!form || drug.form === form) &&
+                (!concentration || drug.Conc.includes(concentration))
+            );
 
-        const advancedResults = drugs.filter(drug => 
-            (!name || drug.Name.toLowerCase().includes(name)) &&
-            (!authority || drug.Authority === authority) &&
-            (!drugClass || drug.class.toLowerCase().includes(drugClass)) &&
-            (!form || drug.form === form) &&
-            (!concentration || drug.Conc.includes(concentration))
-        );
+            showResults(advancedResults);
+            if (advancedSearchModal) advancedSearchModal.style.display = 'none';
+        });
+    }
 
-        showResults(advancedResults);
-        advancedSearchModal.style.display = 'none';
-    });
+    updateFilterButtonStates(); 
 
-    // Initialize the search interface
-    updateResults();
-
-    // Performance monitoring
     const observer = new PerformanceObserver((list) => {
         list.getEntries().forEach((entry) => {
             console.log('Long task:', entry.name, 'Duration:', entry.duration);
