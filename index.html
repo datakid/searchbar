@@ -19,7 +19,6 @@
             --card-radius: 24px;
             --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
-
         body, html {
             font-family: 'Inter', 'SF Pro Display', sans-serif;
             background-color: var(--bg-color);
@@ -29,12 +28,10 @@
             min-height: 100%;
             overflow-x: hidden;
         }
-
         ::-webkit-scrollbar { width: 10px; }
         ::-webkit-scrollbar-track { background: var(--bg-color); }
         ::-webkit-scrollbar-thumb { background: var(--shadow-dark); border-radius: 10px; border: 2px solid var(--bg-color); }
         ::-webkit-scrollbar-thumb:hover { background: var(--secondary-color); }
-
         .container {
             display: flex;
             flex-direction: column;
@@ -44,7 +41,6 @@
             margin: 0 auto;
             box-sizing: border-box;
         }
-
         h1 {
             text-align: center;
             margin-bottom: 40px;
@@ -58,7 +54,6 @@
             position: relative;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.05);
         }
-
         h1::after {
             content: '';
             position: absolute;
@@ -71,7 +66,6 @@
             border-radius: 5px;
             box-shadow: 0 4px 10px rgba(38, 166, 154, 0.3);
         }
-
         .search-container {
             margin-bottom: 40px;
             display: flex;
@@ -80,13 +74,11 @@
             width: 100%;
             z-index: 100;
         }
-
         .search-wrapper {
             position: relative;
             width: 80%;
             max-width: 800px;
         }
-
         .search-icon {
             position: absolute;
             left: 25px;
@@ -97,7 +89,6 @@
             opacity: 0.8;
             pointer-events: none;
         }
-
         .search-bar {
             width: 100%;
             padding: 22px 20px 22px 65px;
@@ -113,7 +104,6 @@
             transition: var(--transition);
             box-sizing: border-box;
         }
-
         .search-bar:focus {
             outline: none;
             box-shadow: 
@@ -121,12 +111,10 @@
                 inset -4px -4px 8px var(--shadow-light),
                 0 0 0 4px rgba(38, 166, 154, 0.2);
         }
-
         .search-bar::placeholder {
             color: var(--text-muted);
             opacity: 0.7;
         }
-
         .autocomplete-items {
             position: absolute;
             top: calc(100% + 15px);
@@ -147,13 +135,11 @@
             transform: translateY(-10px);
             transition: var(--transition);
         }
-
         .autocomplete-items.show {
             opacity: 1;
             visibility: visible;
             transform: translateY(0);
         }
-
         .autocomplete-items div {
             padding: 15px 25px;
             cursor: pointer;
@@ -161,13 +147,11 @@
             transition: background-color 0.2s ease;
             color: var(--text-main);
         }
-
         .autocomplete-items div:hover, .autocomplete-active {
             background-color: rgba(38, 166, 154, 0.15);
             color: var(--primary-color);
             font-weight: 600;
         }
-
         .filter-buttons {
             display: flex;
             justify-content: center;
@@ -175,7 +159,6 @@
             flex-wrap: wrap;
             gap: 20px;
         }
-
         .filter-btn {
             background-color: var(--bg-color);
             border: none;
@@ -194,14 +177,12 @@
             justify-content: center;
             letter-spacing: 0.5px;
         }
-
         .filter-btn i {
             margin-right: 12px;
             font-size: 20px;
             color: var(--secondary-color);
             transition: var(--transition);
         }
-
         .filter-btn:hover {
             color: var(--primary-color);
             transform: translateY(-2px);
@@ -209,7 +190,6 @@
                 8px 8px 15px var(--shadow-dark),
                 -8px -8px 15px var(--shadow-light);
         }
-
         .filter-btn.active, .filter-btn:active {
             box-shadow: 
                 inset 4px 4px 8px var(--shadow-dark),
@@ -217,14 +197,12 @@
             color: var(--primary-color);
             transform: translateY(0);
         }
-
         .filter-btn.filter-applied:not(.active) {
             color: var(--primary-color);
             box-shadow: 
                 inset 4px 4px 8px var(--shadow-dark),
                 inset -4px -4px 8px var(--shadow-light);
         }
-
         .filter-dropdown {
             background-color: rgba(224, 229, 236, 0.95);
             backdrop-filter: blur(15px);
@@ -242,12 +220,10 @@
             min-width: 280px;
             animation: fadeInDrop 0.3s ease forwards;
         }
-
         @keyframes fadeInDrop {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
         .filter-option {
             display: flex;
             align-items: center;
@@ -257,9 +233,7 @@
             transition: var(--transition);
             font-weight: 500;
         }
-
         .filter-option:hover { background-color: rgba(38, 166, 154, 0.1); }
-
         .filter-option input[type="checkbox"] {
             appearance: none;
             width: 22px;
@@ -274,7 +248,6 @@
             place-content: center;
             cursor: pointer;
         }
-
         .filter-option input[type="checkbox"]::before {
             content: "\f00c";
             font-family: "Font Awesome 6 Free";
@@ -283,16 +256,13 @@
             transform: scale(0);
             transition: 0.2s transform ease-in-out;
         }
-
         .filter-option input[type="checkbox"]:checked::before {
             transform: scale(1);
         }
-
         .filter-option label {
             cursor: pointer;
             user-select: none;
         }
-
         .results-container {
             flex-grow: 1;
             padding: 10px;
@@ -300,7 +270,6 @@
             grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
             gap: 30px;
         }
-
         .result-item {
             background-color: var(--bg-color);
             border-radius: var(--card-radius);
@@ -315,18 +284,15 @@
             opacity: 0;
             transform: translateY(20px);
         }
-
         @keyframes cardEnter {
             to { opacity: 1; transform: translateY(0); }
         }
-
         .result-item:hover {
             transform: translateY(-5px);
             box-shadow: 
                 12px 12px 24px var(--shadow-dark),
                 -12px -12px 24px var(--shadow-light);
         }
-
         .result-item h3 {
             color: var(--primary-color);
             margin: 0 0 20px 0;
@@ -336,14 +302,12 @@
             border-bottom: 2px solid rgba(38, 166, 154, 0.2);
             line-height: 1.3;
         }
-
         .result-badges {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
             flex-wrap: wrap;
         }
-
         .badge {
             background-color: var(--bg-color);
             padding: 6px 14px;
@@ -358,10 +322,8 @@
             align-items: center;
             gap: 6px;
         }
-
         .badge.auth { color: #d97706; }
         .badge.form { color: #0284c7; }
-
         .result-item p {
             color: var(--text-muted);
             margin: 8px 0;
@@ -370,20 +332,17 @@
             display: flex;
             align-items: baseline;
         }
-
         .result-item p strong {
             color: var(--text-main);
             min-width: 110px;
             display: inline-block;
         }
-
         .result-item p i {
             color: var(--secondary-color);
             margin-right: 10px;
             width: 16px;
             text-align: center;
         }
-
         .did-you-mean {
             text-align: center;
             margin: -15px 0 30px 0;
@@ -391,7 +350,6 @@
             color: var(--text-muted);
             font-size: 18px;
         }
-
         .did-you-mean a {
             color: var(--primary-color);
             text-decoration: none;
@@ -406,12 +364,10 @@
                 -4px -4px 8px var(--shadow-light);
             transition: var(--transition);
         }
-
         .did-you-mean a:hover {
             box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
             color: var(--secondary-color);
         }
-
         .disclaimer {
             margin-top: 50px;
             padding: 20px;
@@ -426,18 +382,15 @@
             gap: 15px;
             color: var(--text-muted);
         }
-
         .disclaimer i {
             color: var(--primary-color);
             font-size: 24px;
         }
-
         .disclaimer p {
             margin: 0;
             font-size: 15px;
             font-weight: 500;
         }
-
         .no-results {
             text-align: center;
             width: 100%;
@@ -447,7 +400,6 @@
             color: var(--text-muted);
             font-weight: 600;
         }
-
         @media (max-width: 768px) {
             h1 { font-size: 36px; margin-bottom: 25px; }
             .search-wrapper { width: 95%; }
@@ -506,7 +458,8 @@
         const autocompleteList = document.getElementById('autocomplete-list');
         const overlay = document.getElementById('mobileOverlay');
 
-        // Pre-process Data for blazing fast linear searching
+        const esc = s => String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
         const preprocessedDrugs = drugs.map(drug => ({
             ...drug,
             _searchString: `${drug.Name} ${drug.class} ${drug.Authority} ${drug.form}`.toLowerCase()
@@ -516,12 +469,10 @@
         let selectedClasses = new Set();
         let selectedForms = new Set();
 
-        // Extract unique sets for dropdowns
         const authorities = [...new Set(drugs.map(drug => drug.Authority))].sort();
         const classes = [...new Set(drugs.flatMap(drug => drug.class.split(' , ')))].sort();
         const forms = [...new Set(drugs.map(drug => drug.form))].sort();
 
-        // High Performance Levenshtein Distance (Fuzzy Search Fallback)
         function levenshteinDistance(a, b) {
             if (a.length === 0) return b.length;
             if (b.length === 0) return a.length;
@@ -549,8 +500,8 @@
                 const id = `${type}-${item.replace(/[\s\/]/g, '-').toLowerCase()}`;
                 
                 option.innerHTML = `
-                    <input type="checkbox" id="${id}" value="${item}">
-                    <label for="${id}">${item}</label>
+                    <input type="checkbox" id="${esc(id)}" value="${esc(item)}">
+                    <label for="${esc(id)}">${esc(item)}</label>
                 `;
                 
                 const checkbox = option.querySelector('input');
@@ -629,15 +580,11 @@
             document.getElementById('resetFiltersBtn').classList.toggle('filter-applied', anyActive);
         }
 
-        // Fast filtering Engine
         function filterDrugs(query) {
             return preprocessedDrugs.filter(d => {
-                // Filters
                 if (selectedAuthorities.size && !selectedAuthorities.has(d.Authority)) return false;
                 if (selectedClasses.size && !d.class.split(' , ').some(c => selectedClasses.has(c))) return false;
                 if (selectedForms.size && !selectedForms.has(d.form)) return false;
-                
-                // Query Check
                 if (query && !d._searchString.includes(query)) return false;
                 return true;
             });
@@ -653,13 +600,13 @@
                     resultItem.style.animationDelay = `${Math.min(index * 0.05, 0.5)}s`;
                     
                     resultItem.innerHTML = `
-                        <h3>${drug.Name}</h3>
+                        <h3>${esc(drug.Name)}</h3>
                         <div class="result-badges">
-                            <span class="badge auth"><i class="fas fa-shield-alt"></i> ${drug.Authority}</span>
-                            <span class="badge form"><i class="fas fa-prescription-bottle"></i> ${drug.form}</span>
+                            <span class="badge auth"><i class="fas fa-shield-alt"></i> ${esc(drug.Authority)}</span>
+                            <span class="badge form"><i class="fas fa-prescription-bottle"></i> ${esc(drug.form)}</span>
                         </div>
-                        <p><strong><i class="fas fa-flask"></i> Conc:</strong> ${drug.Conc}</p>
-                        <p><strong><i class="fas fa-pills"></i> Class:</strong> ${drug.class}</p>
+                        <p><strong><i class="fas fa-flask"></i> Conc:</strong> ${esc(drug.Conc)}</p>
+                        <p><strong><i class="fas fa-pills"></i> Class:</strong> ${esc(drug.class)}</p>
                     `;
                     fragment.appendChild(resultItem);
                 });
@@ -671,21 +618,18 @@
 
         function handleDidYouMean(query) {
             if (query.length < 3) return;
-            // Get base filtered (filters applied, without text query)
             const baseFiltered = filterDrugs("");
             
-            // Map distances
             let scored = baseFiltered.map(d => ({
                 name: d.Name,
                 score: levenshteinDistance(query, d.Name.toLowerCase())
             }));
             
-            // Sort & Filter good matches
             scored.sort((a, b) => a.score - b.score);
             let topMatches = scored.filter(s => s.score <= 4).slice(0, 3);
             
             if (topMatches.length > 0) {
-                const links = topMatches.map(m => `<a href="#" class="dym-link">${m.name}</a>`).join('');
+                const links = topMatches.map(m => `<a href="#" class="dym-link">${esc(m.name)}</a>`).join('');
                 didYouMeanDiv.innerHTML = `Did you mean: ${links}`;
                 document.querySelectorAll('.dym-link').forEach(link => {
                     link.addEventListener('click', (e) => {
@@ -709,13 +653,12 @@
             }
         }
 
-        // Custom Streamlined Autocomplete
         searchBar.addEventListener('input', function() {
             let val = this.value.trim().toLowerCase();
             autocompleteList.innerHTML = '';
             if (!val) {
                 autocompleteList.classList.remove('show');
-                updateResults(); // Still trigger results to clear or show filtered
+                updateResults();
                 return;
             }
             
@@ -729,11 +672,10 @@
             const fragment = document.createDocumentFragment();
             matches.forEach(drug => {
                 const div = document.createElement("div");
-                const lowerName = drug.Name.toLowerCase();
-                const strongPart = drug.Name.substr(0, val.length);
-                const restPart = drug.Name.substr(val.length);
+                const strongPart = esc(drug.Name.substr(0, val.length));
+                const restPart = esc(drug.Name.substr(val.length));
                 
-                div.innerHTML = `<strong>${strongPart}</strong>${restPart} <span style="font-size:12px;color:var(--text-muted);float:right;">${drug.class.split(' , ')[0]}</span>`;
+                div.innerHTML = `<strong>${strongPart}</strong>${restPart} <span style="font-size:12px;color:var(--text-muted);float:right;">${esc(drug.class.split(' , ')[0])}</span>`;
                 
                 div.addEventListener("click", () => {
                     searchBar.value = drug.Name;
@@ -747,14 +689,12 @@
             updateResults();
         });
 
-        // Close autocomplete when clicking outside
         document.addEventListener('click', (e) => {
             if (e.target !== searchBar) {
                 autocompleteList.classList.remove('show');
             }
         });
 
-        // Initialize state
         updateResults();
     });
     </script>
