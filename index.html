@@ -112,6 +112,13 @@ h1{margin:0;font-family:var(--font-display);font-weight:700;font-size:46px;lette
 .filter-option input[type="checkbox"]::before{content:"\f00c";font-family:"Font Awesome 6 Free";font-weight:900;color:var(--primary);transform:scale(0);transition:0.2s transform var(--ease);font-size:11px;}
 .filter-option input[type="checkbox"]:checked::before{transform:scale(1);}
 .filter-option label{cursor:pointer;user-select:none;}
+.active-filters{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px;margin:-16px 0 28px;}
+.filter-tag{display:inline-flex;align-items:center;gap:8px;padding:7px 10px 7px 16px;border-radius:100px;font-size:12.5px;font-weight:600;color:var(--primary);background-color:var(--surface);box-shadow:3px 3px 7px var(--shadow-lo),-3px -3px 7px var(--shadow-hi);font-family:var(--font-body);}
+.filter-tag .tag-group{color:var(--ink-muted);font-weight:500;margin-right:2px;}
+.filter-tag button{border:none;background:none;color:var(--ink-muted);cursor:pointer;width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;transition:color var(--dur) var(--ease),background-color var(--dur) var(--ease);}
+.filter-tag button:hover{color:var(--danger);background-color:rgba(150,57,42,0.12);}
+.filter-tag.clear-all{color:var(--danger);cursor:pointer;padding:7px 16px;}
+.filter-tag.clear-all:hover{box-shadow:inset 3px 3px 7px var(--shadow-lo),inset -3px -3px 7px var(--shadow-hi);}
 .results-meta{text-align:center;font-family:var(--font-mono);font-size:12px;color:var(--ink-muted);margin-bottom:24px;letter-spacing:0.5px;text-transform:uppercase;}
 .results-container{flex-grow:1;padding:6px;display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:24px;align-items:start;}
 .result-item{content-visibility:auto;contain-intrinsic-size:0 240px;position:relative;overflow:hidden;background-color:var(--surface);border-radius:var(--radius-lg);padding:30px 26px 26px;box-shadow:8px 8px 18px var(--shadow-lo),-8px -8px 18px var(--shadow-hi);transition:transform var(--dur) var(--ease),box-shadow var(--dur) var(--ease);display:flex;flex-direction:column;}
@@ -167,8 +174,7 @@ h1{margin:0;font-family:var(--font-display);font-weight:700;font-size:46px;lette
 <div class="page">
   <div class="masthead">
     <div class="mast-left">
-      <span class="kicker">The Dispensary Index</span>
-      <h1>Lx Search</h1>
+      <h1>Lx Search F1</h1>
     </div>
     <div class="mast-right">
       <span class="record-count neu" id="recordCount"></span>
@@ -203,6 +209,8 @@ h1{margin:0;font-family:var(--font-display);font-weight:700;font-size:46px;lette
   <div class="filter-dropdown" id="authorityDropdown"></div>
   <div class="filter-dropdown" id="classDropdown"></div>
   <div class="filter-dropdown" id="formDropdown"></div>
+
+  <div class="active-filters" id="activeFilters"></div>
 
   <div class="results-meta" id="resultsMeta"></div>
   <div id="didYouMean" class="did-you-mean"></div>
@@ -476,6 +484,7 @@ function selectSort(sort,i){
   });
   sortThumb.style.transform=`translateX(${i*44}px)`;
   updateHint();
+  renderActiveFilterTags();
   scheduleUpdate();
 }
 
@@ -578,14 +587,71 @@ function toggleSelection(item,type){
 }
 
 document.getElementById('resetFiltersBtn').addEventListener('click',()=>{
+  clearAllFilters();
+  closeAllDropdowns();
+});
+
+function clearAllFilters(){
   selectedAuthorities.clear();
   selectedClasses.clear();
   selectedForms.clear();
   document.querySelectorAll('.filter-dropdown input[type="checkbox"]').forEach(cb=>cb.checked=false);
   updateFilterButtonStates();
   scheduleUpdate();
-  closeAllDropdowns();
-});
+}
+
+function removeFilterTag(item,type){
+  const set=type==='authority'?selectedAuthorities:type==='class'?selectedClasses:selectedForms;
+  set.delete(item);
+  const dropdownId=type==='authority'?'authorityDropdown':type==='class'?'classDropdown':'formDropdown';
+  const id=`${type}-${item.replace(/[\s\/]/g,'-').toLowerCase()}`;
+  const cb=document.getElementById(id);
+  if(cb)cb.checked=false;
+  updateFilterButtonStates();
+  scheduleUpdate();
+}
+
+const FILTER_GROUP_LABELS={authority:'Authority',class:'Class',form:'Form',sort:'Sort'};
+
+function renderActiveFilterTags(){
+  const activeFiltersEl=document.getElementById('activeFilters');
+  const tags=[];
+  selectedAuthorities.forEach(item=>tags.push({item,type:'authority'}));
+  selectedClasses.forEach(item=>tags.push({item,type:'class'}));
+  selectedForms.forEach(item=>tags.push({item,type:'form'}));
+  if(currentSort.id!=='relevance')tags.push({item:currentSort.label,type:'sort'});
+
+  if(tags.length===0){
+    activeFiltersEl.innerHTML='';
+    return;
+  }
+
+  const fragment=document.createDocumentFragment();
+  tags.forEach(({item,type})=>{
+    const tag=document.createElement('span');
+    tag.className='filter-tag';
+    tag.innerHTML=`<span class="tag-group">${esc(FILTER_GROUP_LABELS[type])}:</span>${esc(item)}<button type="button" aria-label="Remove ${esc(item)} filter"><i class="fa-solid fa-xmark"></i></button>`;
+    tag.querySelector('button').addEventListener('click',()=>{
+      if(type==='sort'){selectSort(SORTS[0],0);}
+      else{removeFilterTag(item,type);}
+    });
+    fragment.appendChild(tag);
+  });
+
+  if(tags.length>1){
+    const clearAllTag=document.createElement('span');
+    clearAllTag.className='filter-tag clear-all';
+    clearAllTag.textContent='Clear all';
+    clearAllTag.addEventListener('click',()=>{
+      clearAllFilters();
+      if(currentSort.id!=='relevance')selectSort(SORTS[0],0);
+    });
+    fragment.appendChild(clearAllTag);
+  }
+
+  activeFiltersEl.innerHTML='';
+  activeFiltersEl.appendChild(fragment);
+}
 
 function updateFilterButtonStates(){
   document.getElementById('authorityBtn').classList.toggle('filter-applied',selectedAuthorities.size>0);
@@ -593,6 +659,7 @@ function updateFilterButtonStates(){
   document.getElementById('formBtn').classList.toggle('filter-applied',selectedForms.size>0);
   const anyActive=selectedAuthorities.size||selectedClasses.size||selectedForms.size;
   document.getElementById('resetFiltersBtn').classList.toggle('filter-applied',anyActive);
+  renderActiveFilterTags();
 }
 
 function authorityClass(auth){
