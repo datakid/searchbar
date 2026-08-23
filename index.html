@@ -242,6 +242,14 @@ svg.icon.filled{fill:currentColor;stroke:none;}
   color:var(--ink-3);font-size:12px;
 }
 .facet-clear-all:hover{color:var(--cinnabar);}
+.facet-search-wrap{padding:2px 2px 8px;}
+.facet-search{
+  width:100%;height:30px;padding:0 9px;border-radius:var(--radius-sm);
+  background:var(--s2);border:1px solid var(--hair);color:var(--ink);font-size:12.5px;
+}
+.facet-search::placeholder{color:var(--ink-3);}
+.facet-search:focus-visible{outline:none;border-color:var(--iodine);box-shadow:0 0 0 3px color-mix(in srgb, var(--iodine) 16%, transparent);}
+.facet-option.opt-hidden{display:none;}
 
 .main-col{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0;}
 
@@ -361,6 +369,10 @@ svg.icon.filled{fill:currentColor;stroke:none;}
 .grammar-picker .gp-item .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
 .grammar-picker .gp-item:hover,.grammar-picker .gp-item.hi{background:var(--s3);color:var(--ink);}
 .grammar-picker .gp-item .n{margin-left:auto;font-family:var(--font-mono);font-size:10.5px;color:var(--ink-3);}
+.grammar-picker .gp-item .tag{
+  font-family:var(--font-mono);font-size:9.5px;color:var(--ink-3);text-transform:uppercase;
+  letter-spacing:.03em;flex-shrink:0;padding:1px 5px;border:1px solid var(--hair);border-radius:8px;
+}
 
 .detail-panel{
   width:360px;flex-shrink:0;border-left:1px solid var(--hair);background:var(--s1);
@@ -498,7 +510,7 @@ svg.icon.filled{fill:currentColor;stroke:none;}
     <header class="cmdbar">
     <div class="wordmark">
       <span class="mark" aria-hidden="true"></span>
-      <span class="name">Lx Search a1</span>
+      <span class="name">Lx Search</span>
       <span class="count tabular" id="wordmarkCount">— records</span>
     </div>
 
@@ -1125,6 +1137,16 @@ function parseQuery(raw){
   };
 }
 
+function fieldTokensOf(raw){
+  const out = [];
+  const re = /(-)?(auth|class|form):(\S+)/gi;
+  let m;
+  while((m = re.exec(raw))){
+    out.push({ negate: !!m[1], field: m[2].toLowerCase(), value: m[3], full: m[0] });
+  }
+  return out;
+}
+
 function passesFieldFilters(rec, filters){
   for(const f of filters){
     let hit = false;
@@ -1532,6 +1554,8 @@ function initApp(){
   const index = buildIndex(records);
   buildSynStructures(index);
   const siblingIndex = buildSiblingIndex(records);
+  const CLASS_ENTRIES_ALL = [...countByClass(records).entries()];
+  const FORM_ENTRIES_ALL = [...countByForm(records).entries()];
 
   const el = id => document.getElementById(id);
   const searchInput = el('searchInput');
@@ -1599,6 +1623,7 @@ function initApp(){
   let currentResults = [];
   let relaxationMsg = null;
   let focusedRowIndex = -1;
+  let gpIndex = -1;
   let selectedDocId = null;
   let ROW_H = state.density === 'compact' ? 52 : 72;
   const OVERSCAN = 6;
@@ -1694,6 +1719,18 @@ function initApp(){
       const s = SORTS.find(s => s.id === state.sort);
       tags.push({ label: s.label, onRemove: () => setSort('relevance') });
     }
+    fieldTokensOf(state.query).forEach(tok => {
+      const label = (tok.negate ? '−' : '') + tok.field + ':' + tok.value.replace(/_/g, ' ');
+      tags.push({
+        label,
+        onRemove: () => {
+          const next = state.query.replace(tok.full, '').replace(/\s{2,}/g, ' ').trim();
+          searchInput.value = next;
+          state.query = next;
+          clearBtn.classList.toggle('show', next.length > 0);
+        }
+      });
+    });
     state.facets.authorities.forEach(a => tags.push({ label: 'Auth: ' + a, onRemove: () => toggleFacet('authorities', a) }));
     state.facets.classes.forEach(c => tags.push({ label: c, onRemove: () => toggleFacet('classes', c) }));
     state.facets.forms.forEach(f => tags.push({ label: f, onRemove: () => toggleFacet('forms', f) }));
@@ -1803,22 +1840,29 @@ function initApp(){
     if(set.has(value)) set.delete(value); else set.add(value);
   }
 
+  const FACET_SEARCH_THRESHOLD = 6;
+
   function facetGroupHtml(title, dim, entries, colorFn){
     const collapsed = state.collapsedGroups.has(dim);
-    const opts = entries.map(([value, count]) => {
-      const checked = state.facets[dim].has(value);
+    const selected = state.facets[dim];
+    const ordered = entries.slice().sort((a, b) => (selected.has(a[0]) ? 0 : 1) - (selected.has(b[0]) ? 0 : 1));
+    const opts = ordered.map(([value, count]) => {
+      const checked = selected.has(value);
       const dotHtml = colorFn ? `<span class="dot" style="background:${colorFn(value)}"></span>` : '';
-      return `<label class="facet-option${checked ? ' active' : ''}">
+      return `<label class="facet-option${checked ? ' active' : ''}" data-lbl="${escapeHtml(normalizeText(value))}" data-pinned="${checked ? '1' : '0'}">
         <input type="checkbox" data-dim="${dim}" data-value="${escapeHtml(value)}" ${checked ? 'checked' : ''}>
         ${dotHtml}<span class="lbl">${escapeHtml(value)}</span><span class="n tabular">${count}</span>
       </label>`;
     }).join('');
+    const searchHtml = ordered.length > FACET_SEARCH_THRESHOLD
+      ? `<div class="facet-search-wrap"><input type="text" class="facet-search" data-dim="${dim}" placeholder="Filter ${escapeHtml(title.toLowerCase())}…" aria-label="Filter ${escapeHtml(title)} options"></div>`
+      : '';
     return `<div class="facet-group${collapsed ? ' collapsed' : ''}" data-group="${dim}">
       <button type="button" class="facet-group-head" data-toggle="${dim}">
         <span>${title}</span>
         <svg class="icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
-      <div class="facet-group-body">${opts}</div>
+      <div class="facet-group-body">${searchHtml}${opts}</div>
     </div>`;
   }
 
@@ -1854,6 +1898,23 @@ function initApp(){
         if(state.collapsedGroups.has(dim)) state.collapsedGroups.delete(dim);
         else state.collapsedGroups.add(dim);
         renderFacetPanel(container);
+      });
+    });
+    container.querySelectorAll('.facet-search').forEach(inp => {
+      const applyFilter = () => {
+        const q = normalizeText(inp.value);
+        inp.closest('.facet-group-body').querySelectorAll('.facet-option').forEach(opt => {
+          const show = opt.dataset.pinned === '1' || !q || opt.dataset.lbl.includes(q);
+          opt.classList.toggle('opt-hidden', !show);
+        });
+      };
+      inp.addEventListener('input', applyFilter);
+      inp.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape'){
+          e.stopPropagation();
+          if(inp.value){ inp.value = ''; applyFilter(); }
+          else inp.blur();
+        }
       });
     });
   }
@@ -2077,46 +2138,99 @@ function initApp(){
     class: null
   };
 
+  function gpItemEls(){
+    return [...grammarPicker.querySelectorAll('.gp-item')];
+  }
+  function gpHighlight(i){
+    const items = gpItemEls();
+    items.forEach(it => it.classList.remove('hi'));
+    if(i >= 0 && i < items.length){
+      items[i].classList.add('hi');
+      items[i].scrollIntoView({ block:'nearest' });
+    }
+    gpIndex = i;
+  }
+
   function checkGrammarPicker(){
+    gpIndex = -1;
     const val = searchInput.value;
     const pos = searchInput.selectionStart;
     const before = val.slice(0, pos);
     const m = before.match(/(?:^|\s)(auth|class|form):([^\s]*)$/i);
-    if(!m){ grammarPicker.classList.remove('show'); return; }
-    const field = m[1].toLowerCase();
-    const frag = normalizeText(m[2]);
-    let options;
-    if(field === 'auth'){
-      options = GRAMMAR_FIELDS.auth.filter(o => o.value.toLowerCase().startsWith(frag) || !frag);
-    } else if(field === 'class'){
-      const counts = countByClass(records);
-      options = [...counts.keys()].filter(c => normalizeText(c).includes(frag)).slice(0, 8)
-        .map(c => ({ value:c, label:c, color:null }));
-    } else {
-      const counts = countByForm(records);
-      options = [...counts.keys()].filter(f => normalizeText(f).includes(frag)).slice(0, 8)
-        .map(f => ({ value:f, label:f, color:null }));
+    if(m){
+      const field = m[1].toLowerCase();
+      const frag = normalizeText(m[2]);
+      let options;
+      if(field === 'auth'){
+        options = GRAMMAR_FIELDS.auth.filter(o => o.value.toLowerCase().startsWith(frag) || !frag);
+      } else if(field === 'class'){
+        options = CLASS_ENTRIES_ALL.map(e => e[0]).filter(c => normalizeText(c).includes(frag)).slice(0, 8)
+          .map(c => ({ value:c, label:c, color:null }));
+      } else {
+        options = FORM_ENTRIES_ALL.map(e => e[0]).filter(f => normalizeText(f).includes(frag)).slice(0, 8)
+          .map(f => ({ value:f, label:f, color:null }));
+      }
+      if(!options.length){ grammarPicker.classList.remove('show'); return; }
+      grammarPicker.innerHTML = options.map(o =>
+        `<div class="gp-item" role="option" data-field="${field}" data-value="${escapeHtml(o.value)}">
+          ${o.color ? `<span class="dot" style="background:${o.color}"></span>` : ''}
+          <span>${escapeHtml(o.label)}</span>
+        </div>`
+      ).join('');
+      grammarPicker.classList.add('show');
+      grammarPicker.querySelectorAll('.gp-item').forEach(item => {
+        item.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          const field = item.dataset.field, value = item.dataset.value;
+          const newBefore = before.replace(/(?:^|\s)(auth|class|form):([^\s]*)$/i, (m0) => {
+            const lead = /^\s/.test(m0) ? ' ' : '';
+            return lead + field + ':' + value.replace(/\s+/g, '_') + ' ';
+          });
+          searchInput.value = newBefore + val.slice(pos);
+          grammarPicker.classList.remove('show');
+          searchInput.focus();
+          onSearchChanged(true);
+        });
+      });
+      return;
     }
-    if(!options.length){ grammarPicker.classList.remove('show'); return; }
-    grammarPicker.innerHTML = options.map(o =>
-      `<div class="gp-item" role="option" data-field="${field}" data-value="${escapeHtml(o.value)}">
-        ${o.color ? `<span class="dot" style="background:${o.color}"></span>` : ''}
-        <span>${escapeHtml(o.label)}</span>
+
+    const q = normalizeText(val.trim());
+    if(!q){ grammarPicker.classList.remove('show'); return; }
+    const suggestions = [];
+    Object.keys(AUTH_TIERS).forEach(t => {
+      if(state.facets.authorities.has(t)) return;
+      if(t.toLowerCase() === q || normalizeText(AUTH_TIERS[t].full).includes(q)){
+        suggestions.push({ dim:'authorities', value:t, label:AUTH_TIERS[t].full, group:'Authority', color:AUTH_ROW_COLOR(t) });
+      }
+    });
+    CLASS_ENTRIES_ALL.forEach(e => {
+      if(!state.facets.classes.has(e[0]) && normalizeText(e[0]).includes(q)){
+        suggestions.push({ dim:'classes', value:e[0], label:e[0], group:'Class', color:null });
+      }
+    });
+    FORM_ENTRIES_ALL.forEach(e => {
+      if(!state.facets.forms.has(e[0]) && normalizeText(e[0]).includes(q)){
+        suggestions.push({ dim:'forms', value:e[0], label:e[0], group:'Form', color:null });
+      }
+    });
+    if(!suggestions.length){ grammarPicker.classList.remove('show'); return; }
+    grammarPicker.innerHTML = suggestions.slice(0, 6).map(s =>
+      `<div class="gp-item" role="option" data-dim="${s.dim}" data-value="${escapeHtml(s.value)}">
+        <span class="tag">Filter · ${s.group}</span>
+        ${s.color ? `<span class="dot" style="background:${s.color}"></span>` : ''}
+        <span>${escapeHtml(s.label)}</span>
       </div>`
     ).join('');
     grammarPicker.classList.add('show');
     grammarPicker.querySelectorAll('.gp-item').forEach(item => {
       item.addEventListener('mousedown', (e) => {
         e.preventDefault();
-        const field = item.dataset.field, value = item.dataset.value;
-        const newBefore = before.replace(/(?:^|\s)(auth|class|form):([^\s]*)$/i, (m0) => {
-          const lead = /^\s/.test(m0) ? ' ' : '';
-          return lead + field + ':' + value.replace(/\s+/g, '_') + ' ';
-        });
-        searchInput.value = newBefore + val.slice(pos);
+        toggleFacet(item.dataset.dim, item.dataset.value);
+        searchInput.value = '';
         grammarPicker.classList.remove('show');
-        searchInput.focus();
         onSearchChanged(true);
+        searchInput.focus();
       });
     });
   }
@@ -2267,6 +2381,18 @@ function initApp(){
   document.addEventListener('keydown', (e) => {
     const tag = (e.target.tagName || '').toLowerCase();
     const inInput = tag === 'input' || tag === 'textarea';
+
+    if(grammarPicker.classList.contains('show')){
+      if(e.key === 'ArrowDown'){ e.preventDefault(); gpHighlight(Math.min(gpIndex + 1, gpItemEls().length - 1)); return; }
+      if(e.key === 'ArrowUp'){ e.preventDefault(); gpHighlight(Math.max(gpIndex - 1, 0)); return; }
+      if(e.key === 'Enter' && gpIndex >= 0){
+        e.preventDefault();
+        const items = gpItemEls();
+        if(items[gpIndex]) items[gpIndex].dispatchEvent(new MouseEvent('mousedown', { bubbles:true, cancelable:true }));
+        return;
+      }
+      if(e.key === 'Escape'){ e.preventDefault(); grammarPicker.classList.remove('show'); return; }
+    }
 
     if(e.key === '/' && !inInput){
       e.preventDefault();
