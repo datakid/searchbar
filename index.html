@@ -277,8 +277,16 @@ svg.icon.filled{fill:currentColor;stroke:none;}
   flex-shrink:0;
 }
 @media (min-width:1080px){.col-header{display:flex;}}
-.col-name{flex:1;min-width:0;}
-.col-strength{width:100px;text-align:right;flex-shrink:0;}
+.col-header button{
+  appearance:none;background:none;border:none;padding:0;margin:0;cursor:pointer;
+  font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit;
+  display:flex;align-items:center;gap:3px;
+}
+.col-header button:hover,.col-header button.active{color:var(--ink-2);}
+.col-header button .sort-caret{font-family:var(--font-mono);font-size:10px;}
+.col-header button .sort-ord{font-family:var(--font-mono);font-size:9px;vertical-align:super;color:var(--iodine);}
+.col-name{flex:1;min-width:0;justify-content:flex-start;}
+.col-strength{width:100px;text-align:right;flex-shrink:0;justify-content:flex-end;}
 .col-form{width:110px;flex-shrink:0;}
 .col-authority{width:110px;flex-shrink:0;}
 .col-class{width:180px;flex-shrink:0;}
@@ -583,11 +591,11 @@ svg.icon.filled{fill:currentColor;stroke:none;}
       <div class="entry-chips" id="entryChips"></div>
 
       <div class="col-header" role="row">
-        <span class="col-name" role="columnheader">Name</span>
-        <span class="col-strength" role="columnheader">Strength</span>
-        <span class="col-form" role="columnheader">Form</span>
-        <span class="col-authority" role="columnheader">Authority</span>
-        <span class="col-class" role="columnheader">Class</span>
+        <button type="button" class="col-name" role="columnheader" data-sort-key="name">Name<span class="sort-caret"></span><span class="sort-ord"></span></button>
+        <button type="button" class="col-strength" role="columnheader" data-sort-key="strength">Strength<span class="sort-caret"></span><span class="sort-ord"></span></button>
+        <button type="button" class="col-form" role="columnheader" data-sort-key="form">Form<span class="sort-caret"></span><span class="sort-ord"></span></button>
+        <button type="button" class="col-authority" role="columnheader" data-sort-key="authority">Authority<span class="sort-caret"></span><span class="sort-ord"></span></button>
+        <button type="button" class="col-class" role="columnheader" data-sort-key="class">Class<span class="sort-caret"></span><span class="sort-ord"></span></button>
       </div>
 
       <div class="list-scroller" id="listScroller">
@@ -908,6 +916,20 @@ function fixGluedUnitBrand(name){
   return name.replace(/\b(mg|mcg|g|ml|iu)([A-Z][a-z])/g, '$1 $2');
 }
 
+function strengthKey(conc){
+  if(!conc || conc === '—' || conc === '---') return [9, Infinity];
+  const m = conc.match(/([\d.]+)\s*(mcg|mg|g|iu|i\.u\.|%)?/i);
+  if(!m) return [9, Infinity];
+  const val = parseFloat(m[1]);
+  if(isNaN(val)) return [9, Infinity];
+  const unit = (m[2] || 'mg').toLowerCase().replace(/\./g, '');
+  if(unit === 'mcg') return [0, val / 1000];
+  if(unit === 'g') return [0, val * 1000];
+  if(unit === 'iu') return [1, val];
+  if(unit === '%') return [2, val];
+  return [0, val];
+}
+
 function buildRecords(raw){
   const seen = new Map();
   const records = [];
@@ -962,7 +984,14 @@ function buildRecords(raw){
       classes,
       generic: split.generic,
       brands: split.brands,
-      correctedFrom
+      correctedFrom,
+      sk: Object.freeze({
+        name: name.toLowerCase(),
+        cls: (classes[0] || '').toLowerCase(),
+        form: formCanon.toLowerCase(),
+        authOrder: AUTH_TIERS[auth.tier] ? AUTH_TIERS[auth.tier].order : 9,
+        strength: strengthKey(conc)
+      })
     });
   });
   return records;
@@ -1454,26 +1483,50 @@ const SORTS = [
   { id:'relevance', label:'Best match' },
   { id:'name', label:'Name A–Z', field:'Name' },
   { id:'class', label:'By class', field:'classes0' },
-  { id:'authority', label:'By authority', field:'authTier' }
+  { id:'authority', label:'By authority', field:'authTier' },
+  { id:'strength', label:'By strength', field:'sk.strength' }
 ];
+const SORT_KEYS = ['name', 'class', 'form', 'authority', 'strength'];
+const SORT_COLLATOR = new Intl.Collator(undefined, { numeric:true, sensitivity:'base' });
 
-function sortRanked(list, sortId, hasQuery){
-  if(sortId === 'relevance' && hasQuery) return list;
-  const arr = list.slice();
-  if(sortId === 'name' || (sortId === 'relevance' && !hasQuery)){
-    arr.sort((a,b) => a.rec.Name.localeCompare(b.rec.Name));
-  } else if(sortId === 'class'){
-    arr.sort((a,b) => {
-      const ca = a.rec.classes[0] || '', cb = b.rec.classes[0] || '';
-      return ca.localeCompare(cb) || a.rec.Name.localeCompare(b.rec.Name);
-    });
-  } else if(sortId === 'authority'){
-    arr.sort((a,b) => {
-      const oa = (AUTH_TIERS[a.rec.authTier]||{order:9}).order, ob = (AUTH_TIERS[b.rec.authTier]||{order:9}).order;
-      return oa - ob || a.rec.Name.localeCompare(b.rec.Name);
-    });
-  }
+function compareByLevel(level, a, b){
+  const dir = level.dir === 'd' ? -1 : 1;
+  const ak = a.rec.sk, bk = b.rec.sk;
+  if(level.key === 'name') return dir * SORT_COLLATOR.compare(ak.name, bk.name);
+  if(level.key === 'class') return dir * SORT_COLLATOR.compare(ak.cls, bk.cls);
+  if(level.key === 'form') return dir * SORT_COLLATOR.compare(ak.form, bk.form);
+  if(level.key === 'authority') return dir * (ak.authOrder - bk.authOrder);
+  if(level.key === 'strength') return dir * (ak.strength[0] - bk.strength[0] || ak.strength[1] - bk.strength[1]);
+  return 0;
+}
+
+function sortByLevels(list, levels, hasQuery){
+  const base = hasQuery ? list : list.slice().sort((a, b) => SORT_COLLATOR.compare(a.rec.sk.name, b.rec.sk.name));
+  if(!levels.length) return base;
+  const arr = base.slice();
+  arr.sort((a, b) => {
+    for(const level of levels){
+      const c = compareByLevel(level, a, b);
+      if(c) return c;
+    }
+    return 0;
+  });
   return arr;
+}
+
+function encodeSortLevels(levels){
+  return levels.map(l => l.key + ':' + l.dir).join(',');
+}
+
+function decodeSortParam(raw){
+  if(!raw) return [];
+  if(raw.includes(':')){
+    return raw.split(',').map(tok => {
+      const parts = tok.split(':');
+      return { key: parts[0], dir: parts[1] === 'd' ? 'd' : 'a' };
+    }).filter(l => SORT_KEYS.includes(l.key)).slice(0, 3);
+  }
+  return SORT_KEYS.includes(raw) ? [{ key:raw, dir:'a' }] : [];
 }
 
 function computeFacetCounts(query, facets, index, records, excludeDim){
@@ -1518,7 +1571,7 @@ function readUrlState(){
       auth: (p.get('auth') || '').split(',').filter(Boolean),
       class: (p.get('class') || '').split(',').filter(Boolean),
       form: (p.get('form') || '').split(',').filter(Boolean),
-      sort: p.get('sort') || 'relevance',
+      sort: p.get('sort') || '',
       d: p.get('d') || ''
     };
   }catch(e){
@@ -1533,7 +1586,7 @@ function writeUrlState(state){
     if(state.facets.authorities.size) p.set('auth', [...state.facets.authorities].join(','));
     if(state.facets.classes.size) p.set('class', [...state.facets.classes].join(','));
     if(state.facets.forms.size) p.set('form', [...state.facets.forms].join(','));
-    if(state.sort !== 'relevance') p.set('sort', state.sort);
+    if(state.sortLevels.length) p.set('sort', encodeSortLevels(state.sortLevels));
     if(state.density !== 'compact') p.set('d', state.density);
     const qs = p.toString();
     const url = location.pathname + (qs ? '?' + qs : '');
@@ -1609,7 +1662,7 @@ function initApp(){
     query: urlState.q,
     theme: loadLocal('lx_theme', prefersLight ? 'light' : 'dark'),
     density: urlState.d === 'comfortable' ? 'comfortable' : loadLocal('lx_density', 'compact'),
-    sort: SORTS.some(s => s.id === urlState.sort) ? urlState.sort : 'relevance',
+    sortLevels: decodeSortParam(urlState.sort),
     facets: {
       authorities: new Set(urlState.auth),
       classes: new Set(urlState.class),
@@ -1717,10 +1770,17 @@ function initApp(){
   function buildQueryTags(){
     activeQueryTags.innerHTML = '';
     const tags = [];
-    if(state.sort !== 'relevance'){
-      const s = SORTS.find(s => s.id === state.sort);
-      tags.push({ label: s.label, onRemove: () => setSort('relevance') });
-    }
+    state.sortLevels.forEach(level => {
+      const s = SORTS.find(s => s.id === level.key);
+      const label = (s ? s.label : level.key) + (level.dir === 'd' ? ' ↓' : ' ↑');
+      tags.push({
+        label,
+        onRemove: () => {
+          state.sortLevels = state.sortLevels.filter(l => l.key !== level.key);
+          syncSortUI();
+        }
+      });
+    });
     fieldTokensOf(state.query).forEach(tok => {
       const label = (tok.negate ? '−' : '') + tok.field + ':' + tok.value.replace(/_/g, ' ');
       tags.push({
@@ -2246,7 +2306,7 @@ function initApp(){
   function runUpdate(){
     const q = state.query.trim();
     const { results, relaxation } = runSearch(q, records, index, state.facets);
-    const sorted = sortRanked(results, state.sort, q.length > 0);
+    const sorted = sortByLevels(results, state.sortLevels, q.length > 0);
     currentResults = sorted;
     relaxationMsg = relaxation;
     focusedRowIndex = currentResults.length ? Math.min(focusedRowIndex, currentResults.length - 1) : -1;
@@ -2315,18 +2375,55 @@ function initApp(){
   detailSheetClose.addEventListener('click', closeDetail);
   detailSheetScrim.addEventListener('click', closeDetail);
 
+  function syncSortUI(){
+    const levels = state.sortLevels;
+    sortSelectLabel.textContent = !levels.length ? 'Best match'
+      : levels.length === 1 ? (SORTS.find(s => s.id === levels[0].key) || { label: levels[0].key }).label
+      : levels.map(l => l.key[0].toUpperCase() + l.key.slice(1)).join(' + ');
+    document.querySelectorAll('.col-header [data-sort-key]').forEach(btn => {
+      const key = btn.dataset.sortKey;
+      const idx = levels.findIndex(l => l.key === key);
+      btn.classList.toggle('active', idx !== -1);
+      btn.setAttribute('aria-sort', idx === -1 ? 'none' : (levels[idx].dir === 'a' ? 'ascending' : 'descending'));
+      btn.querySelector('.sort-caret').textContent = idx === -1 ? '' : (levels[idx].dir === 'a' ? '↑' : '↓');
+      btn.querySelector('.sort-ord').textContent = idx === -1 || levels.length < 2 ? '' : String(idx + 1);
+    });
+  }
+
   function setSort(id){
-    state.sort = id;
-    sortSelectLabel.textContent = SORTS.find(s => s.id === id).label;
+    state.sortLevels = id === 'relevance' ? [] : [{ key:id, dir:'a' }];
     sortPicker.classList.remove('show');
+    syncSortUI();
     runUpdate();
   }
+
+  function headerSortClick(key, shiftKey){
+    const levels = state.sortLevels.slice();
+    const idx = levels.findIndex(l => l.key === key);
+    if(shiftKey){
+      if(idx === -1){ if(levels.length < 3) levels.push({ key, dir:'a' }); }
+      else levels.splice(idx, 1);
+    } else if(idx === -1){
+      levels.length = 0;
+      levels.push({ key, dir:'a' });
+    } else {
+      levels[idx] = { key, dir: levels[idx].dir === 'a' ? 'd' : 'a' };
+    }
+    state.sortLevels = levels;
+    syncSortUI();
+    runUpdate();
+  }
+
+  document.querySelectorAll('.col-header [data-sort-key]').forEach(btn => {
+    btn.addEventListener('click', (e) => headerSortClick(btn.dataset.sortKey, e.shiftKey));
+  });
+
   sortPicker.innerHTML = SORTS.map(s => `<div class="gp-item" role="option" data-sort="${s.id}"><span>${s.label}</span></div>`).join('');
   sortPicker.querySelectorAll('[data-sort]').forEach(item => {
     item.addEventListener('mousedown', (e) => { e.preventDefault(); setSort(item.dataset.sort); });
   });
   sortSelectBtn.addEventListener('click', () => sortPicker.classList.toggle('show'));
-  sortSelectLabel.textContent = SORTS.find(s => s.id === state.sort).label;
+  syncSortUI();
 
   function setDensity(d){
     state.density = d;
