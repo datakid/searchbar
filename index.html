@@ -261,6 +261,8 @@ svg.icon.filled{fill:currentColor;stroke:none;}
 }
 #resultsMeta{font-family:var(--font-mono);font-size:12px;color:var(--ink-3);}
 .relax-note{font-size:11.5px;color:var(--iodine);}
+.meta-clear{appearance:none;background:none;border:none;padding:0;font:inherit;color:var(--iodine);cursor:pointer;text-decoration:underline;text-underline-offset:2px;}
+.meta-clear:hover{color:var(--cinnabar);}
 .active-query-tags{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
 .qtag{
   display:flex;align-items:center;gap:5px;padding:3px 4px 3px 9px;border-radius:var(--radius-md);
@@ -308,6 +310,8 @@ svg.icon.filled{fill:currentColor;stroke:none;}
 .row:hover,.row.focused{background:var(--s2);}
 .row:hover::before,.row.focused::before{opacity:1;}
 .row.selected{background:var(--s2);}
+.row.picked{background:var(--s2);}
+.row.picked::before{width:4px;background:var(--iodine);opacity:1;}
 .row-h-compact{height:var(--row-compact);}
 .row-h-comfortable{height:var(--row-comfortable);}
 .row-main{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:2px;}
@@ -600,7 +604,7 @@ svg.icon.filled{fill:currentColor;stroke:none;}
 
       <div class="list-scroller" id="listScroller">
         <div class="list-spacer" id="listSpacer">
-          <div class="list-viewport" id="listViewport" role="grid" aria-label="Medication results" aria-rowcount="0" tabindex="-1"></div>
+          <div class="list-viewport" id="listViewport" role="grid" aria-label="Medication results" aria-rowcount="0" aria-multiselectable="true" tabindex="-1"></div>
         </div>
       </div>
 
@@ -657,8 +661,13 @@ svg.icon.filled{fill:currentColor;stroke:none;}
     <div class="sc-row"><span class="sc-desc">Focus search</span><span class="sc-keys"><span class="kbd">/</span><span class="kbd">⌘K</span></span></div>
     <div class="sc-row"><span class="sc-desc">Move row cursor</span><span class="sc-keys"><span class="kbd">↑</span><span class="kbd">↓</span></span></div>
     <div class="sc-row"><span class="sc-desc">Open detail</span><span class="sc-keys"><span class="kbd">Enter</span></span></div>
-    <div class="sc-row"><span class="sc-desc">Close detail, then clear query</span><span class="sc-keys"><span class="kbd">Esc</span></span></div>
+    <div class="sc-row"><span class="sc-desc">Toggle row selection</span><span class="sc-keys"><span class="kbd">Space</span></span></div>
+    <div class="sc-row"><span class="sc-desc">Extend selection</span><span class="sc-keys"><span class="kbd">Shift</span><span class="kbd">↑</span><span class="kbd">↓</span></span></div>
+    <div class="sc-row"><span class="sc-desc">Select all filtered</span><span class="sc-keys"><span class="kbd">⌘A</span></span></div>
+    <div class="sc-row"><span class="sc-desc">Copy selection (or focused row)</span><span class="sc-keys"><span class="kbd">⌘C</span></span></div>
+    <div class="sc-row"><span class="sc-desc">Clear selection, close detail, then clear query</span><span class="sc-keys"><span class="kbd">Esc</span></span></div>
     <div class="sc-row"><span class="sc-desc">Copy focused row</span><span class="sc-keys"><span class="kbd">c</span></span></div>
+    <div class="sc-row"><span class="sc-desc">Sort by column</span><span class="sc-keys"><span class="kbd">Click</span><span class="kbd">⇧Click</span></span></div>
     <div class="sc-row"><span class="sc-desc">Cycle density</span><span class="sc-keys"><span class="kbd">[</span><span class="kbd">]</span></span></div>
     <div class="sc-row"><span class="sc-desc">This sheet</span><span class="sc-keys"><span class="kbd">?</span></span></div>
   </div>
@@ -1680,6 +1689,9 @@ function initApp(){
   let focusedRowIndex = -1;
   let gpIndex = -1;
   let selectedDocId = null;
+  let selectedIds = new Set();
+  let selectionAnchor = -1;
+  let metaOverrideTimer = null;
   let ROW_H = state.density === 'compact' ? 52 : 72;
   const OVERSCAN = 6;
   const POOL_SIZE = 44;
@@ -1702,8 +1714,16 @@ function initApp(){
       '<div class="row-form" role="gridcell"><span class="chip"></span></div>' +
       '<div class="row-authority" role="gridcell"><span class="dot"></span><span class="code"></span></div>' +
       '<div class="row-class" role="gridcell"></div>';
-    row.addEventListener('click', () => {
-      if(row.__docId != null) selectRow(row.__docId, true);
+    row.addEventListener('click', (e) => {
+      if(row.__docId == null) return;
+      if(e.shiftKey){
+        extendSelectionTo(row.__index);
+      } else if(e.metaKey || e.ctrlKey){
+        toggleSelect(row.__docId);
+        selectionAnchor = row.__index;
+      } else {
+        selectRow(row.__docId, true);
+      }
     });
     return row;
   }
@@ -1723,9 +1743,12 @@ function initApp(){
     row.style.visibility = 'visible';
     const rec = item.rec;
     row.__docId = rec.id;
-    row.className = 'row row-h-' + state.density + (rec.id === selectedDocId ? ' selected' : '') + (row.__cursorActive ? ' focused' : '');
+    row.__index = item.__index;
+    const picked = selectedIds.has(rec.id);
+    row.className = 'row row-h-' + state.density + (rec.id === selectedDocId ? ' selected' : '') + (row.__cursorActive ? ' focused' : '') + (picked ? ' picked' : '');
     row.style.setProperty('--row-rule', AUTH_ROW_COLOR(rec.authTier));
     row.setAttribute('aria-rowindex', String(item.__index + 1));
+    row.setAttribute('aria-selected', String(picked));
 
     const nameEl = row.querySelector('.row-name');
     nameEl.innerHTML = highlightText(rec.Name, item.matchedTokens);
@@ -1832,6 +1855,14 @@ function initApp(){
   }
 
   function renderMeta(){
+    if(metaOverrideTimer) return;
+    if(selectedIds.size){
+      resultsMeta.innerHTML = `<span class="tabular">${selectedIds.size}</span> selected · <button type="button" class="meta-clear" id="metaClearBtn">clear</button>`;
+      const btn = document.getElementById('metaClearBtn');
+      if(btn) btn.addEventListener('click', clearSelection);
+      scheduleAnnounce(`${selectedIds.size} selected`);
+      return;
+    }
     const hasQuery = state.query.trim().length > 0;
     const anyFacet = state.facets.authorities.size || state.facets.classes.size || state.facets.forms.size;
     let plainText;
@@ -2038,21 +2069,104 @@ function initApp(){
     return `<div class="detail-row"><span class="k">Also available as</span></div><div class="detail-siblings">${items}</div>`;
   }
 
-  function copyRecordRow(rec){
-    const text = [rec.Name, rec.Conc, rec.form, rec.Authority, rec.classes.join('; ')].join('\t');
-    const done = () => {};
-    if(navigator.clipboard && navigator.clipboard.writeText){
+  function toggleSelect(docId){
+    if(selectedIds.has(docId)) selectedIds.delete(docId);
+    else selectedIds.add(docId);
+    lastStart = -1;
+    paint();
+    renderMeta();
+  }
+
+  function extendSelectionTo(targetIndex){
+    const anchor = selectionAnchor === -1 ? (focusedRowIndex === -1 ? targetIndex : focusedRowIndex) : selectionAnchor;
+    selectionAnchor = anchor;
+    const lo = Math.min(anchor, targetIndex), hi = Math.max(anchor, targetIndex);
+    for(let i = lo; i <= hi; i++){
+      if(currentResults[i]) selectedIds.add(currentResults[i].rec.id);
+    }
+    focusedRowIndex = targetIndex;
+    lastStart = -1;
+    ensureCursorVisible();
+    paint();
+    renderMeta();
+  }
+
+  function selectAllFiltered(){
+    selectedIds = new Set(currentResults.map(r => r.rec.id));
+    lastStart = -1;
+    paint();
+    renderMeta();
+  }
+
+  function clearSelection(){
+    if(!selectedIds.size) return;
+    selectedIds.clear();
+    selectionAnchor = -1;
+    lastStart = -1;
+    paint();
+    renderMeta();
+  }
+
+  function showTransientMeta(text){
+    if(metaOverrideTimer) clearTimeout(metaOverrideTimer);
+    resultsMeta.textContent = text;
+    metaOverrideTimer = setTimeout(() => { metaOverrideTimer = null; renderMeta(); }, 1400);
+  }
+
+  function recordsToTSV(recs){
+    const rows = [['Name', 'Strength', 'Form', 'Authority', 'Class']].concat(
+      recs.map(r => [r.Name, r.Conc, r.form, r.Authority, r.classes.join('; ')])
+    );
+    return rows.map(row => row.join('\t')).join('\n');
+  }
+
+  function recordsToHTMLTable(recs){
+    const head = '<tr>' + ['Name', 'Strength', 'Form', 'Authority', 'Class'].map(h => `<th>${h}</th>`).join('') + '</tr>';
+    const body = recs.map(r => '<tr>' + [r.Name, r.Conc, r.form, r.Authority, r.classes.join('; ')]
+      .map(v => `<td>${escapeHtml(v)}</td>`).join('') + '</tr>').join('');
+    return `<table>${head}${body}</table>`;
+  }
+
+  function fallbackCopy(text, done){
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand('copy'); }catch(e){}
+    document.body.removeChild(ta);
+    done();
+  }
+
+  function copyRecords(recs){
+    if(!recs.length) return;
+    const text = recordsToTSV(recs);
+    const html = recordsToHTMLTable(recs);
+    const done = () => showTransientMeta(`Copied ${recs.length} row${recs.length === 1 ? '' : 's'}`);
+    if(window.ClipboardItem && navigator.clipboard && navigator.clipboard.write){
+      const item = new ClipboardItem({
+        'text/plain': new Blob([text], { type:'text/plain' }),
+        'text/html': new Blob([html], { type:'text/html' })
+      });
+      navigator.clipboard.write([item]).then(done, () => fallbackCopy(text, done));
+    } else if(navigator.clipboard && navigator.clipboard.writeText){
       navigator.clipboard.writeText(text).then(done, done);
     } else {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.select();
-      try{ document.execCommand('copy'); }catch(e){}
-      document.body.removeChild(ta);
+      fallbackCopy(text, done);
     }
+  }
+
+  function copySelectionOrFocused(){
+    if(selectedIds.size){
+      copyRecords(currentResults.map(r => r.rec).filter(r => selectedIds.has(r.id)));
+    } else if(focusedRowIndex >= 0 && currentResults[focusedRowIndex]){
+      copyRecords([currentResults[focusedRowIndex].rec]);
+    }
+  }
+
+  function copyRecordRow(rec){
+    copyRecords([rec]);
     document.querySelectorAll('[data-action="copy-row"]').forEach(btn => {
       btn.classList.add('copied');
       const original = btn.innerHTML;
@@ -2504,12 +2618,23 @@ function initApp(){
       searchInput.select();
       return;
     }
+    if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'a' && !inInput){
+      e.preventDefault();
+      selectAllFiltered();
+      return;
+    }
+    if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'c' && !inInput){
+      e.preventDefault();
+      copySelectionOrFocused();
+      return;
+    }
     if(e.key === '?' && !inInput){
       e.preventDefault();
       openShortcuts();
       return;
     }
     if(e.key === 'Escape'){
+      if(selectedIds.size){ clearSelection(); return; }
       if(shortcutsModal.classList.contains('show')){ closeShortcuts(); return; }
       if(detailSheet.classList.contains('show')){ closeDetail(); return; }
       if(facetSheet.classList.contains('show')){ closeFacetSheet(); return; }
@@ -2520,14 +2645,32 @@ function initApp(){
       }
       return;
     }
+    if(e.key === ' ' && !inInput){
+      e.preventDefault();
+      if(focusedRowIndex >= 0 && currentResults[focusedRowIndex]){
+        toggleSelect(currentResults[focusedRowIndex].rec.id);
+        selectionAnchor = focusedRowIndex;
+      }
+      return;
+    }
     if(e.key === 'ArrowDown' && !e.altKey){
       e.preventDefault();
-      moveCursor(1);
+      if(e.shiftKey && currentResults.length){
+        extendSelectionTo(Math.min(currentResults.length - 1, (focusedRowIndex < 0 ? 0 : focusedRowIndex) + 1));
+      } else {
+        selectionAnchor = -1;
+        moveCursor(1);
+      }
       return;
     }
     if(e.key === 'ArrowUp' && !e.altKey){
       e.preventDefault();
-      moveCursor(-1);
+      if(e.shiftKey && currentResults.length){
+        extendSelectionTo(Math.max(0, (focusedRowIndex < 0 ? 0 : focusedRowIndex) - 1));
+      } else {
+        selectionAnchor = -1;
+        moveCursor(-1);
+      }
       return;
     }
     if(e.key === 'Enter' && !inInput){
