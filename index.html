@@ -286,7 +286,7 @@ svg.icon.filled{fill:currentColor;stroke:none;}
 }
 .col-header button:hover,.col-header button.active{color:var(--ink-2);}
 .col-header button .sort-caret{font-family:var(--font-mono);font-size:10px;}
-.col-header button .sort-ord{font-family:var(--font-mono);font-size:9px;vertical-align:super;color:var(--iodine);}
+.col-header button .sort-ord{font-family:var(--font-mono);font-size:9px;color:var(--iodine);}
 .col-name{flex:1;min-width:0;justify-content:flex-start;}
 .col-strength{width:100px;text-align:right;flex-shrink:0;justify-content:flex-end;}
 .col-form{width:110px;flex-shrink:0;}
@@ -549,7 +549,7 @@ svg.icon.filled{fill:currentColor;stroke:none;}
     <div class="cmd-search">
       <div class="cmd-search-field" id="searchFieldWrap">
         <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input id="searchInput" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+        <input id="searchInput" type="text" dir="auto" autocomplete="off" autocapitalize="off" spellcheck="false"
                placeholder="Search name, brand, class, dose…" aria-label="Search medications"
                role="combobox" aria-expanded="false" aria-controls="resultsList" aria-autocomplete="list">
         <button class="search-clear" id="clearBtn" aria-label="Clear search" type="button">
@@ -1543,14 +1543,36 @@ function buildSheetXML(rows){
     '<sheetData>';
   const allRows = [cols].concat(rows);
   allRows.forEach((row, ri) => {
+    const styleAttr = ri === 0 ? ' s="1"' : '';
     xml += `<row r="${ri+1}">`;
     row.forEach((val, ci) => {
-      xml += `<c r="${colLetter(ci)}${ri+1}" t="inlineStr"><is><t xml:space="preserve">${xmlEscape(val)}</t></is></c>`;
+      xml += `<c r="${colLetter(ci)}${ri+1}"${styleAttr} t="inlineStr"><is><t xml:space="preserve">${xmlEscape(val)}</t></is></c>`;
     });
     xml += '</row>';
   });
   xml += '</sheetData>' + `<autoFilter ref="A1:${colLetter(cols.length-1)}${allRows.length}"/>` + '</worksheet>';
   return xml;
+}
+
+function buildStylesXML(){
+  return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+    '<fonts count="2">' +
+    '<font><sz val="11"/><name val="Calibri"/></font>' +
+    '<font><b/><sz val="11"/><name val="Calibri"/></font>' +
+    '</fonts>' +
+    '<fills count="2">' +
+    '<fill><patternFill patternType="none"/></fill>' +
+    '<fill><patternFill patternType="gray125"/></fill>' +
+    '</fills>' +
+    '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>' +
+    '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
+    '<cellXfs count="2">' +
+    '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>' +
+    '<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/>' +
+    '</cellXfs>' +
+    '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>' +
+    '</styleSheet>';
 }
 
 function buildXLSX(rows){
@@ -1560,6 +1582,7 @@ function buildXLSX(rows){
     '<Default Extension="xml" ContentType="application/xml"/>' +
     '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
     '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>' +
+    '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' +
     '</Types>';
   const rootRels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
@@ -1571,12 +1594,14 @@ function buildXLSX(rows){
   const workbookRels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
     '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>' +
+    '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>' +
     '</Relationships>';
   return buildZip([
     { name:'[Content_Types].xml', data: contentTypes },
     { name:'_rels/.rels', data: rootRels },
     { name:'xl/workbook.xml', data: workbookXML },
     { name:'xl/_rels/workbook.xml.rels', data: workbookRels },
+    { name:'xl/styles.xml', data: buildStylesXML() },
     { name:'xl/worksheets/sheet1.xml', data: buildSheetXML(rows) }
   ]);
 }
@@ -2096,7 +2121,7 @@ function initApp(){
       </label>`;
     }).join('');
     const searchHtml = ordered.length > FACET_SEARCH_THRESHOLD
-      ? `<div class="facet-search-wrap"><input type="text" class="facet-search" data-dim="${dim}" placeholder="Filter ${escapeHtml(title.toLowerCase())}…" aria-label="Filter ${escapeHtml(title)} options"></div>`
+      ? `<div class="facet-search-wrap"><input type="text" class="facet-search" dir="auto" data-dim="${dim}" placeholder="Filter ${escapeHtml(title.toLowerCase())}…" aria-label="Filter ${escapeHtml(title)} options"></div>`
       : '';
     return `<div class="facet-group${collapsed ? ' collapsed' : ''}" data-group="${dim}">
       <button type="button" class="facet-group-head" data-toggle="${dim}">
