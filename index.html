@@ -280,13 +280,15 @@ svg.icon.filled{fill:currentColor;stroke:none;}
 }
 @media (min-width:1080px){.col-header{display:flex;}}
 .col-header button{
-  appearance:none;background:none;border:none;padding:0;margin:0;cursor:pointer;
+  appearance:none;background:none;border:none;cursor:pointer;
   font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit;
-  display:flex;align-items:center;gap:3px;
+  display:inline-flex;align-items:center;gap:3px;
+  padding:3px 5px;margin:-3px -5px;border-radius:var(--radius-sm);
 }
 .col-header button:hover,.col-header button.active{color:var(--ink-2);}
 .col-header button .sort-caret{font-family:var(--font-mono);font-size:10px;}
 .col-header button .sort-ord{font-family:var(--font-mono);font-size:9px;color:var(--iodine);}
+.col-header span[role="columnheader"]{display:flex;}
 .col-name{flex:1;min-width:0;justify-content:flex-start;}
 .col-strength{width:100px;text-align:right;flex-shrink:0;justify-content:flex-end;}
 .col-form{width:110px;flex-shrink:0;}
@@ -620,11 +622,11 @@ svg.icon.filled{fill:currentColor;stroke:none;}
       <div class="entry-chips" id="entryChips"></div>
 
       <div class="col-header" role="row">
-        <button type="button" class="col-name" role="columnheader" data-sort-key="name">Name<span class="sort-caret"></span><span class="sort-ord"></span></button>
-        <button type="button" class="col-strength" role="columnheader" data-sort-key="strength">Strength<span class="sort-caret"></span><span class="sort-ord"></span></button>
-        <button type="button" class="col-form" role="columnheader" data-sort-key="form">Form<span class="sort-caret"></span><span class="sort-ord"></span></button>
-        <button type="button" class="col-authority" role="columnheader" data-sort-key="authority">Authority<span class="sort-caret"></span><span class="sort-ord"></span></button>
-        <button type="button" class="col-class" role="columnheader" data-sort-key="class">Class<span class="sort-caret"></span><span class="sort-ord"></span></button>
+        <span class="col-name" role="columnheader"><button type="button" data-sort-key="name">Name<span class="sort-caret"></span><span class="sort-ord"></span></button></span>
+        <span class="col-strength" role="columnheader"><button type="button" data-sort-key="strength">Strength<span class="sort-caret"></span><span class="sort-ord"></span></button></span>
+        <span class="col-form" role="columnheader"><button type="button" data-sort-key="form">Form<span class="sort-caret"></span><span class="sort-ord"></span></button></span>
+        <span class="col-authority" role="columnheader"><button type="button" data-sort-key="authority">Authority<span class="sort-caret"></span><span class="sort-ord"></span></button></span>
+        <span class="col-class" role="columnheader"><button type="button" data-sort-key="class">Class<span class="sort-caret"></span><span class="sort-ord"></span></button></span>
       </div>
 
       <div class="list-scroller" id="listScroller">
@@ -2792,7 +2794,8 @@ function initApp(){
       const key = btn.dataset.sortKey;
       const idx = levels.findIndex(l => l.key === key);
       btn.classList.toggle('active', idx !== -1);
-      btn.setAttribute('aria-sort', idx === -1 ? 'none' : (levels[idx].dir === 'a' ? 'ascending' : 'descending'));
+      const headerCell = btn.closest('[role="columnheader"]') || btn;
+      headerCell.setAttribute('aria-sort', idx === -1 ? 'none' : (levels[idx].dir === 'a' ? 'ascending' : 'descending'));
       btn.querySelector('.sort-caret').textContent = idx === -1 ? '' : (levels[idx].dir === 'a' ? '↑' : '↓');
       btn.querySelector('.sort-ord').textContent = idx === -1 || levels.length < 2 ? '' : String(idx + 1);
     });
@@ -2901,7 +2904,7 @@ function initApp(){
       if(e.key === 'Escape'){ e.preventDefault(); grammarPicker.classList.remove('show'); return; }
     }
 
-    if(e.key === '/' && !inInput){
+    if((e.key === '/' || e.code === 'Slash') && !inInput){
       e.preventDefault();
       searchInput.focus();
       return;
