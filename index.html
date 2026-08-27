@@ -1540,8 +1540,8 @@ function buildSheetXML(rows){
   const widths = [34, 12, 12, 22, 26];
   let xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
-    '<cols>' + widths.map((w, i) => `<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('') + '</cols>' +
     '<sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>' +
+    '<cols>' + widths.map((w, i) => `<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('') + '</cols>' +
     '<sheetData>';
   const allRows = [cols].concat(rows);
   allRows.forEach((row, ri) => {
@@ -2374,14 +2374,16 @@ function initApp(){
   }
 
   function triggerDownload(blob, filename){
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    const reader = new FileReader();
+    reader.onload = () => {
+      const a = document.createElement('a');
+      a.href = reader.result;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    };
+    reader.readAsDataURL(blob);
   }
 
   function csvField(v){
