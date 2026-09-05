@@ -1093,8 +1093,10 @@ class TrieNode{
   constructor(){ this.children = new Map(); this.tokens = null; }
 }
 class Trie{
-  constructor(){ this.root = new TrieNode(); }
+  constructor(){ this.root = new TrieNode(); this.inserted = new Set(); }
   insert(token){
+    if(this.inserted.has(token)) return;
+    this.inserted.add(token);
     let node = this.root;
     for(const ch of token){
       let next = node.children.get(ch);
@@ -1102,7 +1104,7 @@ class Trie{
       node = next;
     }
     if(!node.tokens) node.tokens = [];
-    if(!node.tokens.includes(token)) node.tokens.push(token);
+    node.tokens.push(token);
   }
   collectSubtree(node, out, limit){
     if(node.tokens){
@@ -1252,6 +1254,7 @@ function phoneticSkeleton(raw){
 const FIELDS = ['brand','name','class','form','strength','authority'];
 const FIELD_WEIGHTS = { brand:1.0, name:1.0, class:0.45, form:0.3, strength:0.3, authority:0.25 };
 const NUM_FIELDS = FIELDS.length;
+const FIELD_SHIFT = [1, 256, 65536, 16777216, 4294967296, 1099511627776];
 const CLASS_STOPWORDS = new Set(['drugs','agents','disorders','disease','diseases','drug','agent']);
 
 function fieldText(rec, field){
@@ -1308,9 +1311,10 @@ function parseDose(tokenText){
   return null;
 }
 function buildSortRank(records, keyFn){
+  const keys = records.map(keyFn);
   const idx = records.map((r,i) => i);
   idx.sort((a,b) => {
-    const ka = keyFn(records[a]), kb = keyFn(records[b]);
+    const ka = keys[a], kb = keys[b];
     if(ka < kb) return -1;
     if(ka > kb) return 1;
     return a - b;
@@ -1367,11 +1371,11 @@ function buildIndex(records, variantGroups){
       }
       fieldLen[rec.id*NUM_FIELDS+fi] = cached.expanded.length;
       fieldLenSum[fi] += cached.expanded.length;
+      const shift = FIELD_SHIFT[fi];
       cached.counted.forEach((count, tok) => {
-        if(!postingsTemp.has(tok)) postingsTemp.set(tok, new Map());
-        const docMap = postingsTemp.get(tok);
-        if(!docMap.has(rec.id)) docMap.set(rec.id, new Uint8Array(NUM_FIELDS));
-        docMap.get(rec.id)[fi] = Math.min(255, count);
+        let docMap = postingsTemp.get(tok);
+        if(docMap === undefined){ docMap = new Map(); postingsTemp.set(tok, docMap); }
+        docMap.set(rec.id, (docMap.get(rec.id) || 0) + Math.min(255, count) * shift);
       });
     });
   });
@@ -1395,8 +1399,11 @@ function buildIndex(records, variantGroups){
     const docIds = [...docMap.keys()].sort((a,b) => a-b);
     docIds.forEach(docId => {
       postingsDoc[cursor] = docId;
-      const tfArr = docMap.get(docId);
-      for(let fi=0; fi<NUM_FIELDS; fi++) postingsTf[cursor*NUM_FIELDS+fi] = tfArr[fi];
+      let packed = docMap.get(docId);
+      for(let fi=0; fi<NUM_FIELDS; fi++){
+        postingsTf[cursor*NUM_FIELDS+fi] = packed % 256;
+        packed = Math.floor(packed / 256);
+      }
       cursor++;
     });
   });
@@ -1404,15 +1411,6 @@ function buildIndex(records, variantGroups){
   terms.forEach((t, ti) => { idf[ti] = Math.log(1 + (N - dfArr[ti] + 0.5) / (dfArr[ti] + 0.5)); });
   const avgFieldLen = new Float32Array(NUM_FIELDS);
   FIELDS.forEach((f,fi) => avgFieldLen[fi] = fieldLenSum[fi] / N || 1);
-
-  const phoneticMap = new Map();
-  terms.forEach(t => {
-    if(t.length < 3 || /^[0-9]/.test(t)) return;
-    const sk = phoneticSkeleton(t);
-    if(!sk) return;
-    if(!phoneticMap.has(sk)) phoneticMap.set(sk, []);
-    phoneticMap.get(sk).push(t);
-  });
 
   const doseValueMg = new Float32Array(N).fill(NaN);
   const doseValueIU = new Float32Array(N).fill(NaN);
@@ -1458,7 +1456,7 @@ function buildIndex(records, variantGroups){
   return {
     N, FIELDS, FIELD_WEIGHTS, NUM_FIELDS, terms, termId,
     postingsStart, postingsDoc, postingsTf, df: dfArr, idf, fieldLen, avgFieldLen,
-    trie, phoneticMap, doseValueMg, doseValueIU, dosePercent,
+    trie, phoneticState:{ map:null }, doseValueMg, doseValueIU, dosePercent,
     authorityValues, classValues, formValues, authorityBitset, classBitset, formBitset,
     nameRank: nameSort.rank, classRank: classSort.rank, formRank: formSort.rank,
     strengthRank, alphaPermutation: nameSort.permutation,
@@ -1508,6 +1506,21 @@ function qualityForFuzzy(cost, isPrefix){
   const base = Math.max(0.3, 1 - cost * 0.25);
   return isPrefix ? base * 0.95 : base;
 }
+function phoneticBucket(index, tok){
+  const st = index.phoneticState;
+  if(st.map === null){
+    const m = new Map();
+    index.terms.forEach(t => {
+      if(t.length < 3 || /^[0-9]/.test(t)) return;
+      const sk = phoneticSkeleton(t);
+      if(!sk) return;
+      if(!m.has(sk)) m.set(sk, []);
+      m.get(sk).push(t);
+    });
+    st.map = m;
+  }
+  return st.map.get(phoneticSkeleton(tok));
+}
 function resolveQueryToken(qtok, index, opts){
   opts = opts || {};
   const isLast = !!opts.isLast;
@@ -1529,7 +1542,7 @@ function resolveQueryToken(qtok, index, opts){
   }
   synExpansions(qtok).forEach(s => { if(index.termId.has(s)) out.push({ tok:s, kind:'synonym', quality:0.85 }); });
   if(out.length === 0 && qtok.length >= 3 && !/^[0-9]/.test(qtok)){
-    const bucket = index.phoneticMap.get(phoneticSkeleton(qtok));
+    const bucket = phoneticBucket(index, qtok);
     if(bucket) bucket.forEach(t => { if(t !== qtok) out.push({ tok:t, kind:'phonetic', quality:0.6 }); });
   }
   return out;
@@ -1955,7 +1968,7 @@ function compareByLevel(level, a, b){
   if(level.key === 'strength') return dir * (ar.strength - br.strength);
   return 0;
 }
-function sortByLevels(list, levels, hasQuery){
+function sortByLevels(list, levels){
   if(!levels.length) return list;
   const arr = list.slice();
   arr.sort((a, b) => {
@@ -2220,11 +2233,6 @@ function buildSiblingIndex(records){
   return m;
 }
 const AUTH_ROW_COLOR = tier => `var(${(AUTH_TIERS[tier] || AUTH_TIERS.Con).color})`;
-
-function findVariants(rec, records, variantGroups){
-  if(!rec.variantSiblings || !rec.variantSiblings.length) return [];
-  return rec.variantSiblings.map(id => records[id]);
-}
 const QWERTY_NEARBY = {
   a:'qwsz', b:'vghn', c:'xdfv', d:'serfcx', e:'wsdr', f:'drtgvc', g:'ftyhbv',
   h:'gyujnb', i:'ujko', j:'huikmn', k:'jiolm', l:'kop', m:'njk', n:'bhjm',
@@ -2312,6 +2320,14 @@ function buildCorruptionSuite(records, count){
     out.push({ query, targetId: rec.id, strategy: name });
   }
   return out;
+}
+function buildTruncationClasses(records){
+  const m = new Map();
+  records.filter(r => r.Name.replace(/[^a-zA-Z]/g,'').length >= 4).forEach(r => {
+    const k = corruptTruncate60(r.Name);
+    m.set(k, (m.get(k) || 0) + 1);
+  });
+  return m;
 }
 
 function buildIndexTimed(){
@@ -2627,6 +2643,11 @@ function runSelfTest(ctx){
     'recall@5': (100*b.hit5/b.n).toFixed(1)+'%',
     'variant-eq@1': (100*b.hitVariant1/b.n).toFixed(1)+'%'
   })));
+
+  const truncClasses = buildTruncationClasses(records);
+  const ambig = [...truncClasses.entries()].filter(e => e[1] > 1).sort((a,b) => b[1]-a[1]).slice(0, 15);
+  console.log('truncate_60 same-length collision families (records whose OWN 60%-truncation is byte-identical to another record\'s -- a lower bound on genuine ambiguity, not the full picture, since same-generic records of a different name length truncate to a different length and do not show up here even though the matcher still cannot always tell them apart)');
+  console.table(ambig.map(([q,n]) => ({ truncated_prefix:q, colliding_records:n })));
   console.log('variant-equivalent recall@1: ' + (100*hitVariant1/suite.length).toFixed(1) + '% (strict recall@1: ' + (recall1*100).toFixed(1) + '%)');
   console.log(failures.length + ' of ' + suite.length + ' missed the top-5. First ' + Math.min(40, failures.length) + ':');
   failures.slice(0, 40).forEach(f => console.log(f.strategy + ' | ' + f.src + ' | ' + f.query + ' | ' + f.got.join(', ')));
