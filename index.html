@@ -1045,14 +1045,16 @@ function buildRecords(raw){
     const percentFix = fixPercentConc(concOriginal);
     const concDisplay = concOriginal === '---' ? '—' : (percentFix.isPercentFix ? percentFix.display : concOriginal);
 
-    const genericKeyToks = tokenizeRaw(split.generic)
+    const nameTokens = tokenizeRaw(name);
+    const genericTokens = split.generic === name ? nameTokens : tokenizeRaw(split.generic);
+    const genericKeyToks = genericTokens
       .map(t => applyTypoCorrection(t.tok)).filter(t => !UNIT_WORDS.has(t)).sort();
     const brandNorm = split.brands.map(b => applyTypoCorrection(normalizeText(b))).sort().join('+');
     const concNorm = normalizeText(concOriginal).replace(/\s+/g,'');
     const variantKey = [genericKeyToks.join(' '), concNorm, formCanon.toLowerCase(), auth.tier, brandNorm].join('|');
 
     const correctedFrom = [];
-    tokenizeRaw(name).forEach(t => {
+    nameTokens.forEach(t => {
       const c = applyTypoCorrection(t.tok);
       if(c !== t.tok) correctedFrom.push({ from:t.tok, to:c });
     });
@@ -1342,26 +1344,30 @@ function buildIndex(records, variantGroups){
   records.forEach(rec => {
     FIELDS.forEach((field, fi) => {
       const text = fieldText(rec, field);
-      let expanded = expandedCache.get(text);
-      if(expanded === undefined){
+      let cached = expandedCache.get(text);
+      if(cached === undefined){
         const raw = tokenizeRaw(text);
-        expanded = [];
+        const expanded = [];
+        const counted = new Map();
         raw.forEach(({ tok, wordStart }) => {
           expanded.push({ tok, wordStart });
+          counted.set(tok, (counted.get(tok) || 0) + 1);
+          vocabulary.add(tok);
+          if(wordStart) trie.insert(tok);
           const corrected = applyTypoCorrection(tok);
-          if(corrected !== tok) expanded.push({ tok:corrected, wordStart });
+          if(corrected !== tok){
+            expanded.push({ tok:corrected, wordStart });
+            counted.set(corrected, (counted.get(corrected) || 0) + 1);
+            vocabulary.add(corrected);
+            if(wordStart) trie.insert(corrected);
+          }
         });
-        expandedCache.set(text, expanded);
+        cached = { expanded, counted };
+        expandedCache.set(text, cached);
       }
-      fieldLen[rec.id*NUM_FIELDS+fi] = expanded.length;
-      fieldLenSum[fi] += expanded.length;
-      const counted = new Map();
-      expanded.forEach(({ tok, wordStart }) => {
-        counted.set(tok, (counted.get(tok) || 0) + 1);
-        vocabulary.add(tok);
-        if(wordStart) trie.insert(tok);
-      });
-      counted.forEach((count, tok) => {
+      fieldLen[rec.id*NUM_FIELDS+fi] = cached.expanded.length;
+      fieldLenSum[fi] += cached.expanded.length;
+      cached.counted.forEach((count, tok) => {
         if(!postingsTemp.has(tok)) postingsTemp.set(tok, new Map());
         const docMap = postingsTemp.get(tok);
         if(!docMap.has(rec.id)) docMap.set(rec.id, new Uint8Array(NUM_FIELDS));
