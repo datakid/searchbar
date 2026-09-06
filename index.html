@@ -1526,6 +1526,7 @@ function resolveQueryToken(qtok, index, opts){
   const forceMaxDist = opts.forceMaxDist;
   const out = [];
   if(index.termId.has(qtok)) out.push({ tok:qtok, kind:'exact', quality:1 });
+  if(qtok.length > 40) return out;
   if(qtok.length >= 2){
     index.trie.prefixTokens(qtok, 25).forEach(t => { if(t !== qtok) out.push({ tok:t, kind:'prefix', quality:0.9 }); });
   }
