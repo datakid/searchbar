@@ -7,6 +7,9 @@
 <link rel="icon" media="(prefers-color-scheme:light)" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5.5 15.82A10.5 10.5 0 1 1 22.02 24.6' fill='none' stroke='%23B4501F' stroke-width='4'/%3E%3Cpath d='M18 26.31A10.5 10.5 0 0 1 6.34 20.1' fill='none' stroke='%23B4501F' stroke-width='4'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%23B4501F'/%3E%3C/svg%3E">
 <link rel="icon" media="(prefers-color-scheme:dark)" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5.5 15.82A10.5 10.5 0 1 1 22.02 24.6' fill='none' stroke='%23E2703A' stroke-width='4'/%3E%3Cpath d='M18 26.31A10.5 10.5 0 0 1 6.34 20.1' fill='none' stroke='%23E2703A' stroke-width='4'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%23E2703A'/%3E%3C/svg%3E">
 <meta name="description" content="Formulary lookup — dispensing authority, strength and class for the insurance formulary.">
+<script>(function(){try{var v=localStorage.getItem('lx_theme');var t=v?JSON.parse(v):(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<meta name="theme-color" content="#0d0d0f" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#faf9f6" media="(prefers-color-scheme: light)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Martian+Mono:wght@400..700&display=swap">
@@ -25,6 +28,7 @@
 }
 @media (min-resolution:2dppx){ :root{ --hair-w:0.5px; } }
 :root[data-theme="dark"]{
+  color-scheme:dark;
   --void:#07080A; --s1:#0D0F12; --s2:#131619; --s3:#1A1E22; --s4:#22272C;
   --hair:#23282D; --hair-2:#2F353B;
   --ink:#E8EBED; --ink-2:#99A2AA; --ink-3:#7E858C;
@@ -38,6 +42,7 @@
   --overlay-shadow:0 14px 34px rgba(0,0,0,0.5),0 2px 8px rgba(0,0,0,0.4);
 }
 :root[data-theme="light"]{
+  color-scheme:light;
   --void:#EFEFEC; --s1:#F7F7F5; --s2:#FFFFFF; --s3:#E9E9E5; --s4:#DEDED8;
   --hair:#D7D7D1; --hair-2:#C4C4BD;
   --ink:#16181A; --ink-2:#565C62; --ink-3:#666D73;
@@ -67,7 +72,6 @@ body{
   background:var(--void);
   color:var(--ink);
   -webkit-font-smoothing:antialiased;
-  text-rendering:optimizeLegibility;
   overscroll-behavior-y:none;
 }
 ::selection{background:var(--iodine);color:#fff;}
@@ -77,27 +81,19 @@ button{cursor:pointer;}
 :focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:2px;}
 .tabular{font-variant-numeric:tabular-nums;}
 
+*{scrollbar-width:thin;scrollbar-color:var(--s4) transparent;}
 ::-webkit-scrollbar{width:10px;height:10px;}
 ::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:var(--s4);border-radius:10px;border:2px solid var(--void);}
+::-webkit-scrollbar-thumb{background:var(--s4);border-radius:10px;border:2px solid var(--scrollbar-thumb-border);}
 ::-webkit-scrollbar-thumb:hover{background:var(--hair-2);}
 
-.t-micro{font-size:11px;letter-spacing:.06em;text-transform:uppercase;}
-.t-meta{font-size:12px;}
-.t-secondary{font-size:13px;}
-.t-body{font-size:15px;letter-spacing:-.011em;}
-.t-emph{font-size:17px;letter-spacing:-.011em;}
-.t-section{font-size:22px;letter-spacing:-.011em;line-height:1.2;}
-.t-masthead{font-size:30px;letter-spacing:-.011em;line-height:1.2;}
-
-:root{ --icon-hair:1px; --icon-stem:2px; }
+:root{ --icon-hair:1px; --icon-stem:2px; --scrollbar-thumb-border:var(--void); }
 svg.icon{
   width:16px;height:16px;flex-shrink:0;
   fill:none;stroke:currentColor;
   stroke-width:var(--icon-hair);
   stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;
 }
-svg.icon.filled{fill:currentColor;stroke:none;}
 
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
 .skip-link{position:fixed;top:-40px;left:8px;z-index:400;background:var(--iodine);color:#fff;padding:8px 14px;border-radius:var(--radius-sm);font-size:13px;transition:top var(--dur-in) var(--ease);}
@@ -109,7 +105,7 @@ svg.icon.filled{fill:currentColor;stroke:none;}
   position:sticky;top:0;z-index:60;
   height:var(--bar-h);flex-shrink:0;
   display:flex;align-items:center;gap:14px;
-  padding:0 16px;
+  padding:0 16px 0 max(16px, env(safe-area-inset-left));
   background:var(--s1);
   border-bottom:var(--hair-w) solid var(--hair);
 }
@@ -151,6 +147,7 @@ svg.icon.filled{fill:currentColor;stroke:none;}
   font-family:var(--font-mono);font-size:10.5px;color:var(--ink-3);
   padding:2px 6px;border:1px solid var(--hair);border-radius:var(--radius-sm);
 }
+.cmd-search:has(#searchInput:not(:placeholder-shown)) .search-kbd{display:none;}
 .search-clear{
   display:none;align-items:center;justify-content:center;position:relative;
   width:28px;height:28px;margin-right:5px;border-radius:50%;
@@ -158,23 +155,6 @@ svg.icon.filled{fill:currentColor;stroke:none;}
 }
 .search-clear.show{display:flex;}
 .search-clear:hover{color:var(--cinnabar);background:var(--s3);}
-
-.compute-hairline{
-  position:absolute;left:0;right:0;bottom:-1px;height:1px;overflow:hidden;pointer-events:none;
-}
-.compute-hairline::after{
-  content:'';position:absolute;top:0;left:0;width:48px;height:1px;
-  background:var(--iodine);opacity:0;
-  transform:translateX(-100%);
-}
-.compute-hairline.active::after{
-  opacity:1;
-  animation:hairline-sweep .5s var(--ease);
-}
-@keyframes hairline-sweep{
-  0%{transform:translateX(-100%);}
-  100%{transform:translateX(20000%);}
-}
 
 .cmd-controls{display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto;}
 .icon-btn{
@@ -187,7 +167,6 @@ svg.icon.filled{fill:currentColor;stroke:none;}
   width:max(44px,100%);height:max(44px,100%);transform:translate(-50%,-50%);
 }
 .icon-btn:hover{background:var(--s3);color:var(--ink);}
-.icon-btn.on{color:var(--iodine);border-color:var(--hair);}
 
 .sort-select-wrap{position:relative;flex-shrink:0;}
 .sort-select{
@@ -224,6 +203,7 @@ svg.icon.filled{fill:currentColor;stroke:none;}
 .facet-rail{
   width:240px;flex-shrink:0;border-right:var(--hair-w) solid var(--hair);
   overflow-y:auto;padding:16px 16px 40px;background:var(--s1);
+  --scrollbar-thumb-border:var(--s1);
 }
 .facet-group{margin-bottom:4px;border-bottom:var(--hair-w) solid var(--hair);}
 .facet-group:last-child{border-bottom:none;}
@@ -245,6 +225,7 @@ svg.icon.filled{fill:currentColor;stroke:none;}
 .facet-option:hover{color:var(--ink);}
 .facet-option.zero{opacity:.4;}
 .facet-option.zero:hover,.facet-option.zero:focus-within{opacity:.7;}
+.facet-option:has(input:disabled){cursor:not-allowed;}
 .facet-option input[type="checkbox"]{
   appearance:none;width:14px;height:14px;flex-shrink:0;border-radius:3px;
   border:1.5px solid var(--hair-2);background:var(--s2);position:relative;
@@ -293,6 +274,8 @@ svg.icon.filled{fill:currentColor;stroke:none;}
 .qtag button{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:transparent;border:none;color:var(--ink-3);}
 .qtag button:hover{color:var(--cinnabar);background:var(--s4);}
 
+.results-grid{display:flex;flex-direction:column;flex:1;min-height:0;}
+.results-grid.hidden{display:none;}
 .col-header{
   display:none;position:sticky;top:0;z-index:5;
   padding:0 20px 0 16px;height:36px;align-items:center;gap:12px;
@@ -317,7 +300,7 @@ svg.icon.filled{fill:currentColor;stroke:none;}
 .group-sticky-header.show{display:flex;}
 .col-header button .sort-caret{font-family:var(--font-mono);font-size:10px;}
 .col-header button .sort-ord{font-family:var(--font-mono);font-size:9px;color:var(--iodine);}
-.col-header span[role="columnheader"]{display:flex;}
+.col-header span{display:flex;}
 .col-name{flex:1;min-width:0;justify-content:flex-start;}
 .col-strength{width:100px;text-align:right;flex-shrink:0;justify-content:flex-end;}
 .col-form{width:110px;flex-shrink:0;}
@@ -341,6 +324,7 @@ svg.icon.filled{fill:currentColor;stroke:none;}
 }
 .row:hover,.row.focused{background:var(--s2);}
 .row:hover::before,.row.focused::before{opacity:1;}
+.row.focused{box-shadow:inset 0 0 0 1px var(--focus);}
 .row.selected{background:color-mix(in srgb, var(--row-rule, var(--iodine)) 10%, var(--s1));}
 .row.picked{background:var(--s3);}
 .row.picked.selected{background:color-mix(in srgb, var(--row-rule, var(--iodine)) 10%, var(--s3));}
@@ -352,9 +336,9 @@ svg.icon.filled{fill:currentColor;stroke:none;}
   font-size:15px;font-weight:540;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   letter-spacing:-.011em;
 }
-.row-name mark,.detail mark{
-  background:none;color:var(--iodine);font-weight:600;
-  text-decoration:none;
+.row-name mark{
+  background:none;color:var(--iodine);font-weight:inherit;
+  text-decoration:underline;text-decoration-color:currentColor;text-underline-offset:2px;text-decoration-thickness:1px;
 }
 .row-sub{
   display:none;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11px;color:var(--ink-2);
@@ -446,7 +430,6 @@ svg.icon.filled{fill:currentColor;stroke:none;}
 .detail-panel{
   width:360px;flex-shrink:0;border-left:var(--hair-w) solid var(--hair);background:var(--s1);
   overflow-y:auto;display:none;flex-direction:column;position:relative;
-  content-visibility:auto;contain-intrinsic-size:auto 500px;
   view-transition-name:detail-panel;
 }
 .detail-panel::before{
@@ -499,7 +482,7 @@ svg.icon.filled{fill:currentColor;stroke:none;}
 .sibling-chip:hover{border-color:var(--hair-2);color:var(--ink);background:var(--s3);}
 .sibling-chip .sc-dose{font-family:var(--font-mono);font-size:12px;color:var(--ink);flex-shrink:0;}
 .sibling-chip .sc-form{color:var(--ink-3);font-size:11px;}
-.detail-actions{display:flex;gap:8px;padding:14px 20px;border-top:var(--hair-w) solid var(--hair);margin-top:auto;}
+.detail-actions{display:flex;gap:8px;padding:14px 20px;border-top:var(--hair-w) solid var(--hair);margin-top:auto;position:sticky;bottom:0;background:var(--s1);}
 .btn{
   display:flex;align-items:center;justify-content:center;gap:7px;height:36px;padding:0 14px;
   border-radius:var(--radius-md);border:1px solid var(--hair);background:transparent;color:var(--ink-2);
@@ -508,11 +491,11 @@ svg.icon.filled{fill:currentColor;stroke:none;}
 .btn:hover{border-color:var(--hair-2);color:var(--ink);background:var(--s3);}
 .btn.copied{color:var(--ink-2);border-color:var(--ink-2);}
 
-.sheet-scrim{
+.sheet-scrim,.modal-scrim{
   position:fixed;inset:0;z-index:80;background:var(--scrim);opacity:0;pointer-events:none;
   transition:opacity var(--dur-in) var(--ease);
 }
-.sheet-scrim.show{opacity:1;pointer-events:auto;}
+.sheet-scrim.show,.modal-scrim.show{opacity:1;pointer-events:auto;}
 .bottom-sheet{
   position:fixed;left:0;right:0;bottom:0;z-index:90;
   background:var(--s1);border-top-left-radius:14px;border-top-right-radius:14px;
@@ -682,7 +665,7 @@ svg.icon.filled{fill:currentColor;stroke:none;}
 </symbol>
 
 </defs></svg>
-<a href="#resultsList" class="skip-link">Skip to results</a>
+<a href="#listViewport" class="skip-link">Skip to results</a>
 <div id="app">
 
     <header class="cmdbar">
@@ -695,20 +678,19 @@ svg.icon.filled{fill:currentColor;stroke:none;}
     <div class="cmd-search">
       <div class="cmd-search-field" id="searchFieldWrap">
         <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
-        <input id="searchInput" type="text" dir="auto" autocomplete="off" autocapitalize="off" spellcheck="false"
+        <input id="searchInput" type="text" dir="auto" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search"
                placeholder="Search name, brand, class, dose…" aria-label="Search medications"
-               role="combobox" aria-expanded="false" aria-controls="resultsList" aria-autocomplete="list">
+               role="combobox" aria-expanded="false" aria-controls="listViewport" aria-autocomplete="list">
         <button class="search-clear" id="clearBtn" aria-label="Clear search" type="button">
           <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>
         </button>
         <span class="search-kbd" aria-hidden="true">/</span>
-        <div class="compute-hairline" id="computeHairline"></div>
       </div>
       <div class="grammar-picker" id="grammarPicker" role="listbox"></div>
     </div>
 
     <div class="cmd-controls">
-      <button class="mobile-filter-btn" id="mobileFilterBtn" type="button" aria-haspopup="true">
+      <button class="mobile-filter-btn" id="mobileFilterBtn" type="button" aria-haspopup="dialog">
         <svg class="icon" aria-hidden="true"><use href="#i-filter"/></svg>
         <span>Filter</span>
         <span class="badge" id="mobileFilterBadge">0</span>
@@ -732,7 +714,7 @@ svg.icon.filled{fill:currentColor;stroke:none;}
       </div>
 
       <div class="sort-select-wrap export-wrap">
-        <button class="icon-btn" id="exportBtn" type="button" aria-haspopup="listbox" aria-label="Export or print" title="Export or print">
+        <button class="icon-btn" id="exportBtn" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="Export or print" title="Export or print">
           <svg class="icon" aria-hidden="true"><use href="#i-export"/></svg>
         </button>
         <div class="grammar-picker align-right" id="exportPicker" role="listbox" aria-label="Export options"></div>
@@ -765,18 +747,20 @@ svg.icon.filled{fill:currentColor;stroke:none;}
 
       <div class="entry-chips" id="entryChips"></div>
 
-      <div class="col-header" role="row">
-        <span class="col-name" role="columnheader"><button type="button" data-sort-key="name">Name<span class="sort-caret"></span><span class="sort-ord"></span></button></span>
-        <span class="col-strength" role="columnheader"><button type="button" data-sort-key="strength">Strength<span class="sort-caret"></span><span class="sort-ord"></span></button></span>
-        <span class="col-form" role="columnheader"><button type="button" data-sort-key="form">Form<span class="sort-caret"></span><span class="sort-ord"></span></button></span>
-        <span class="col-authority" role="columnheader"><button type="button" data-sort-key="authority">Authority<span class="sort-caret"></span><span class="sort-ord"></span></button></span>
-        <span class="col-class" role="columnheader"><button type="button" data-sort-key="class">Class<span class="sort-caret"></span><span class="sort-ord"></span></button></span>
-      </div>
+      <div class="results-grid" id="resultsGrid" role="grid" aria-label="Medication results" aria-rowcount="0" aria-multiselectable="true">
+        <div class="col-header" role="row">
+          <span class="col-name" role="columnheader"><button type="button" data-sort-key="name" aria-label="Sort by name">Name<span class="sort-caret"></span><span class="sort-ord"></span></button></span>
+          <span class="col-strength" role="columnheader"><button type="button" data-sort-key="strength" aria-label="Sort by strength">Strength<span class="sort-caret"></span><span class="sort-ord"></span></button></span>
+          <span class="col-form" role="columnheader"><button type="button" data-sort-key="form" aria-label="Sort by form">Form<span class="sort-caret"></span><span class="sort-ord"></span></button></span>
+          <span class="col-authority" role="columnheader"><button type="button" data-sort-key="authority" aria-label="Sort by authority">Authority<span class="sort-caret"></span><span class="sort-ord"></span></button></span>
+          <span class="col-class" role="columnheader"><button type="button" data-sort-key="class" aria-label="Sort by class">Class<span class="sort-caret"></span><span class="sort-ord"></span></button></span>
+        </div>
 
-      <div class="list-scroller" id="listScroller">
-        <div class="group-sticky-header" id="groupStickyHeader"></div>
-        <div class="list-spacer" id="listSpacer">
-          <div class="list-viewport" id="listViewport" role="grid" aria-label="Medication results" aria-rowcount="0" aria-multiselectable="true" tabindex="-1"></div>
+        <div class="list-scroller" id="listScroller">
+          <div class="group-sticky-header" id="groupStickyHeader"></div>
+          <div class="list-spacer" id="listSpacer">
+            <div class="list-viewport" id="listViewport" tabindex="-1"></div>
+          </div>
         </div>
       </div>
 
@@ -800,7 +784,7 @@ svg.icon.filled{fill:currentColor;stroke:none;}
 </div>
 
 <div class="sheet-scrim" id="facetSheetScrim"></div>
-<div class="bottom-sheet snap-half" id="facetSheet" role="dialog" aria-modal="true" aria-label="Filters">
+<div class="bottom-sheet snap-half" id="facetSheet" role="dialog" aria-modal="true" aria-label="Filters" tabindex="-1">
   <div class="sheet-handle-row" id="facetSheetHandle"><div class="sheet-handle"></div></div>
   <div class="sheet-head">
     <span class="sheet-title">Filters</span>
@@ -816,7 +800,7 @@ svg.icon.filled{fill:currentColor;stroke:none;}
 </div>
 
 <div class="sheet-scrim" id="detailSheetScrim"></div>
-<div class="bottom-sheet snap-full" id="detailSheet" role="dialog" aria-modal="true" aria-label="Medication detail">
+<div class="bottom-sheet snap-full" id="detailSheet" role="dialog" aria-modal="true" aria-label="Medication detail" tabindex="-1">
   <div class="sheet-handle-row" id="detailSheetHandle"><div class="sheet-handle"></div></div>
   <div class="sheet-head">
     <span class="sheet-title">Detail</span>
@@ -827,8 +811,8 @@ svg.icon.filled{fill:currentColor;stroke:none;}
   <div class="sheet-body" id="detailSheetBody"></div>
 </div>
 
-<div class="sheet-scrim" id="shortcutsScrim"></div>
-<div class="shortcuts-modal" id="shortcutsModal" role="dialog" aria-modal="true" aria-label="Keyboard shortcuts">
+<div class="modal-scrim" id="shortcutsScrim"></div>
+<div class="shortcuts-modal" id="shortcutsModal" role="dialog" aria-modal="true" aria-label="Keyboard shortcuts" tabindex="-1">
   <h2>Keyboard shortcuts</h2>
   <div class="shortcuts-list">
     <div class="sc-row"><span class="sc-desc">Focus search</span><span class="sc-keys"><span class="kbd">/</span><span class="kbd">⌘K</span></span></div>
@@ -1004,13 +988,21 @@ function fixGluedUnitBrand(name){
 }
 function strengthKey(conc){
   if(!conc || conc === '—' || conc === '---') return [9, Infinity];
-  const m = conc.match(/([\d.]+)\s*(mcg|mg|g|iu|i\.u\.|%)?/i);
+  let s = normalizeText(conc);
+  s = s.replace(/(\d)\.\s+(\d)/g, '$1.$2');
+  s = s.replace(/\bm\.(iu)\b/g, 'm$1');
+  s = s.replace(/(\d),(?=\d{3}(?:\D|$))/g, '$1');
+  s = s.replace(/\d{1,3}(?:\.\d{3}){2,}\b/g, seg => seg.replace(/\./g, ''));
+  const unitMatch = s.match(/(mcg|mg|g|miu|iu|%)/);
+  const unit = unitMatch ? unitMatch[1] : 'mg';
+  const numSection = unitMatch ? s.slice(0, unitMatch.index) : s;
+  const m = numSection.match(/[\d.]+/);
   if(!m) return [9, Infinity];
-  const val = parseFloat(m[1]);
+  const val = parseFloat(m[0]);
   if(isNaN(val)) return [9, Infinity];
-  const unit = (m[2] || 'mg').toLowerCase().replace(/\./g, '');
   if(unit === 'mcg') return [0, val / 1000];
   if(unit === 'g') return [0, val * 1000];
+  if(unit === 'miu') return [1, val * 1000000];
   if(unit === 'iu') return [1, val];
   if(unit === '%') return [2, val];
   return [0, val];
@@ -1047,7 +1039,7 @@ function buildRecords(raw){
     const nameTokens = tokenizeRaw(name);
     const genericTokens = split.generic === name ? nameTokens : tokenizeRaw(split.generic);
     const genericKeyToks = genericTokens
-      .map(t => applyTypoCorrection(t.tok)).filter(t => !UNIT_WORDS.has(t)).sort();
+      .map(t => applyTypoCorrection(t.tok)).filter(t => !UNIT_WORDS.has(t) && !/^\d+$/.test(t)).sort();
     const brandNorm = split.brands.map(b => applyTypoCorrection(normalizeText(b))).sort().join('+');
     const concNorm = normalizeText(concOriginal).replace(/\s+/g,'');
     const variantKey = [genericKeyToks.join(' '), concNorm, formCanon.toLowerCase(), auth.tier, brandNorm].join('|');
@@ -1063,6 +1055,7 @@ function buildRecords(raw){
       concPercentFixed: percentFix.isPercentFix, form: formCanon, Authority: authRaw,
       authTier: auth.tier, authCommittee: auth.committee, classes,
       generic: split.generic, brands: split.brands, correctedFrom, variantKey,
+      trigrams: charTrigrams(normalizeText(split.generic + ' ' + split.brands.join(' '))),
       sk: Object.freeze({
         name: name.toLowerCase(), cls: (classes[0] || '').toLowerCase(),
         form: formCanon.toLowerCase(),
@@ -1075,18 +1068,16 @@ function buildRecords(raw){
     groupByKey.get(variantKey).push(rec);
   });
 
-  const variantGroups = new Map();
   groupByKey.forEach((list, key) => {
     if(list.length > 1){
       list.sort((a,b) => a.id - b.id);
       list.forEach(r => { r.variantSiblings = list.filter(x => x !== r).map(x => x.id); r.variantPrimary = list[0].id === r.id; });
-      variantGroups.set(key, list.map(r => r.id));
     } else {
       list[0].variantSiblings = [];
       list[0].variantPrimary = true;
     }
   });
-  return { records, variantGroups };
+  return { records };
 }
 class TrieNode{
   constructor(){ this.children = new Map(); this.tokens = null; }
@@ -1181,6 +1172,15 @@ function insertCostForQuery(qch, prevQueryChar){
   return 1;
 }
 
+const FUZZY_ROW_POOL = [];
+function getFuzzyRow(depth, columns){
+  let row = FUZZY_ROW_POOL[depth];
+  if(!row || row.length < columns){
+    row = new Float64Array(columns);
+    FUZZY_ROW_POOL[depth] = row;
+  }
+  return row;
+}
 function trieFuzzyWalk(trie, word, maxCost, opts){
   opts = opts || {};
   const prefixMode = !!opts.prefixMode;
@@ -1189,13 +1189,20 @@ function trieFuzzyWalk(trie, word, maxCost, opts){
   const columns = word.length + 1;
   const maxDepth = word.length + Math.ceil(maxCost / 0.3) + 2;
   const rowPool = [];
-  for(let d = 0; d <= maxDepth + 1; d++) rowPool.push(new Float64Array(columns));
+  for(let d = 0; d <= maxDepth + 1; d++) rowPool.push(getFuzzyRow(d, columns));
   const initialRow = rowPool[0];
   for(let i = 0; i < columns; i++) initialRow[i] = i;
 
-  function collectFree(node, quality){
-    if(node.tokens) for(let i=0;i<node.tokens.length;i++) results.push({ term:node.tokens[i], cost: quality });
-    node.children.forEach(child => collectFree(child, quality));
+  function collectFree(node, quality, limit){
+    if(results.length >= limit) return;
+    if(node.tokens) for(let i=0;i<node.tokens.length;i++){
+      if(results.length >= limit) return;
+      results.push({ term:node.tokens[i], cost: quality });
+    }
+    for(const [, child] of node.children){
+      if(results.length >= limit) return;
+      collectFree(child, quality, limit);
+    }
   }
 
   function walk(node, letter, depth, prevRow, prevPrevRow, parentLetter, prevTrieChar2){
@@ -1228,7 +1235,7 @@ function trieFuzzyWalk(trie, word, maxCost, opts){
   }
 
   for(const [ch, child] of trie.root.children) walk(child, ch, 1, initialRow, null, null, null);
-  if(prefixMode) qualifyingAncestors.forEach(({ node, cost }) => collectFree(node, cost));
+  if(prefixMode) qualifyingAncestors.forEach(({ node, cost }) => collectFree(node, cost, 25));
 
   const best = new Map();
   results.forEach(r => {
@@ -1273,17 +1280,10 @@ function classInitialism(className){
   const initials = words.map(w => w[0]).join('').toLowerCase();
   return initials.length >= 2 ? initials : null;
 }
-function popcount(x){
-  x = x - ((x >> 1) & 0x55555555);
-  x = (x & 0x33333333) + ((x >> 2) & 0x33333333);
-  x = (x + (x >> 4)) & 0x0f0f0f0f;
-  return (x * 0x01010101) >> 24;
-}
 function makeBitset(N){ return new Uint32Array(Math.ceil(N/32) || 1); }
 function bitsetSet(bs, i){ bs[i >>> 5] |= (1 << (i & 31)); }
 function bitsetAnd(a, b, out){ for(let i=0;i<a.length;i++) out[i] = a[i] & b[i]; return out; }
 function bitsetOr(a, b, out){ for(let i=0;i<a.length;i++) out[i] = a[i] | b[i]; return out; }
-function bitsetPopcount(bs){ let c = 0; for(let i=0;i<bs.length;i++) c += popcount(bs[i]); return c; }
 function bitsetForEach(bs, N, fn){
   for(let w=0; w<bs.length; w++){
     let word = bs[w];
@@ -1335,7 +1335,7 @@ function buildStrengthRank(records){
   return rank;
 }
 
-function buildIndex(records, variantGroups){
+function buildIndex(records){
   const N = records.length;
   const postingsTemp = new Map();
   const fieldLen = new Uint16Array(N * NUM_FIELDS);
@@ -1459,12 +1459,10 @@ function buildIndex(records, variantGroups){
     authorityValues, classValues, formValues, authorityBitset, classBitset, formBitset,
     nameRank: nameSort.rank, classRank: classSort.rank, formRank: formSort.rank,
     strengthRank, alphaPermutation: nameSort.permutation,
-    formWords, authWords, initialismSyn, variantGroups,
+    formWords, authWords, initialismSyn,
     facetCountCache: { query:null, bitset:null }
   };
 }
-let SYN_EFFECTIVE = null;
-let REVERSE_SYN = null;
 const SYN_STOPWORDS = new Set(['drugs','agents','disorders','disease','diseases','drug','agent','and','or','the','of']);
 
 function buildSynStructures(index){
@@ -1487,13 +1485,14 @@ function buildSynStructures(index){
   }
   const rev = {};
   for(const key in eff) eff[key].forEach(w => { (rev[w] = rev[w] || []).push(key); });
-  SYN_EFFECTIVE = eff;
-  REVERSE_SYN = rev;
+  index.syn = { eff, rev };
+  return index.syn;
 }
-function synExpansions(tok){
+function synExpansions(tok, index){
   const out = new Set();
-  if(SYN_EFFECTIVE && SYN_EFFECTIVE[tok]) SYN_EFFECTIVE[tok].forEach(t => out.add(t));
-  if(REVERSE_SYN && REVERSE_SYN[tok]) REVERSE_SYN[tok].forEach(t => out.add(t));
+  const syn = index && index.syn;
+  if(syn && syn.eff[tok]) syn.eff[tok].forEach(t => out.add(t));
+  if(syn && syn.rev[tok]) syn.rev[tok].forEach(t => out.add(t));
   return out;
 }
 function maxFuzzyDistance(len){
@@ -1540,7 +1539,7 @@ function resolveQueryToken(qtok, index, opts){
       });
     }
   }
-  synExpansions(qtok).forEach(s => { if(index.termId.has(s)) out.push({ tok:s, kind:'synonym', quality:0.85 }); });
+  synExpansions(qtok, index).forEach(s => { if(index.termId.has(s)) out.push({ tok:s, kind:'synonym', quality:0.85 }); });
   if(out.length === 0 && qtok.length >= 3 && !/^[0-9]/.test(qtok)){
     const bucket = phoneticBucket(index, qtok);
     if(bucket) bucket.forEach(t => { if(t !== qtok) out.push({ tok:t, kind:'phonetic', quality:0.6 }); });
@@ -1744,7 +1743,7 @@ function trigramJaccard(aGrams, bGrams){
 }
 function trigramNearest(query, records, limit){
   const qGrams = charTrigrams(normalizeText(query));
-  const scored = records.map(rec => ({ rec, sim: trigramJaccard(qGrams, charTrigrams(normalizeText(rec.generic + ' ' + rec.brands.join(' ')))) }));
+  const scored = records.map(rec => ({ rec, sim: trigramJaccard(qGrams, rec.trigrams) }));
   scored.sort((a,b) => b.sim - a.sim);
   return scored.filter(s => s.sim > 0).slice(0, limit || 6);
 }
@@ -1818,7 +1817,7 @@ function runSearch(query, records, index, facets, opts){
     } else {
       ids = index.alphaPermutation.filter(docId => passesFacets(records[docId], facets));
     }
-    return { results: ids.map(id => ({ rec: records[id], score:0, matchedTokens: new Set() })), relaxation: null };
+    return { results: ids.map(id => ({ rec: records[id], score:0, matchedTokens: new Set() })), relaxation: null, nearest: null };
   }
 
   const tokens = trySegmentationRepair(parsed.freeTokens, index);
@@ -1828,7 +1827,7 @@ function runSearch(query, records, index, facets, opts){
   const activeRawTokens = activeTokens.map(t => t.raw);
   const totalActive = activeTokens.length + doseResolutions.length;
 
-  if(totalActive === 0) return { results: [], relaxation: null };
+  if(totalActive === 0) return { results: [], relaxation: null, nearest: null };
 
   let relaxation = null;
   let workingTokens = activeTokens;
@@ -1875,8 +1874,9 @@ function runSearch(query, records, index, facets, opts){
   }
 
   let results;
+  let nearest = null;
   if(candidateDocs.length === 0){
-    const nearest = trigramNearest(parsed.freeTextRaw, records, 20);
+    nearest = trigramNearest(parsed.freeTextRaw, records, 20);
     results = nearest.map(n => ({ rec: n.rec, score: n.sim, matchedTokens: new Set() }));
     relaxation = 'No close match — showing nearest by similarity';
   } else {
@@ -1901,7 +1901,7 @@ function runSearch(query, records, index, facets, opts){
   }
 
   results.sort(tieBreak);
-  return { results, relaxation };
+  return { results, relaxation, nearest };
 }
 
 function computeFacetCounts(query, facets, index, records, excludeDim){
@@ -1994,9 +1994,58 @@ function decodeSortParam(raw){
   return SORT_KEYS.includes(raw) ? [{ key:raw, dir:'a' }] : [];
 }
 
+function sameIdSet(a, b){
+  if(a.size !== b.size) return false;
+  for(const id of a) if(!b.has(id)) return false;
+  return true;
+}
 function debounce(fn, ms){
   let t = null;
   return (...args) => { if(t) clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+}
+function bindExpandedSync(trigger, panel){
+  const sync = () => trigger.setAttribute('aria-expanded', String(panel.classList.contains('show')));
+  sync();
+  new MutationObserver(sync).observe(panel, { attributes:true, attributeFilter:['class'] });
+}
+function getFocusableIn(container){
+  return [...container.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])')];
+}
+let openOverlayCount = 0;
+function lockBodyScroll(){
+  openOverlayCount++;
+  document.body.style.overflow = 'hidden';
+}
+function unlockBodyScroll(){
+  openOverlayCount = Math.max(0, openOverlayCount - 1);
+  if(openOverlayCount === 0) document.body.style.overflow = '';
+}
+function createFocusTrap(container){
+  let previouslyFocused = null;
+  function onKeydown(e){
+    if(e.key !== 'Tab') return;
+    const focusable = getFocusableIn(container);
+    if(!focusable.length) return;
+    const first = focusable[0], last = focusable[focusable.length - 1];
+    if(e.shiftKey && document.activeElement === first){
+      e.preventDefault(); last.focus();
+    } else if(!e.shiftKey && document.activeElement === last){
+      e.preventDefault(); first.focus();
+    }
+  }
+  return {
+    activate(){
+      previouslyFocused = document.activeElement;
+      container.addEventListener('keydown', onKeydown);
+      const focusable = getFocusableIn(container);
+      (focusable[0] || container).focus();
+    },
+    deactivate(){
+      container.removeEventListener('keydown', onKeydown);
+      if(previouslyFocused && document.contains(previouslyFocused) && typeof previouslyFocused.focus === 'function') previouslyFocused.focus();
+      previouslyFocused = null;
+    }
+  };
 }
 function readUrlState(){
   try{
@@ -2022,6 +2071,7 @@ function writeUrlState(state){
     history.replaceState(null, '', location.pathname + (qs ? '?' + qs : ''));
   }catch(e){}
 }
+const writeUrlStateDebounced = debounce(writeUrlState, 250);
 function loadLocal(key, fallback){
   try{ const v = localStorage.getItem(key); return v === null ? fallback : JSON.parse(v); }catch(e){ return fallback; }
 }
@@ -2332,8 +2382,8 @@ function buildTruncationClasses(records){
 
 function buildIndexTimed(){
   const t0 = performance.now();
-  const { records, variantGroups } = buildRecords(RAW_DATA);
-  const index = buildIndex(records, variantGroups);
+  const { records } = buildRecords(RAW_DATA);
+  const index = buildIndex(records);
   buildSynStructures(index);
   const ms = performance.now() - t0;
   return { records, index, ms };
@@ -2377,7 +2427,7 @@ function selftestSortStability(records, index){
   const facets = { authorities:new Set(), classes:new Set(), forms:new Set() };
   const { results } = runSearch('a', records, index, facets);
   const levels = [{ key:'class', dir:'a' }, { key:'name', dir:'a' }];
-  const sorted = sortByLevels(results, levels, true);
+  const sorted = sortByLevels(results, levels);
   for(let i = 1; i < sorted.length; i++){
     const prev = sorted[i-1].rec.rank, cur = sorted[i].rec.rank;
     if(prev.class > cur.class) return false;
@@ -2536,6 +2586,41 @@ function selftestIconSpriteIntegrity(){
   return { pass: symbols.length === 12 && unresolved === 0, detail: symbols.length + ' symbols, ' + uses.length + ' use refs, ' + unresolved + ' unresolved' };
 }
 
+function selftestAnchorsResolve(){
+  const anchors = [...document.querySelectorAll('a[href^="#"]')];
+  const bad = [];
+  anchors.forEach(a => {
+    const id = a.getAttribute('href').slice(1);
+    if(id && !document.getElementById(id)) bad.push(a.getAttribute('href'));
+  });
+  return { pass: bad.length === 0, detail: bad.length === 0 ? 'all anchors resolve' : 'unresolved: ' + bad.join(', ') };
+}
+function selftestStrengthKeyTable(){
+  const table = [
+    ['1.200.000 I.U', 1, 1200000],
+    ['10,000 I.U', 1, 10000],
+    ['3 M.I.U', 1, 3000000],
+    ['0. 5 mg', 0, 0.5],
+    ['0.0005', 0, 0.0005],
+    ['625 mg', 0, 625]
+  ];
+  const bad = [];
+  table.forEach(([input, cls, val]) => {
+    const [gotCls, gotVal] = strengthKey(input);
+    if(gotCls !== cls || Math.abs(gotVal - val) > 1e-9) bad.push(input + ' -> [' + gotCls + ',' + gotVal + '] expected [' + cls + ',' + val + ']');
+  });
+  return { pass: bad.length === 0, detail: bad.length === 0 ? 'all concentrations parse correctly' : bad.join('; ') };
+}
+function selftestButtonsKeyboardReachable(){
+  const buttons = [...document.querySelectorAll('[role="button"]')];
+  const bad = buttons.filter(b => {
+    const tag = b.tagName.toLowerCase();
+    if(tag === 'button' || tag === 'a') return false;
+    const ti = b.getAttribute('tabindex');
+    return ti === null || ti === '-1';
+  });
+  return { pass: bad.length === 0, detail: bad.length === 0 ? (buttons.length + ' role=button elements, all keyboard reachable') : bad.length + ' unreachable' };
+}
 function selftestArabicCommittee(records, index){
   const facets = { authorities:new Set(), classes:new Set(), forms:new Set() };
   const { results } = runSearch('لجنة عليا', records, index, facets);
@@ -2595,15 +2680,109 @@ function renderSelfTestPanel(rows, summaryLine){
   document.body.appendChild(panel);
 }
 
-function runSelfTest(ctx){
+function selftestGroupHeaderOffset(ctx){
+  const { listScroller, listViewport, groupStickyHeader, state, forcePaint, getRowH, getCurrentResults } = ctx;
+  const GROUP_HEADER_H = 26, OVERSCAN = 6;
+  if(getCurrentResults().length < 30) return { pass:true, detail:'not enough rows to check' };
+  const prevSortLevels = state.sortLevels;
+  const prevScrollTop = listScroller.scrollTop;
+  const rowH = getRowH();
+
+  state.sortLevels = [{ key:'class', dir:'a' }];
+  listScroller.scrollTop = 20 * rowH;
+  forcePaint();
+  const shown = groupStickyHeader.classList.contains('show');
+  const expectedStart = Math.max(0, Math.floor((20 * rowH - GROUP_HEADER_H) / rowH) - OVERSCAN);
+  const expectedTransform = 'translateY(' + (expectedStart * rowH) + 'px)';
+  const actualTransform = listViewport.style.transform;
+
+  state.sortLevels = prevSortLevels;
+  listScroller.scrollTop = prevScrollTop;
+  forcePaint();
+
+  const pass = shown && actualTransform === expectedTransform;
+  return { pass, detail: 'expected ' + expectedTransform + ', got ' + actualTransform + (shown ? '' : ' (header not shown)') };
+}
+function selftestRowAtTopAligned(ctx){
+  const { listScroller, pool, forcePaint, getCurrentResults } = ctx;
+  if(getCurrentResults().length < 5) return { pass:true, detail:'not enough rows to check' };
+  const prevScrollTop = listScroller.scrollTop;
+  listScroller.scrollTop = 0;
+  forcePaint();
+  const row = pool.find(r => r.style.visibility !== 'hidden');
+  listScroller.scrollTop = prevScrollTop;
+  forcePaint();
+  if(!row) return { pass:true, detail:'no visible row to check' };
+  const rowTop = row.getBoundingClientRect().top;
+  const scrollerTop = listScroller.getBoundingClientRect().top;
+  const pass = Math.abs(rowTop - scrollerTop) < 1;
+  return { pass, detail: 'row top ' + rowTop.toFixed(1) + ', scroller top ' + scrollerTop.toFixed(1) };
+}
+function selftestShiftRangeSymmetry(ctx){
+  const { getCurrentResults, extendSelectionTo, getSelectedIds, resetSelection, setFocusedRowIndex } = ctx;
+  if(getCurrentResults().length < 10) return { pass:true, detail:'not enough rows to check' };
+  resetSelection();
+  setFocusedRowIndex(0);
+  extendSelectionTo(5);
+  extendSelectionTo(2);
+  const size = getSelectedIds().size;
+  resetSelection();
+  return { pass: size === 3, detail: size + ' selected after extend-to-5 then shrink-to-2 (expected 3)' };
+}
+async function selftestAriaExpandedSync(ctx){
+  const { grammarPicker, searchInput, sortPicker, sortSelectBtn, exportPicker, exportBtn } = ctx;
+  const pairs = [[grammarPicker, searchInput, 'search'], [sortPicker, sortSelectBtn, 'sort'], [exportPicker, exportBtn, 'export']];
+  const bad = [];
+  for(const [panel, trigger, label] of pairs){
+    panel.classList.add('show');
+    await Promise.resolve();
+    if(trigger.getAttribute('aria-expanded') !== 'true') bad.push(label + '(open)');
+    panel.classList.remove('show');
+    await Promise.resolve();
+    if(trigger.getAttribute('aria-expanded') !== 'false') bad.push(label + '(close)');
+  }
+  return { pass: bad.length === 0, detail: bad.length === 0 ? 'aria-expanded stays in sync' : 'out of sync: ' + bad.join(', ') };
+}
+function selftestFacetFilterPreserved(ctx){
+  const { facetGroupsEl } = ctx;
+  const searchInput = facetGroupsEl.querySelector('.facet-search');
+  if(!searchInput) return { pass:true, detail:'no facet search box present to check' };
+  const checkbox = facetGroupsEl.querySelector('input[type="checkbox"]:not(:disabled)');
+  if(!checkbox) return { pass:true, detail:'no checkbox available to toggle' };
+  searchInput.value = 'zzz-test-filter';
+  checkbox.checked = !checkbox.checked;
+  checkbox.dispatchEvent(new Event('change', { bubbles:true }));
+  const stillThere = facetGroupsEl.querySelector('.facet-search') === searchInput && searchInput.value === 'zzz-test-filter';
+  checkbox.checked = !checkbox.checked;
+  checkbox.dispatchEvent(new Event('change', { bubbles:true }));
+  searchInput.value = '';
+  return { pass: stillThere, detail: stillThere ? 'filter text preserved across checkbox toggle' : 'filter text was wiped' };
+}
+function selftestSlashQuestionRouting(ctx){
+  const { searchInput, shortcutsModal, closeShortcuts } = ctx;
+  searchInput.blur();
+  shortcutsModal.classList.remove('show');
+  document.body.dispatchEvent(new KeyboardEvent('keydown', { key:'/', code:'Slash', bubbles:true, cancelable:true }));
+  const slashFocused = document.activeElement === searchInput;
+  const slashOpenedModal = shortcutsModal.classList.contains('show');
+  searchInput.blur();
+  shortcutsModal.classList.remove('show');
+  document.body.dispatchEvent(new KeyboardEvent('keydown', { key:'?', code:'Slash', shiftKey:true, bubbles:true, cancelable:true }));
+  const questionOpenedModal = shortcutsModal.classList.contains('show');
+  const questionFocused = document.activeElement === searchInput;
+  if(shortcutsModal.classList.contains('show')) closeShortcuts();
+  const pass = slashFocused && !slashOpenedModal && questionOpenedModal && !questionFocused;
+  return { pass, detail: '/ -> focus:' + slashFocused + ' modal:' + slashOpenedModal + '; ? -> modal:' + questionOpenedModal + ' focus:' + questionFocused };
+}
+
+async function runSelfTest(ctx){
   const timedBuild = buildIndexTimed();
   const records = timedBuild.records, index = timedBuild.index;
   const facets = { authorities:new Set(), classes:new Set(), forms:new Set() };
 
   for(let i = 0; i < 300; i++) runSearch('amoxicillin', records, index, facets);
 
-  const seedParam = parseInt(new URLSearchParams(location.search).get('seed'), 10);
-  const seed = Number.isFinite(seedParam) ? seedParam : 42;
+  const seed = (ctx && Number.isFinite(ctx.seed)) ? ctx.seed : 42;
   stRng = mulberry32(seed);
 
   const suite = buildCorruptionSuite(records, 2000);
@@ -2699,6 +2878,36 @@ function runSelfTest(ctx){
   const iconSprite = selftestIconSpriteIntegrity();
   rows.push({ name:'[Icons] sprite has 12 symbols, all use refs resolve', pass: iconSprite.pass, detail: iconSprite.detail });
 
+  const anchors = selftestAnchorsResolve();
+  rows.push({ name:'[Nav] every #id anchor resolves', pass: anchors.pass, detail: anchors.detail });
+  const strengthTable = selftestStrengthKeyTable();
+  rows.push({ name:'strengthKey round-trips tricky concentrations', pass: strengthTable.pass, detail: strengthTable.detail });
+  const buttonsReachable = selftestButtonsKeyboardReachable();
+  rows.push({ name:'every role=button is keyboard reachable', pass: buttonsReachable.pass, detail: buttonsReachable.detail });
+  if(ctx && ctx.listScroller){
+    const headerOffset = selftestGroupHeaderOffset(ctx);
+    rows.push({ name:'group sticky header does not shift row offsets', pass: headerOffset.pass, detail: headerOffset.detail });
+    const rowAtTop = selftestRowAtTopAligned(ctx);
+    rows.push({ name:'row at scrollTop 0 aligns with scroller top', pass: rowAtTop.pass, detail: rowAtTop.detail });
+  }
+  if(ctx && ctx.extendSelectionTo){
+    const shiftRange = selftestShiftRangeSymmetry(ctx);
+    rows.push({ name:'shift-range selection shrinks as well as grows', pass: shiftRange.pass, detail: shiftRange.detail });
+  }
+  if(ctx && ctx.grammarPicker){
+    const ariaSync = await selftestAriaExpandedSync(ctx);
+    rows.push({ name:'aria-expanded stays in sync with each picker', pass: ariaSync.pass, detail: ariaSync.detail });
+  }
+  if(ctx && ctx.facetGroupsEl){
+    await new Promise(r => requestAnimationFrame(r));
+    const facetFilter = selftestFacetFilterPreserved(ctx);
+    rows.push({ name:'facet panel preserves filter text across a toggle', pass: facetFilter.pass, detail: facetFilter.detail });
+  }
+  if(ctx && ctx.shortcutsModal){
+    const slashRouting = selftestSlashQuestionRouting(ctx);
+    rows.push({ name:'/ and ? shortcuts route to different handlers', pass: slashRouting.pass, detail: slashRouting.detail });
+  }
+
   const passCount = rows.filter(r => r.pass).length;
   const summaryLine = passCount + ' / ' + rows.length + ' checks passed';
   console.log('%c' + summaryLine, 'font-weight:bold');
@@ -2708,9 +2917,12 @@ function runSelfTest(ctx){
 
 const RAW_DATA = [{"Name":"9- Fluorohydrocortisone","Conc":"---","form":"Tab","Authority":"Sp","class":"Hormones Disorders"},{"Name":"Abemaciclib 100 Verzeni","Conc":"100 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Abemaciclib 150 Verzeni","Conc":"150 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Abemaciclib 200 Verzeni","Conc":"200 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Abiraterone acetate Zytiga","Conc":"250 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Acalabrutinib Calquence","Conc":"100 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Acefylline Or Theophylline + Guaiphenesin","Conc":"2.5 mg","form":"Syrup","Authority":"Sp","class":"Respiratory Agents"},{"Name":"Acetazolamide","Conc":"250 mg","form":"Tab","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Acetyl Salicylic Acid 100","Conc":"100 mg","form":"Tab","Authority":"Gp","class":"Cardiovascular"},{"Name":"Acetyl Salicylic Acid 75","Conc":"75 mg","form":"Tab","Authority":"Gp","class":"Cardiovascular"},{"Name":"Acetyl Salicylic Acid 81","Conc":"81 mg","form":"Tab","Authority":"Gp","class":"Cardiovascular"},{"Name":"Acetylcysteine Sach","Conc":"600 mg","form":"Sachet","Authority":"Sp","class":"Respiratory Agents"},{"Name":"Acetylsalicylic Acid 300","Conc":"300 mg","form":"Tab","Authority":"Gp","class":"Analgesic , Antirheumatic"},{"Name":"Acitretin 10","Conc":"10 mg","form":"Tab","Authority":"Con","class":"Dermatological Agents"},{"Name":"Acitretin 25","Conc":"25 mg","form":"Tab","Authority":"Con","class":"Dermatological Agents"},{"Name":"Activated Charcoal","Conc":"1000 mg","form":"Tab","Authority":"Sp","class":"Gastro-Intestinal Drugs"},{"Name":"Acyclovir 0.05%","Conc":"0.0005","form":"Tube","Authority":"Con","class":"Dermatological Agents"},{"Name":"Acyclovir 0.03%","Conc":"0.0003","form":"E.O","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Acyclovir 200","Conc":"200 mg","form":"Tab","Authority":"Sp","class":"Antiviral"},{"Name":"Acyclovir 400","Conc":"400 mg","form":"Tab","Authority":"Con","class":"Antiviral"},{"Name":"Acyclovir 800","Conc":"800 mg","form":"Tab","Authority":"Con","class":"Antiviral"},{"Name":"Adalimumab 20 mg Humira Amgevita Hyrimoz","Conc":"20 mg","form":"Syringe","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Adalimumab 40 mg Humira Amgevita Hyrimoz","Conc":"40 mg","form":"Syringe","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Aescin","Conc":"40 mg","form":"Tab","Authority":"Sp","class":"Analgesic , Antirheumatic"},{"Name":"Aescin + Diethyl Amine Salicylate","Conc":"1%+ 5 %","form":"Tube","Authority":"Sp","class":"Analgesic , Antirheumatic"},{"Name":"Afatinib","Conc":"40 mg","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Alcaftadine","Conc":"---","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Alfacalcidol 0.25","Conc":"0.25 mcg","form":"Tab","Authority":"Con","class":"Miscellaneous"},{"Name":"Alfacalcidol 0.5","Conc":"0.5 mcg","form":"Tab","Authority":"Con","class":"Miscellaneous"},{"Name":"Alfacalcidol 1","Conc":"1mcg","form":"Tab","Authority":"Con","class":"Miscellaneous"},{"Name":"Alfacalcidol Drop","Conc":"2 mcg/ml","form":"oral dp","Authority":"Con","class":"Miscellaneous"},{"Name":"Allopurinol 100","Conc":"100 mg","form":"Tab","Authority":"Sp","class":"Analgesic , Antirheumatic"},{"Name":"Allopurinol 100 mg + Benzbromarone","Conc":"---","form":"Tab","Authority":"Sp","class":"Analgesic , Antirheumatic"},{"Name":"Allopurinol 300","Conc":"300 mg","form":"Tab","Authority":"Sp","class":"Analgesic , Antirheumatic"},{"Name":"Alogliptin","Conc":"---","form":"Tab","Authority":"Con","class":"Anti-Diabetics"},{"Name":"Alogliptin + metformin","Conc":"---","form":"Tab","Authority":"Con","class":"Anti-Diabetics"},{"Name":"Alpha Lipoic Acid Antioxidant Group 300","Conc":"300 mg","form":"Tab","Authority":"Con","class":"Miscellaneous"},{"Name":"Alphalipoic Acid Antioxidant Group 600","Conc":"600 mg","form":"Tab","Authority":"Con","class":"Miscellaneous"},{"Name":"Alpha-Methyl Dopa 250","Conc":"250 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Amantadine","Conc":"100 mg","form":"Tab","Authority":"Con","class":"Hepatic Diseases Agents"},{"Name":"Amilodipine 10","Conc":"10 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Amilodipine 5","Conc":"5 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Amiloride + Hydrochlorothiazide 5/50","Conc":"5 mg+50 mg","form":"Tab","Authority":"Gp","class":"Diuretics"},{"Name":"Amiodarone 200","Conc":"200 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Amitriptyline 10","Conc":"10 mg","form":"Tab","Authority":"Sp","class":"Psycotropic"},{"Name":"Amitriptyline 25","Conc":"25 mg","form":"Tab","Authority":"Sp","class":"Psycotropic"},{"Name":"Amlodipine + Valsartan + Hydrochlorothiazide 5/160/12.5","Conc":"5 mg + 160 mg + 12.5 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Amlodipine 10 mg+ Valsartan 160 mg","Conc":"10 + 160 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Amlodipine 5 mg+ Valsartan 160 mg","Conc":"160 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Amoxicillin 125 mg+Flucloxacillin 125mg","Conc":"250 mg","form":"Susp","Authority":"Sp","class":"Antibiotic"},{"Name":"Amoxicillin 200mg+Clavulanic Acid 28.5mg /5Ml","Conc":"200 mg+ 28.5 mg /5ml","form":"Susp","Authority":"Sp","class":"Antibiotic"},{"Name":"Amoxicillin 250","Conc":"250 mg","form":"Tab","Authority":"Gp","class":"Antibiotic"},{"Name":"Amoxicillin 250 mg+Flucloxacillin 250 mg","Conc":"500 mg","form":"Tab","Authority":"Sp","class":"Antibiotic"},{"Name":"Amoxicillin 400 mg Clavulanic Acid 57mg / 5Ml","Conc":"400 mg+ 57 mg/ 5ml","form":"Susp","Authority":"Sp","class":"Antibiotic"},{"Name":"Amoxicillin 500","Conc":"500 mg","form":"Tab","Authority":"Gp","class":"Antibiotic"},{"Name":"Amoxicillin 500mg+ Clavulanic Acid 125mg","Conc":"625 mg","form":"Tab","Authority":"Sp","class":"Antibiotic"},{"Name":"Amoxicillin 600mg + Clavulanic Acid 42.9mg Susp","Conc":"642.9 mg / 5 ml","form":"Susp","Authority":"Sp","class":"Antibiotic"},{"Name":"Amoxicillin 875mg + Clavulanic Acid 125mg","Conc":"1 gm","form":"Tab","Authority":"Con","class":"Antibiotic"},{"Name":"Amoxicillin Susp","Conc":"250 mg /5ml","form":"Susp","Authority":"Gp","class":"Antibiotic"},{"Name":"Ampicillin","Conc":"1 gm","form":"Vial","Authority":"Sp","class":"Antibiotic"},{"Name":"Ampicillin 250","Conc":"250 mg","form":"Tab","Authority":"Gp","class":"Antibiotic"},{"Name":"Ampicillin 500","Conc":"500 mg","form":"Tab","Authority":"Gp","class":"Antibiotic"},{"Name":"Ampicillin Susp","Conc":"250 mg /5ml","form":"Susp","Authority":"Gp","class":"Antibiotic"},{"Name":"Anagrelide 0.5 mg Thrombonorm","Conc":"0.5 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Anastrazole","Conc":"1mg","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Anethole+Borneol+Pinene","Conc":"---","form":"Tab","Authority":"Sp","class":"Urinary Track Disorders"},{"Name":"Antacid Containing Alginate","Conc":"---","form":"Tab","Authority":"Sp","class":"Gastro-Intestinal Drugs"},{"Name":"Antacid Containing Al-mg Compounds","Conc":"---","form":"Tab","Authority":"Gp","class":"Gastro-Intestinal Drugs"},{"Name":"Antacid Containing Al-mg Compounds Syrup","Conc":"---","form":"Syrup","Authority":"Gp","class":"Gastro-Intestinal Drugs"},{"Name":"Antacids Containing Simethicone","Conc":"---","form":"Susp","Authority":"Sp","class":"Gastro-Intestinal Drugs"},{"Name":"Antazoline +Tetryzoline","Conc":"---","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Anthraquinone Glycosides+Lidocaine+Salicylic Acid","Conc":"---","form":"Paint","Authority":"Sp","class":"Dental &Buccal Agents"},{"Name":"Antibiotics + Steroids","Conc":"---","form":"Ear.d","Authority":"Sp","class":"Otorhinolaryngology Agents"},{"Name":"Anticoagulant","Conc":"---","form":"Tube","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Anti-Corn","Conc":"---","form":"Paint","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Anti-Hemorrhoidal Containing Hydrocortisone Oint","Conc":"---","form":"Oint","Authority":"Sp","class":"Anti Haemorrhoidal"},{"Name":"Anti-Hemorrhoidal Containing Hydrocortisone Supp","Conc":"---","form":"Supp","Authority":"Sp","class":"Anti Haemorrhoidal"},{"Name":"Anti-Hemorrhoidal Containing Lignocaine Oint","Conc":"---","form":"Oint","Authority":"Gp","class":"Anti Haemorrhoidal"},{"Name":"Anti-Hemorrhoidal Containing Lignocaine Supp","Conc":"---","form":"Supp","Authority":"Gp","class":"Anti Haemorrhoidal"},{"Name":"Anti-Rheumatic","Conc":"---","form":"Oint","Authority":"Gp","class":"Analgesic , Antirheumatic"},{"Name":"Antispasmodic","Conc":"---","form":"Tab","Authority":"Gp","class":"Effervescent & Antispasmodic"},{"Name":"Antispasmodic Supp","Conc":"---","form":"Supp","Authority":"Gp","class":"Effervescent & Antispasmodic"},{"Name":"Apixaban 2.5","Conc":"2.5 mg","form":"Tab","Authority":"Con","class":"Anti-Coagulant"},{"Name":"Apixaban 5","Conc":"5 mg","form":"Tab","Authority":"Con","class":"Anti-Coagulant"},{"Name":"Aripiprazole 10","Conc":"10 mg","form":"Tab","Authority":"Con","class":"Psycotropic"},{"Name":"Aripiprazole 30","Conc":"30 mg","form":"Tab","Authority":"Con","class":"Psycotropic"},{"Name":"Aromatase Inhibitor","Conc":"---","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Ascorbic Acid+Rutin","Conc":"160 mg +60 mg","form":"Tab","Authority":"Gp","class":"Vitamins"},{"Name":"Atenolol 100","Conc":"100 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Atenolol 50","Conc":"50 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Atomextine 10","Conc":"10 mg","form":"Tab","Authority":"Con لجنة فرعية","class":"Psycotropic"},{"Name":"Atomextine 18","Conc":"18 mg","form":"Tab","Authority":"Con لجنة فرعية","class":"Psycotropic"},{"Name":"Atomextine 25","Conc":"25 mg","form":"Tab","Authority":"Con لجنة فرعية","class":"Psycotropic"},{"Name":"Atomextine 40","Conc":"40 mg","form":"Tab","Authority":"Con لجنة فرعية","class":"Psycotropic"},{"Name":"Atomextine 60","Conc":"60 mg","form":"Tab","Authority":"Con لجنة فرعية","class":"Psycotropic"},{"Name":"Atomextine Syrup","Conc":"4mg / ml","form":"Syrup","Authority":"Con لجنة فرعية","class":"Psycotropic"},{"Name":"Atropin Sulphate E.D","Conc":"0.01","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Atropin Sulphate E.O","Conc":"0.01","form":"E.O","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Atropine Sulphate","Conc":"1 mg","form":"Amp","Authority":"Sp","class":"Gastro-Intestinal Drugs"},{"Name":"Atrovastatin 10","Conc":"10 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Atrovastatin 20","Conc":"20 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Atrovastatin 40","Conc":"40 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Azathioprine 50","Conc":"50 mg","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Azelaic Acid","Conc":"0.2","form":"Tube","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Azithromycin","Conc":"0.01","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Azithromycin 1% E.D","Conc":"0.01","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Azithromycin 250","Conc":"250 mg","form":"Tab","Authority":"Sp","class":"Antibiotic"},{"Name":"Azithromycin Susp","Conc":"200 mg / 5ml","form":"Susp","Authority":"Sp","class":"Antibiotic"},{"Name":"Azole Derivatives cream","Conc":"---","form":"Tube","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Azole Derivatives lotion","Conc":"---","form":"Lotion","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Azole Derivatives powder","Conc":"---","form":"Powder","Authority":"Sp","class":"Dermatological Agents"},{"Name":"B2 + B6 + Thiamine + Nictinamide + Dexapanthenol","Conc":"---","form":"Syrup","Authority":"Sp","class":"Vitamins"},{"Name":"Baclofen 10 mg","Conc":"10 mg","form":"Tab","Authority":"Sp","class":"Muscle Relaxant"},{"Name":"Baclofen 25 mg","Conc":"25 mg","form":"Tab","Authority":"Sp","class":"Muscle Relaxant"},{"Name":"Baricitinib 2 mg Baritava","Conc":"2 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Baricitinib 4 mg Baritava","Conc":"4 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Beclomethasone 100 mcg / Spray","Conc":"100 mcg","form":"Spray","Authority":"Con","class":"Respiratory Agents"},{"Name":"Beclomethasone 50 mcg / Spray","Conc":"50 mcg","form":"Inh","Authority":"Sp","class":"Respiratory Agents"},{"Name":"Bendamustin","Conc":"---","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Benzathin Penicillin","Conc":"1.200.000 I.U","form":"Vial","Authority":"Sp","class":"Antibiotic"},{"Name":"Benztropine Mesylate","Conc":"2 mg","form":"Tab","Authority":"Sp","class":"Anti - Parkinsonial"},{"Name":"Benzydamine","Conc":"0.0015","form":"Mouth wash","Authority":"Gp","class":"Dental &Buccal Agents"},{"Name":"Benzyl Benzoate cream","Conc":"0.1","form":"Tube","Authority":"Gp","class":"Dermatological Agents"},{"Name":"Benzyl Benzoate lotion","Conc":"0.25","form":"Lotion","Authority":"Gp","class":"Dermatological Agents"},{"Name":"Betahistine","Conc":"---","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Betamethasone","Conc":"0.001","form":"Tube","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Betamethasone + Clioquinol","Conc":"---","form":"Tube","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Betamethasone Amp","Conc":"---","form":"Amp","Authority":"Sp","class":"Anti - Allergic"},{"Name":"Betamethasone+Gentamycine","Conc":"---","form":"Oint","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Betamethasone+Salicylic Acid lotion","Conc":"0.05%+3%","form":"Lotion","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Betamethasone+Salicylic Acid oint","Conc":"---","form":"Oint","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Betaxolol","Conc":"0.005","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Liposomal Doxorubicin Bevacizumab Avastin","Conc":"---","form":"Vial","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Bicalutamide","Conc":"50 mg","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Biperiden Hcl 2 mg","Conc":"2 mg","form":"Tab","Authority":"Sp","class":"Anti - Parkinsonial"},{"Name":"Bisoprolol + Hct 5/12.5","Conc":"5 mg + 12.5 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Bisoprolol 2.5","Conc":"2.5 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Bisoprolol 5","Conc":"5 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Bleomycin","Conc":"15 mg","form":"Amp","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Bortezomib Velcade","Conc":"3.5 mg","form":"Vial","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Brimonidine Tartrate","Conc":"0.0015","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Brivaracetam 100","Conc":"100 mg","form":"Tab","Authority":"Con","class":"Anti-Epileptic"},{"Name":"Brivaracetam 25","Conc":"25 mg","form":"Tab","Authority":"Con","class":"Anti-Epileptic"},{"Name":"Brivaracetam 50","Conc":"50 mg","form":"Tab","Authority":"Con","class":"Anti-Epileptic"},{"Name":"Brivaracetam 75","Conc":"75 mg","form":"Tab","Authority":"Con","class":"Anti-Epileptic"},{"Name":"Brivaracetam Syrup","Conc":"---","form":"Syrup","Authority":"Con","class":"Anti-Epileptic"},{"Name":"Bromazepam 1.5","Conc":"1.5 mg","form":"Tab","Authority":"Sp","class":"Psycotropic"},{"Name":"Bromazepam 3","Conc":"3 mg","form":"Tab","Authority":"Sp","class":"Psycotropic"},{"Name":"Bromhexine Or Ambroxol","Conc":"---","form":"Tab","Authority":"Gp","class":"Respiratory Agents"},{"Name":"Bromhexine Or Ambroxol Syrup","Conc":"---","form":"Syrup","Authority":"Gp","class":"Respiratory Agents"},{"Name":"Bromocriptine Mesylate","Conc":"2.5 mg","form":"Tab","Authority":"Sp","class":"Hormones Disorders"},{"Name":"B-Sitosterol","Conc":"0.0025","form":"Oint","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Budesonide + Formoterol 200/6","Conc":"200 mcg + 6 mcg","form":"Inh","Authority":"Con","class":"Respiratory Agents"},{"Name":"Budesonide + Formoterol 400/12","Conc":"400 mcg + 12 mcg","form":"Inh","Authority":"Con","class":"Respiratory Agents"},{"Name":"Budesonide 160 Mcg + Formoterol 4.5 Mcg","Conc":"160 + 4.5 mcg","form":"Inh","Authority":"Con","class":"Respiratory Agents"},{"Name":"Budesonide 400 mcg","Conc":"400 mg","form":"Inh","Authority":"Con","class":"Respiratory Agents"},{"Name":"Budesonide Inhaler Powder In Cap","Conc":"400mcg","form":"Inh","Authority":"Con","class":"Respiratory Agents"},{"Name":"Bumetanide 1","Conc":"1mg","form":"Tab","Authority":"Sp","class":"Diuretics"},{"Name":"Busulphan","Conc":"2 mg","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Cabergoline","Conc":"0.5mg","form":"Tab","Authority":"Con","class":"Miscellaneous"},{"Name":"Cabergoline 0.5 mg","Conc":"0.5 mg","form":"Tab","Authority":"Con","class":"Hormones Disorders"},{"Name":"Calamine + Antihistamine","Conc":"---","form":"Lotion","Authority":"Gp","class":"Dermatological Agents"},{"Name":"Calciportiol + Betamethasone Oint","Conc":"---","form":"Tube","Authority":"Con","class":"Dermatological Agents"},{"Name":"Calcipotriol+Betamthasone","Conc":"---","form":"Oint","Authority":"Con","class":"Dermatological Agents"},{"Name":"Calcium + Magnesium","Conc":"---","form":"Tab","Authority":"Con","class":"Vitamins"},{"Name":"Calcium + Magnesium + Zinc + Vitamin D3","Conc":"---","form":"Tab","Authority":"Con","class":"Vitamins"},{"Name":"Calcium 1000 mg + Vitamin D","Conc":"---","form":"Tab","Authority":"Con","class":"Vitamins"},{"Name":"Calcium 500 mg + Vit D","Conc":"---","form":"Tab","Authority":"Sp","class":"Vitamins"},{"Name":"Calcium Acetate","Conc":"700 mg","form":"Tab","Authority":"Gp","class":"Vitamins"},{"Name":"Calcium Carbonate 500","Conc":"500 mg","form":"Tab","Authority":"Sp","class":"Vitamins"},{"Name":"Calcium Carbonate 640","Conc":"640 mg","form":"Tab","Authority":"Con","class":"Vitamins"},{"Name":"Calcium Folinate","Conc":"50 mg","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Calcium Gluconate Amp","Conc":"0.1","form":"Amp","Authority":"Sp","class":"Vitamins"},{"Name":"Calcium Salts Syrup except calcium levulinate","Conc":"---","form":"Syrup","Authority":"Sp","class":"Vitamins"},{"Name":"Calcium+ Vitamins","Conc":"---","form":"Syrup","Authority":"Sp","class":"Vitamins"},{"Name":"Candesartan 16","Conc":"16 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Candesartan Cilexetil 8","Conc":"8 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Candesartan Cilexetil+Hct 16 /12.5","Conc":"16 mg+12.5mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Capcitabine 500","Conc":"500 mg","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Captopril + Hydrochlorothiazide 50/25","Conc":"50 mg+25 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Captopril + Indapamide 50/2.5","Conc":"50mg + 2.5mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Captopril 25","Conc":"25 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Carbamazepine 200","Conc":"200 mg","form":"Tab","Authority":"Sp","class":"Anti-Epileptic"},{"Name":"Carbamazepine 200 Cr","Conc":"200 mg","form":"Tab","Authority":"Con","class":"Anti-Epileptic"},{"Name":"Carbamazepine 400 Cr","Conc":"400 mg","form":"Tab","Authority":"Con","class":"Anti-Epileptic"},{"Name":"Carbidopa + Levodopa + Entacapone","Conc":"37.5mg+150mg +200mg","form":"Tab","Authority":"Con","class":"Anti - Parkinsonial"},{"Name":"Carbimazole","Conc":"5 mg","form":"Tab","Authority":"Sp","class":"Hormones Disorders"},{"Name":"Carbocysteine","Conc":"375 mg","form":"Tab","Authority":"Con","class":"Respiratory Agents"},{"Name":"Carbocysteine Syrup","Conc":"250 mg / 5 ml","form":"Syrup","Authority":"Con","class":"Respiratory Agents"},{"Name":"Carbonic Anhydrous Inhibitor","Conc":"0.02","form":"E.D","Authority":"Con","class":"Ophthalmic Agents"},{"Name":"Carboplatin 150","Conc":"150 mg","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Carboplatin 450","Conc":"450 mg","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Carvedilol 12.5","Conc":"12.5 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Carvedilol 25","Conc":"25 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Carvedilol 6.25","Conc":"6.25 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Cefadroxil 500","Conc":"500 mg","form":"Tab","Authority":"Sp","class":"Antibiotic"},{"Name":"Celecoxib","Conc":"200 mg","form":"Tab","Authority":"Con","class":"Analgesic , Antirheumatic"},{"Name":"Central Muscle Relaxant + Analgesics","Conc":"---","form":"Tab","Authority":"Gp","class":"Muscle Relaxant"},{"Name":"Cephalexin 250","Conc":"250 mg","form":"Tab","Authority":"Sp","class":"Antibiotic"},{"Name":"Cephalexin 500","Conc":"500 mg","form":"Tab","Authority":"Sp","class":"Antibiotic"},{"Name":"Cephalexin Susp","Conc":"250 mg","form":"Susp","Authority":"Sp","class":"Antibiotic"},{"Name":"Cerebrolycsin","Conc":"---","form":"Amp","Authority":"Con لجنة عليا","class":"Miscellaneous"},{"Name":"Certolizumab Cimzia","Conc":"200 mg","form":"Syringe","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Cetirizine","Conc":"---","form":"Tab","Authority":"Con","class":"Anti - Allergic"},{"Name":"Cetuximab Erbitux","Conc":"---","form":"Vial","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Chamomile Extract","Conc":"---","form":"Oint","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Chlorambucil","Conc":"5 mg","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Chloramphenicol","Conc":"0.01","form":"Oint","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Chloramphenicol + Collagenase","Conc":"---","form":"Oint","Authority":"Con","class":"Dermatological Agents"},{"Name":"Chloramphenicol E.D","Conc":"0.005","form":"E.D","Authority":"Gp","class":"Ophthalmic Agents"},{"Name":"Chloramphenicol E.O","Conc":"0.01","form":"E.O","Authority":"Gp","class":"Ophthalmic Agents"},{"Name":"Chloramphinicol+Prednisolone Acetate","Conc":"---","form":"E.D","Authority":"Gp","class":"Ophthalmic Agents"},{"Name":"Chlorhexidine Gluconate","Conc":"---","form":"Mouth wash","Authority":"Gp","class":"Dental &Buccal Agents"},{"Name":"Chlorobutanol + Polyvinyl Alcohol","Conc":"---","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Chloroquine Phosphate 250","Conc":"250 mg","form":"Tab","Authority":"Gp","class":"Antimalarial"},{"Name":"Chloroquine Phosphate Syrup","Conc":"80 mg / 5ml","form":"Syrup","Authority":"Gp","class":"Antimalarial"},{"Name":"Chlorpheniramine Maleate 4","Conc":"4 mg","form":"Tab","Authority":"Gp","class":"Anti - Allergic"},{"Name":"Chlorpheniramine Maleate Amp","Conc":"5 mg /ml","form":"Amp","Authority":"Gp","class":"Anti - Allergic"},{"Name":"Chlorpheniramine Maleate Cream","Conc":"0.02","form":"Tube","Authority":"Gp","class":"Anti - Allergic"},{"Name":"Chlorpheniramine Maleate Oint","Conc":"0.02","form":"Oint","Authority":"Gp","class":"Anti - Allergic"},{"Name":"Chlorpheniramine Maleate Syrup","Conc":"2 mg / 5 ml","form":"Syrup","Authority":"Gp","class":"Anti - Allergic"},{"Name":"Chlorpromazine 100","Conc":"100 mg","form":"Tab","Authority":"Gp","class":"Psycotropic"},{"Name":"Chlorpromazine 25","Conc":"25 mg","form":"Tab","Authority":"Gp","class":"Psycotropic"},{"Name":"Chlorpromazine Supp","Conc":"---","form":"Supp","Authority":"Gp","class":"Psycotropic"},{"Name":"Cholecalciferol Vit D3 10000 IU/ml","Conc":"10000 IU/ml","form":"oral dp","Authority":"Con","class":"Vitamins"},{"Name":"Cholecalciferol Vit D3 2800 IU/ml","Conc":"2800 IU/ml","form":"oral dp","Authority":"Con","class":"Vitamins"},{"Name":"Cholecalciferol Vit D3 400 IU/drop","Conc":"400 IU/drop","form":"oral dp","Authority":"Con","class":"Vitamins"},{"Name":"Chorionic Gonadotropin 1500 I.U","Conc":"1500 I.U","form":"Amp","Authority":"Sp","class":"Hormones Disorders"},{"Name":"Chorionic Gonadotropin 5000 I.U","Conc":"5000 I.U","form":"Amp","Authority":"Sp","class":"Hormones Disorders"},{"Name":"Chymotrypsin","Conc":"5 mg","form":"Amp","Authority":"Sp","class":"Analgesic , Antirheumatic"},{"Name":"Cilostazole 100","Conc":"100 mg","form":"Tab","Authority":"Con","class":"Anti-Coagulant"},{"Name":"Cilostazole 50","Conc":"50 mg","form":"Tab","Authority":"Con","class":"Anti-Coagulant"},{"Name":"Cinacalcet 30","Conc":"30 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Hormones Disorders"},{"Name":"Cinnarizine 25","Conc":"25 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Cinnarizine+Diminhydramin","Conc":"40 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Ciprofloxacin E.D","Conc":"0.003","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Ciprofloxacin + Tinidazole","Conc":"500 mg + 600 mg","form":"Tab","Authority":"Con","class":"Antibiotic"},{"Name":"Ciprofloxacin 500","Conc":"500 mg","form":"Tab","Authority":"Con","class":"Antibiotic"},{"Name":"Cisplatin 10","Conc":"10 mg","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Cisplatin 50","Conc":"50 mg","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Citalopram 20","Conc":"20 mg","form":"Tab","Authority":"Con","class":"Anti-Depressant"},{"Name":"Citicholine","Conc":"100mg/ml","form":"oral dp","Authority":"Con","class":"Miscellaneous"},{"Name":"Citicholine amp","Conc":"500mg/4ml","form":"Amp","Authority":"Con","class":"Miscellaneous"},{"Name":"Cladribine 10 mg Mavenclad","Conc":"10 mg","form":"Tab","Authority":"لجنة MS","class":"Miscellaneous"},{"Name":"Clarithromycin","Conc":"500 mg","form":"Tab","Authority":"Con","class":"Antibiotic"},{"Name":"Clindamycin","Conc":"300 mg","form":"Tab","Authority":"Con","class":"Antibiotic"},{"Name":"Clindamycin 150","Conc":"150 mg","form":"Tab","Authority":"Sp","class":"Antibiotic"},{"Name":"Clobetasol","Conc":"---","form":"Tube","Authority":"Con","class":"Dermatological Agents"},{"Name":"Clomiphene","Conc":"50 mg","form":"Tab","Authority":"Sp","class":"Hormones Disorders"},{"Name":"Clomipramine 25","Conc":"25 mg","form":"Tab","Authority":"Sp","class":"Psycotropic"},{"Name":"Clomipramine 75","Conc":"75 mg","form":"Tab","Authority":"Sp","class":"Psycotropic"},{"Name":"Clonazepam 0.5","Conc":"0.5 mg","form":"Tab","Authority":"Sp","class":"Anti-Epileptic"},{"Name":"Clonazepam 2","Conc":"2 mg","form":"Tab","Authority":"Sp","class":"Anti-Epileptic"},{"Name":"Clopidogrel + Aspirin","Conc":"75 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Clopidogrel 75","Conc":"75 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Clotrimazol","Conc":"---","form":"Vag Tab","Authority":"Sp","class":"Antifungal"},{"Name":"Clotrimazole Cream","Conc":"0.01","form":"Tube","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Clotrimazole lotion","Conc":"0.01","form":"Solu","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Clozapine 100","Conc":"100 mg","form":"Tab","Authority":"Con","class":"Anti-Depressant"},{"Name":"Clozapine 25","Conc":"25 mg","form":"Tab","Authority":"Con","class":"Anti-Depressant"},{"Name":"CMO + Camphor Castor oil+ Menthol Sulfax Plus","Conc":"---","form":"Tube","Authority":"Sp","class":"Analgesic , Antirheumatic"},{"Name":"CMO + Camphor + Menthol Sulfax CMO","Conc":"---","form":"Tube","Authority":"Sp","class":"Analgesic , Antirheumatic"},{"Name":"Coagulation Factor IX","Conc":"---","form":"Vial","Authority":"Con لجنة عليا","class":"Miscellaneous"},{"Name":"Coagulation Factor Viia","Conc":"---","form":"Vial","Authority":"Con لجنة عليا","class":"Miscellaneous"},{"Name":"Coal Tar Containing Oint","Conc":"---","form":"Oint","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Colchicine For Gout","Conc":"0.5 mg","form":"Tab","Authority":"Sp","class":"Analgesic , Antirheumatic"},{"Name":"Concerta 18","Conc":"18 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Psycotropic"},{"Name":"Concerta 27","Conc":"27 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Psycotropic"},{"Name":"Concerta 54","Conc":"54 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Psycotropic"},{"Name":"Conjugated Estrogen","Conc":"---","form":"Tab","Authority":"Sp","class":"Hormones Disorders"},{"Name":"Couph Sedative Contain Dextromethorphan","Conc":"10 mg","form":"Tab","Authority":"Gp","class":"Respiratory Agents"},{"Name":"Couph Sedative Contain Dextromethorphan Syrup","Conc":"10 mg / 5 ml","form":"Syrup","Authority":"Gp","class":"Respiratory Agents"},{"Name":"Crizotinib Xalkori","Conc":"250 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Cromoglycate","Conc":"0.02","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Cyclobenzapine 10 mg","Conc":"10 mg","form":"Tab","Authority":"Sp","class":"Muscle Relaxant"},{"Name":"Cyclobenzaprine","Conc":"10mg","form":"Tab","Authority":"Sp","class":"Muscle Relaxant"},{"Name":"Cyclopentolate","Conc":"0.01","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Cyclophosphamide","Conc":"50mg","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Cyclophosphamide +Nacl","Conc":"200mg","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Cyclophosphamide 1000","Conc":"1000 mg","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Cyclophosphamide 500","Conc":"500 mg","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Cyclosporine 100","Conc":"100 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Cyclosporine 25","Conc":"25 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Cyclosporine 50","Conc":"50 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Cyclosporine Soln 50 ml","Conc":"100 mg /ml","form":"Bottle","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Cyproterone acetate","Conc":"50 mg","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Cytarabine 100","Conc":"100 mg","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Cytarabine 1000","Conc":"1gm","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Danazol","Conc":"200 mg","form":"Tab","Authority":"Con","class":"Hormones Disorders"},{"Name":"Dapagliflozin 10","Conc":"10 mg","form":"Tab","Authority":"Con","class":"Anti-Diabetics"},{"Name":"Dapagliflozin 10 mg + metformin 1000 mg XR","Conc":"10mg + 1000mg","form":"Tab","Authority":"Con","class":"Anti-Diabetics"},{"Name":"Dapagliflozin 5","Conc":"5 mg","form":"Tab","Authority":"Con","class":"Anti-Diabetics"},{"Name":"Dapagliflozin 5 mg + metformin 1000 mg","Conc":"5mg + 1000mg","form":"Tab","Authority":"Con","class":"Anti-Diabetics"},{"Name":"Dapsone 50","Conc":"50 mg","form":"Tab","Authority":"Sp","class":"Antibiotic"},{"Name":"Darbepoetin Alfa 10 Aranesp","Conc":"10 mcg","form":"Syringe","Authority":"Con لجنة عليا","class":"Miscellaneous"},{"Name":"Darbepoetin Alfa 100 Aranesp","Conc":"100 mcg","form":"Syringe","Authority":"Con لجنة عليا","class":"Miscellaneous"},{"Name":"Darbepoetin Alfa 20 Aranesp","Conc":"20 mcg","form":"Syringe","Authority":"Con لجنة عليا","class":"Miscellaneous"},{"Name":"Darbepoetin Alfa 30 Aranesp","Conc":"30 mcg","form":"Syringe","Authority":"Con لجنة عليا","class":"Miscellaneous"},{"Name":"Dasatinib Sprycel","Conc":"---","form":"Tab","Authority":"Con لجنة فرعية","class":"Cytotoxic,Immunosuppressant"},{"Name":"Deferasirox 125","Conc":"125 mg","form":"Tab","Authority":"Con","class":"Miscellaneous"},{"Name":"Deferasirox 180","Conc":"180 mg","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Deferasirox 250","Conc":"250mg","form":"Tab","Authority":"Con","class":"Miscellaneous"},{"Name":"Deferasirox 360","Conc":"360 mg","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Deferasirox 500","Conc":"500 mg","form":"Tab","Authority":"Con","class":"Miscellaneous"},{"Name":"Deferasirox 90","Conc":"90 mg","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Deferiprone","Conc":"500 mg","form":"Tab","Authority":"Con","class":"Miscellaneous"},{"Name":"Deferoxamine Mesylate","Conc":"500 mg","form":"Amp","Authority":"Con","class":"Miscellaneous"},{"Name":"Denosumab 120 mg Xgeva","Conc":"120 mg","form":"Syringe","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Denosumab 60 mg Prolia","Conc":"60 mg","form":"Syringe","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Desloratidine","Conc":"5 mg","form":"Tab","Authority":"Sp","class":"Anti - Allergic"},{"Name":"Desloratidine 0.5 mg / 1 Ml Syrup","Conc":"0.5 / ml syrup","form":"Syrup","Authority":"Sp","class":"Anti - Allergic"},{"Name":"Desloratidine 5 mg","Conc":"5 mg","form":"Tab","Authority":"Sp","class":"Anti - Allergic"},{"Name":"Desmopressin 120","Conc":"120 mcg","form":"Tab","Authority":"Con","class":"Hormones Disorders"},{"Name":"Desmopressin 60","Conc":"60 mcg","form":"Tab","Authority":"Con","class":"Hormones Disorders"},{"Name":"Desmopressin Spray","Conc":"10mcg/dose","form":"Nasal Spray","Authority":"Con","class":"Hormones Disorders"},{"Name":"Dexamethasone","Conc":"0.5 mg","form":"Tab","Authority":"Sp","class":"Anti - Allergic"},{"Name":"Dexamethasone + Panthenol","Conc":"0.05","form":"Tube","Authority":"Gp","class":"Dermatological Agents"},{"Name":"Dexamethasone 8 mg","Conc":"8 mg","form":"Tab","Authority":"Con","class":"Anti - Allergic"},{"Name":"Dexamethasone Amp","Conc":"4mg / ml","form":"Amp","Authority":"Sp","class":"Anti - Allergic"},{"Name":"Dexamethasone E.D","Conc":"0.001","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Dexamethasone E.O","Conc":"---","form":"E.O","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Dexamethasone+Neomycine+Polimyxin E.D","Conc":"---","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Dexamethasone+Neomycine+Polimyxin E.O","Conc":"---","form":"E.O","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Dexamethazone + Tobramycin E.D","Conc":"---","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Dexamethazone + Tobramycin Tube","Conc":"---","form":"Tube","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Diacerin 50","Conc":"50 mg","form":"Tab","Authority":"Con","class":"Analgesic , Antirheumatic"},{"Name":"Dichlorphenamide","Conc":"50 mg","form":"Tab","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Diclofenac E.D","Conc":"0.01","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Diclofenac Sodium 100 Supp","Conc":"100 mg","form":"Supp","Authority":"Sp","class":"Analgesic , Antirheumatic"},{"Name":"Diclofenac Sodium 25","Conc":"25 mg","form":"Tab","Authority":"Sp","class":"Analgesic , Antirheumatic"},{"Name":"Diclofenac Sodium 50","Conc":"50 mg","form":"Tab","Authority":"Sp","class":"Analgesic , Antirheumatic"},{"Name":"Diclofenac Sodium 75 mg Amp","Conc":"75 mg","form":"Amp","Authority":"Sp","class":"Analgesic , Antirheumatic"},{"Name":"Diflucortolone","Conc":"0.001","form":"Oint","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Diflucortolone+Chlorquinaldol","Conc":"---","form":"Tube","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Digestive","Conc":"---","form":"Tab","Authority":"Gp","class":"Gastro-Intestinal Drugs"},{"Name":"Digestive Syrup","Conc":"---","form":"Syrup","Authority":"Gp","class":"Gastro-Intestinal Drugs"},{"Name":"Digoxin","Conc":"0.25 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Diiodohydroxyquinoline","Conc":"250 mg","form":"Tab","Authority":"Gp","class":"Anti-Amoebic"},{"Name":"Diloxanide Furoate","Conc":"500 mg","form":"Tab","Authority":"Gp","class":"Anti-Amoebic"},{"Name":"Diltiazem Hcl 120","Conc":"120 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Diltiazem Hcl 60","Conc":"60 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Diltiazem Hcl 90","Conc":"90 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Dimenhydrinate","Conc":"---","form":"Tab","Authority":"Gp","class":"Otorhinolaryngology Agents"},{"Name":"Dimethyl Fumarate Marovarex","Conc":"240mg","form":"Tab","Authority":"لجنة MS","class":"Miscellaneous"},{"Name":"Diosmin + Hespiridin","Conc":"450mg + 50mg","form":"Tab","Authority":"Con","class":"Haemostatic"},{"Name":"Dipyridamole","Conc":"75 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Disodium Clodronate 400","Conc":"400 mg","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Disodium Clodronate amp","Conc":"300 mg","form":"Amp","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Docetaxel 20","Conc":"20 mg","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Docetaxel 80","Conc":"80 mg","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Docusate Sodium","Conc":"20 mg / 5ml","form":"Syrup","Authority":"Sp","class":"Laxative"},{"Name":"Domperidone Tab","Conc":"10 mg","form":"Tab","Authority":"Sp","class":"Gastro-Intestinal Drugs"},{"Name":"Domperidone Supp","Conc":"30 mg","form":"Supp","Authority":"Sp","class":"Gastro-Intestinal Drugs"},{"Name":"Domperidone Syrup","Conc":"1mg / ml","form":"Syrup","Authority":"Sp","class":"Gastro-Intestinal Drugs"},{"Name":"Dorzolamide E.D","Conc":"0.02","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Dorzolamide Hcl +Timolol Maleate","Conc":"2%+0.5%","form":"E.D","Authority":"Con","class":"Ophthalmic Agents"},{"Name":"Dothiepin 25","Conc":"25 mg","form":"Tab","Authority":"Sp","class":"Psycotropic"},{"Name":"Dothiepin 75","Conc":"75 mg","form":"Tab","Authority":"Sp","class":"Psycotropic"},{"Name":"Doxazocin 1","Conc":"1 mg","form":"Tab","Authority":"Sp","class":"Urinary Track Disorders"},{"Name":"Doxazocin 4","Conc":"4 mg","form":"Tab","Authority":"Sp","class":"Urinary Track Disorders"},{"Name":"Doxorubicin 10","Conc":"10 mg","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Doxorubicin 50","Conc":"50 mg","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Doxycycline 100","Conc":"100 mg","form":"Tab","Authority":"Sp","class":"Antibiotic"},{"Name":"Duloxetine 30","Conc":"30 mg","form":"Tab","Authority":"Con","class":"Anti-Depressant"},{"Name":"Duloxetine 60","Conc":"60 mg","form":"Tab","Authority":"Con","class":"Anti-Depressant"},{"Name":"Dupilumab 200 mg Dupixent","Conc":"200 mg","form":"Syringe","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Dupilumab 300 mg Dupixent","Conc":"300 mg","form":"Syringe","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Dutasteride 0.5","Conc":"0.5 mg","form":"Tab","Authority":"Sp","class":"Urinary Track Disorders"},{"Name":"Dydrogesterone","Conc":"10 mg","form":"Tab","Authority":"Sp","class":"Hormones Disorders"},{"Name":"Echinacea Angustifolia Ext","Conc":"---","form":"Tab","Authority":"Sp","class":"Urinary Track Disorders"},{"Name":"Eltrombopag 25 mg Revolade","Conc":"25 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Eltrombopag 50 mg Revolade","Conc":"50 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Eltrombopag 75 mg Revolade","Conc":"75 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Emicizumab Hemlibra","Conc":"---","form":"Vial","Authority":"Con لجنة عليا","class":"Miscellaneous"},{"Name":"Empagliflozin 10","Conc":"10 mg","form":"Tab","Authority":"Con","class":"Anti-Diabetics"},{"Name":"Empagliflozin 10 mg + Linagliptin 5 mg","Conc":"10 mg + 5 mg","form":"Tab","Authority":"Con","class":"Anti-Diabetics"},{"Name":"Empagliflozin 10 mg + Linagliptin 5 mg + Metformin XR 1000 mg","Conc":"10 mg + 5 mg + 1000 mg","form":"Tab","Authority":"Con","class":"Anti-Diabetics"},{"Name":"Empagliflozin 12.5 mg + metformin 1000 mg","Conc":"5mg + 1000mg","form":"Tab","Authority":"Con","class":"Anti-Diabetics"},{"Name":"Empagliflozin 25","Conc":"25 mg","form":"Tab","Authority":"Con","class":"Anti-Diabetics"},{"Name":"Empagliflozin 25 mg + Linagliptin 5 mg","Conc":"25 mg + 5 mg","form":"Tab","Authority":"Con","class":"Anti-Diabetics"},{"Name":"Empagliflozin 25 mg + Linagliptin 5 mg + Metformin XR 1000 mg","Conc":"25 mg + 5 mg + 1000 mg","form":"Tab","Authority":"Con","class":"Anti-Diabetics"},{"Name":"Empagliflozin 25 mg + metformin 1000mg","Conc":"5mg + 1000mg","form":"Tab","Authority":"Con","class":"Anti-Diabetics"},{"Name":"Empagliflozin 5","Conc":"5 mg","form":"Tab","Authority":"Con","class":"Anti-Diabetics"},{"Name":"Empagliflozin 5 mg + metformin 1000mg","Conc":"5mg + 1000mg","form":"Tab","Authority":"Con","class":"Anti-Diabetics"},{"Name":"Enalapril 10","Conc":"10 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Enalapril 20","Conc":"20 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Entecavir 0.5","Conc":"0.5mg","form":"Tab","Authority":"Con","class":"Antiviral"},{"Name":"Entecavir 1","Conc":"1mg","form":"Tab","Authority":"Con","class":"Antiviral"},{"Name":"Epirubicin 10","Conc":"10 mg","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Epirubicin 50","Conc":"50 mg","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Eplerenone 25","Conc":"25 mg","form":"Tab","Authority":"Con","class":"Diuretics"},{"Name":"Eplerenone 50","Conc":"50 mg","form":"Tab","Authority":"Con","class":"Diuretics"},{"Name":"Erenumab 140 Aimovig","Conc":"140 mg","form":"Syringe","Authority":"Con لجنة عليا","class":"Miscellaneous"},{"Name":"Erenumab 70 Aimovig","Conc":"70 mg","form":"Syringe","Authority":"Con لجنة عليا","class":"Miscellaneous"},{"Name":"Ergocalciferol 0.25 mg Eq To10000 Iu","Conc":"10000 IU","form":"Tab","Authority":"Con","class":"Vitamins"},{"Name":"Ergocalciferol Vit D3","Conc":"600.000 I.U","form":"Amp","Authority":"Sp","class":"Vitamins"},{"Name":"Ergotamine Tartarate+Other Anti-Migraine","Conc":"---","form":"Tab","Authority":"Sp","class":"Analgesic , Antirheumatic"},{"Name":"Erythromycin 250","Conc":"250 mg","form":"Tab","Authority":"Sp","class":"Antibiotic"},{"Name":"Erythromycin 500","Conc":"500 mg","form":"Tab","Authority":"Sp","class":"Antibiotic"},{"Name":"Erythromycin Susp","Conc":"200 mg / 5ml","form":"Susp","Authority":"Sp","class":"Antibiotic"},{"Name":"Erythropoietin 2000 I.U","Conc":"2000 I.U","form":"vial","Authority":"Con","class":"Miscellaneous"},{"Name":"Erythropoietin 4000 I.U","Conc":"4000 I.U","form":"vial","Authority":"Con","class":"Miscellaneous"},{"Name":"Escitalopram 10","Conc":"10 mg","form":"Tab","Authority":"Sp","class":"Anti-Depressant"},{"Name":"Esomeprazole 20","Conc":"20 mg","form":"Tab","Authority":"Con","class":"Gastro-Intestinal Drugs"},{"Name":"Esomeprazole 40","Conc":"40 mg","form":"Tab","Authority":"Con","class":"Gastro-Intestinal Drugs"},{"Name":"Etanercept 25 mg Enbrel","Conc":"25 mg","form":"Syringe","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Etanercept 50 mg Enbrel","Conc":"50 mg","form":"Syringe","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Ethambutol 500","Conc":"500 mg","form":"Tab","Authority":"Sp","class":"Antibiotic"},{"Name":"Ethamsylate","Conc":"250 mg","form":"Tab","Authority":"Sp","class":"Haemostatic"},{"Name":"Ethamsylate Amp","Conc":"250 mg/2 ml","form":"Amp","Authority":"Sp","class":"Haemostatic"},{"Name":"Etoposide","Conc":"50 mg","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Etoposide Amp","Conc":"100 mg","form":"Amp","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Etoricoxib 120","Conc":"120 mg","form":"Tab","Authority":"Con","class":"Analgesic , Antirheumatic"},{"Name":"Etoricoxib 60","Conc":"60 mg","form":"Tab","Authority":"Con","class":"Analgesic , Antirheumatic"},{"Name":"Etoricoxib 90","Conc":"90 mg","form":"Tab","Authority":"Con","class":"Analgesic , Antirheumatic"},{"Name":"Everolimus 0.25 mg Certican","Conc":"0.25 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Everolimus 0.75 mg Certican","Conc":"0.75 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Everolimus 10 mg Afinitor","Conc":"10 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Everolimus 5 mg Afinitor","Conc":"5 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Exemestane Aromasin","Conc":"25 mg","form":"Tab","Authority":"Con لجنة فرعية","class":"Cytotoxic,Immunosuppressant"},{"Name":"Expectorant Guaiphenesin+Bronchodialator Syrup","Conc":"---","form":"Syrup","Authority":"Gp","class":"Respiratory Agents"},{"Name":"Ezetimibe + Atrovastatin 10/10","Conc":"10mg+10mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Ezetimibe + Atrovastatin 10/20","Conc":"10mg+20mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Ezetimibe + Atrovastatin 10/40","Conc":"10mg+40mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Ezetimibe + Rosuvastatin 10/10","Conc":"10 + 10 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Ezetimibe + Rosuvastatin 10/20","Conc":"20 + 10 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Ezetimibe + Rosuvastatin 10/5","Conc":"5 + 10 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Famotidine 20","Conc":"20 mg","form":"Tab","Authority":"Con","class":"Gastro-Intestinal Drugs"},{"Name":"Famotidine 40","Conc":"40 mg","form":"Tab","Authority":"Con","class":"Gastro-Intestinal Drugs"},{"Name":"Febuxostate 40","Conc":"40 mg","form":"Tab","Authority":"Sp","class":"Analgesic , Antirheumatic"},{"Name":"Febuxostate 80","Conc":"80 mg","form":"Tab","Authority":"Sp","class":"Analgesic , Antirheumatic"},{"Name":"Fenofibrate 200","Conc":"200 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Fenofibrate 300","Conc":"300 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Ferrous Iron Salts","Conc":"---","form":"Tab","Authority":"Gp","class":"Vitamins"},{"Name":"Ferrous Salts + Folic Acid","Conc":"---","form":"Tab","Authority":"Con","class":"Vitamins"},{"Name":"Ferrous Syrup","Conc":"---","form":"Syrup","Authority":"Gp","class":"Vitamins"},{"Name":"Fexofenadine 120","Conc":"120 mg","form":"Tab","Authority":"Sp","class":"Anti - Allergic"},{"Name":"Fexofenadine 180","Conc":"180 mg","form":"Tab","Authority":"Sp","class":"Anti - Allergic"},{"Name":"Finasteride","Conc":"5 mg","form":"Tab","Authority":"Sp","class":"Urinary Track Disorders"},{"Name":"Finglimod 0.5 mg Gilenya","Conc":"0.5 mg","form":"Tab","Authority":"لجنة MS","class":"Miscellaneous"},{"Name":"Fish Oil+Omega3 + Vit E","Conc":"1200 mg + 600mg","form":"Tab","Authority":"Con","class":"Vitamins"},{"Name":"Fladrabine 50","Conc":"50 mg","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Flavoxate","Conc":"200 mg","form":"Tab","Authority":"Con","class":"Urinary Track Disorders"},{"Name":"Flu Combination Syrup","Conc":"---","form":"Syrup","Authority":"Gp","class":"Analgesic , Antirheumatic"},{"Name":"Flu Combination Tab","Conc":"---","form":"Tab","Authority":"Gp","class":"Analgesic , Antirheumatic"},{"Name":"Flubendazole","Conc":"100 mg","form":"Tab","Authority":"Gp","class":"Anthelmintic"},{"Name":"Flubendazole Susp","Conc":"20 mg / ml","form":"Susp","Authority":"Gp","class":"Anthelmintic"},{"Name":"Fluconazole 150","Conc":"150 mg","form":"Tab","Authority":"Sp","class":"Antifungal"},{"Name":"Fludarabine 25","Conc":"25 mg","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Fluorouracil","Conc":"250 mg","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Fluoxetine 10","Conc":"10 mg","form":"Tab","Authority":"Con","class":"Anti-Depressant"},{"Name":"Fluoxetine 20","Conc":"20 mg","form":"Tab","Authority":"Con","class":"Anti-Depressant"},{"Name":"Fluphenazine Vial","Conc":"25 mg / ml","form":"Vial","Authority":"Sp","class":"Psycotropic"},{"Name":"Fluspirilen Amp","Conc":"2 mg / ml","form":"Amp","Authority":"Sp","class":"Psycotropic"},{"Name":"Flutamide","Conc":"250 mg","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Folic Acid","Conc":"5 mg","form":"Tab","Authority":"Gp","class":"Vitamins"},{"Name":"Folic Acid + Iron + Calcium","Conc":"---","form":"Tab","Authority":"Con","class":"Vitamins"},{"Name":"Formoterol 12 mcg","Conc":"12 mcg","form":"Inh","Authority":"Con","class":"Respiratory Agents"},{"Name":"Fucidic Acid","Conc":"0.02","form":"Tube","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Fucidic Acid+Corticosteroid","Conc":"---","form":"Tube","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Fulvestrant Faslodex","Conc":"250 mg","form":"Syringe","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Furosemide + Spironolactone 20/50","Conc":"20 mg+50 mg","form":"Tab","Authority":"Con","class":"Diuretics"},{"Name":"Furosemide 40","Conc":"40 mg","form":"Tab","Authority":"Gp","class":"Diuretics"},{"Name":"Gabapentin 100","Conc":"100 mg","form":"Tab","Authority":"Con","class":"Anti-Epileptic"},{"Name":"Gabapentin 400","Conc":"400 mg","form":"Tab","Authority":"Con","class":"Anti-Epileptic"},{"Name":"Gammabenzen Hexachloride","Conc":"0.003","form":"Tube","Authority":"Gp","class":"Dermatological Agents"},{"Name":"Gatifloxacin E.D","Conc":"---","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Gefitinib Iressa","Conc":"250 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Gemcitabine 1000","Conc":"1 gm","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Gemcitabine 200","Conc":"200 mg","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Gentamicin","Conc":"80 mg","form":"Amp","Authority":"Con","class":"Antibiotic"},{"Name":"Gentamicin E.D","Conc":"5 ml","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Gentamicin E.O","Conc":"0.003","form":"E.O","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Gentamycin cream","Conc":"0.001","form":"Tube","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Gentamycin oint","Conc":"0.001","form":"Oint","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Ginkgo Blloba Leaves 40mg","Conc":"40 mg","form":"Tab","Authority":"Con","class":"Miscellaneous"},{"Name":"Ginkobiloba 60","Conc":"60 mg","form":"Tab","Authority":"Con","class":"Miscellaneous"},{"Name":"Glibenclamide","Conc":"5 mg","form":"Tab","Authority":"Sp","class":"Anti-Diabetics"},{"Name":"Glibenclamide + Metformin 5 / 500","Conc":"5 mg+500 mg","form":"Tab","Authority":"Sp","class":"Anti-Diabetics"},{"Name":"Glibenclamide + Metformin 5/1000","Conc":"5mg+1000mg","form":"Tab","Authority":"Sp","class":"Anti-Diabetics"},{"Name":"Gliclazide 30 MR","Conc":"30 mg","form":"Tab","Authority":"Sp","class":"Anti-Diabetics"},{"Name":"Gliclazide 60 MR","Conc":"60 mg","form":"Tab","Authority":"Sp","class":"Anti-Diabetics"},{"Name":"Gliclazide 80","Conc":"80 mg","form":"Tab","Authority":"Sp","class":"Anti-Diabetics"},{"Name":"Glimepiride + Metformin","Conc":"2 mg + 500 mg","form":"Tab","Authority":"Sp","class":"Anti-Diabetics"},{"Name":"Glimepiride 1","Conc":"1 mg","form":"Tab","Authority":"Sp","class":"Anti-Diabetics"},{"Name":"Glimepiride 2","Conc":"2 mg","form":"Tab","Authority":"Sp","class":"Anti-Diabetics"},{"Name":"Glimepiride 3","Conc":"3 mg","form":"Tab","Authority":"Sp","class":"Anti-Diabetics"},{"Name":"Glimepiride 4","Conc":"4 mg","form":"Tab","Authority":"Sp","class":"Anti-Diabetics"},{"Name":"Glipizide 5","Conc":"5 mg","form":"Tab","Authority":"Sp","class":"Anti-Diabetics"},{"Name":"Gliptins","Conc":"---","form":"Tab","Authority":"Con","class":"Anti-Diabetics"},{"Name":"Gliptins + metformin 50/1000","Conc":"50 / 1000 mg","form":"Tab","Authority":"Con","class":"Anti-Diabetics"},{"Name":"Gliptins + metformin 50/850","Conc":"50 / 850 mg","form":"Tab","Authority":"Con","class":"Anti-Diabetics"},{"Name":"Glucosamine & Chondroitin","Conc":"500mg + 400 mg","form":"Tab","Authority":"Sp","class":"Analgesic , Antirheumatic"},{"Name":"Glucosamine + Ascorbic Acid","Conc":"---","form":"Tab","Authority":"Con","class":"Analgesic , Antirheumatic"},{"Name":"Glucosamlne Sulphate 500 mg","Conc":"500 mg","form":"Tab","Authority":"Con","class":"Analgesic , Antirheumatic"},{"Name":"Glycerin + Gelatin","Conc":"---","form":"Supp","Authority":"Gp","class":"Laxative"},{"Name":"Glyceryl Trinitrate","Conc":"2.5 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Glyceryl Trinitrate Patch","Conc":"5 mg","form":"Patch","Authority":"Sp","class":"Cardiovascular"},{"Name":"Glycopyrronium Bromide","Conc":"50 mcg","form":"Inh","Authority":"Con","class":"Respiratory Agents"},{"Name":"Golimumab Simponi","Conc":"50 mg","form":"penfill","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Gramicidin+Neomycin+Nystatin+Triamcinolone","Conc":"---","form":"Tube","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Griseofulvine 125","Conc":"125 mg","form":"Tab","Authority":"Gp","class":"Antifungal"},{"Name":"Growth Factor Granocyte","Conc":"---","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Growth Hormone +Solvent For Single Use","Conc":"4 I.U","form":"Syringe","Authority":"Con","class":"Miscellaneous"},{"Name":"Guselkumab 100 mg Tremfya","Conc":"100 mg","form":"Syringe","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Haloperidol 1.5","Conc":"1.5 mg","form":"Tab","Authority":"Sp","class":"Psycotropic"},{"Name":"Haloperidol 5","Conc":"5 mg","form":"Tab","Authority":"Sp","class":"Psycotropic"},{"Name":"Haloperidol Amp 50 mg / ml","Conc":"50 mg / ml","form":"Amp","Authority":"Con","class":"Psycotropic"},{"Name":"Haloperidol Amp 5 mg / ml","Conc":"5 mg /ml","form":"Amp","Authority":"Sp","class":"Psycotropic"},{"Name":"Halopridol 50 mg / Ml Amp","Conc":"50 mg / ml","form":"Amp","Authority":"Con","class":"Psycotropic"},{"Name":"Halphabarol","Conc":"0.4 mg","form":"Tab","Authority":"Sp","class":"Effervescent & Antispasmodic"},{"Name":"Halphabarol+Piprazine Eff.G","Conc":"---","form":"Eff. G","Authority":"Sp","class":"Effervescent & Antispasmodic"},{"Name":"Hepato Protective","Conc":"---","form":"Tab","Authority":"Sp","class":"Hepatic Diseases Agents"},{"Name":"Humulin 70/30","Conc":"100 I.U","form":"penfill","Authority":"Sp","class":"Anti-Diabetics"},{"Name":"Humulin N","Conc":"100 I.U","form":"penfill","Authority":"Sp","class":"Anti-Diabetics"},{"Name":"Humulin R","Conc":"100 I.U","form":"penfill","Authority":"Sp","class":"Anti-Diabetics"},{"Name":"Hydrochlorothiazide 25","Conc":"25 mg","form":"Tab","Authority":"Gp","class":"Diuretics"},{"Name":"Hydrocortisone","Conc":"10 mg","form":"Tab","Authority":"Con","class":"Hormones Disorders"},{"Name":"Hydrocortisone + Tetracycline","Conc":"1%+3%","form":"Oint","Authority":"Gp","class":"Dermatological Agents"},{"Name":"Hydrocortisone +Antifungal","Conc":"1%+1%","form":"Tube","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Hydrocortisone cream","Conc":"0.01","form":"Tube","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Hydrocortisone oint","Conc":"0.01","form":"Oint","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Hydrocortisone Sodium Succinate","Conc":"100 mg","form":"Vial","Authority":"Sp","class":"Anti - Allergic"},{"Name":"Hydroxy Propyl Methyl Cellulose","Conc":"0.003","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Hydroxychloroquine Sulphate","Conc":"200 mg","form":"Tab","Authority":"Con","class":"Analgesic , Antirheumatic"},{"Name":"Hydroxyprogesterone + Estradiol","Conc":"---","form":"Amp","Authority":"Sp","class":"Hormones Disorders"},{"Name":"Hydroxyurea","Conc":"500 mg","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Hyoscine Butyl Bromide","Conc":"10 mg","form":"Tab","Authority":"Gp","class":"Gastro-Intestinal Drugs"},{"Name":"Hyoscine Butylbromid","Conc":"20 mg","form":"Amp","Authority":"Gp","class":"Effervescent & Antispasmodic"},{"Name":"Ibandronic Acid 150","Conc":"150 mg","form":"Tab","Authority":"Con","class":"Miscellaneous"},{"Name":"Ibrutinib Imbruvica","Conc":"140 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Ibuprofen Syrup","Conc":"100 mg / 5ml","form":"Syrup","Authority":"Gp","class":"Analgesic , Antirheumatic"},{"Name":"Ibuprofen Tab","Conc":"200 mg","form":"Tab","Authority":"Gp","class":"Analgesic , Antirheumatic"},{"Name":"Ichthyol+Potassium Iodide","Conc":"---","form":"Supp","Authority":"Gp","class":"Urinary Track Disorders"},{"Name":"Ifosfamide 1","Conc":"1 mg","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Ifosfamide 2","Conc":"2 mg","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Imatinib 100","Conc":"100 mg","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Imatinib 400","Conc":"400 mg","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Imipramine 25","Conc":"25 mg","form":"Tab","Authority":"Sp","class":"Psycotropic"},{"Name":"Indacaterol + Glycopyrronium","Conc":"110 mcg + 50 mcg","form":"Inh","Authority":"Con","class":"Respiratory Agents"},{"Name":"Indapamide 2.5","Conc":"2.5 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Indomethacin","Conc":"50 mg","form":"Tab","Authority":"Sp","class":"Analgesic , Antirheumatic"},{"Name":"Indomethacin Amp","Conc":"50 mg","form":"Amp","Authority":"Sp","class":"Analgesic , Antirheumatic"},{"Name":"Indomethacin Supp","Conc":"100 mg","form":"Supp","Authority":"Gp","class":"Analgesic , Antirheumatic"},{"Name":"Infliximab Remicad","Conc":"100 mg","form":"Vial","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Insulin Human Mixtard Penfill","Conc":"100 I.U / ml","form":"penfill","Authority":"Sp","class":"Anti-Diabetics"},{"Name":"Insulin Human Mixtard Vial","Conc":"1000 I.U.","form":"Vial","Authority":"Sp","class":"Anti-Diabetics"},{"Name":"Insulin Human Neutral Penfill","Conc":"100 I.U / ml","form":"penfill","Authority":"Sp","class":"Anti-Diabetics"},{"Name":"Insulin Human Neutral Vial","Conc":"1000 I.U.","form":"Vial","Authority":"Sp","class":"Anti-Diabetics"},{"Name":"Insulin Human Retard Penfill","Conc":"100 I.U / ml","form":"penfill","Authority":"Sp","class":"Anti-Diabetics"},{"Name":"Insulin Human Retard Vial","Conc":"1000 I.U.","form":"Vial","Authority":"Sp","class":"Anti-Diabetics"},{"Name":"Insulin Lispro Humalog","Conc":"100 I.U / ml","form":"penfill","Authority":"Sp","class":"Anti-Diabetics"},{"Name":"Interferon 3000.000 I.U","Conc":"3000.000 I.U","form":"Vial","Authority":"Con","class":"Hepatic Diseases Agents"},{"Name":"Interferon beta 1A Avonex","Conc":"30 mcg","form":"Syringe","Authority":"لجنة MS","class":"Miscellaneous"},{"Name":"Interferon beta 1A Rebif","Conc":"44mcg/0.5ml","form":"Syringe","Authority":"لجنة MS","class":"Miscellaneous"},{"Name":"Interferon beta 1B Betaferon","Conc":"250 mcg / ml","form":"Vial","Authority":"لجنة MS","class":"Miscellaneous"},{"Name":"Interferon Pegylated","Conc":"---","form":"Vial","Authority":"Con","class":"Hepatic Diseases Agents"},{"Name":"Iodochlor Hydroxyquin + Hydrocortisone","Conc":"---","form":"Tube","Authority":"Gp","class":"Dermatological Agents"},{"Name":"Ipratropium 0.02 mg + Salbatamol 25 Mcg","Conc":"0.02 + 25 mcg","form":"Inh","Authority":"Sp","class":"Respiratory Agents"},{"Name":"Ipratrpium + Salbutamol","Conc":"0.2 mg + 0.12 mg","form":"Tab","Authority":"Sp","class":"Respiratory Agents"},{"Name":"Irbesartan 150","Conc":"150 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Irbesartan 300","Conc":"300 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Irbesartan + Hydrochlorothiazide 150/12.5","Conc":"150 mg + 12.5 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Irbesartan + Hydrochlorothiazide 300/12.5","Conc":"300 mg + 12.5 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Iron 27 mg + Folic Acid 600 mcg + B12 2.6 mcg","Conc":"---","form":"Tab","Authority":"Con","class":"Vitamins"},{"Name":"Iron Oral Drip","Conc":"---","form":"oral dp","Authority":"Gp","class":"Vitamins"},{"Name":"Iron Syrup","Conc":"---","form":"Syrup","Authority":"Gp","class":"Vitamins"},{"Name":"Isoconazol 600 mg Vaginal Tab","Conc":"600 mg","form":"Vag Tab","Authority":"Con","class":"Antifungal"},{"Name":"Isoconazol Nitrate","Conc":"0.01","form":"Tube","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Isoconazole Vag ovules","Conc":"600mg","form":"vag.ovules","Authority":"Con","class":"Dermatological Agents"},{"Name":"Isoniazid + Rifampicin","Conc":"150 mg+300 mg","form":"Tab","Authority":"Sp","class":"Antibiotic"},{"Name":"Isoniazid 100","Conc":"100 mg","form":"Tab","Authority":"Sp","class":"Antibiotic"},{"Name":"Isoniazid+Rifampicin+Ethambutol+ Pyrazinamide","Conc":"---","form":"Tab","Authority":"Sp","class":"Antibiotic"},{"Name":"Isosorbid Dinitrates 10","Conc":"10 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Isosorbid Dinitrates 20","Conc":"20 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Isosorbid Dinitrates 5","Conc":"5 mg subling","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Isosorbid Mononitrate 100","Conc":"100 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Isosorbid Mononitrate 20","Conc":"20 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Isosorbid Mononitrate 25","Conc":"25 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Isosorbid Mononitrate 40","Conc":"40 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Isosorbid Mononitrate 50","Conc":"50 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Itraconazole 100","Conc":"100 mg","form":"Tab","Authority":"Con","class":"Antifungal"},{"Name":"Ivabradine 5","Conc":"5 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Ivabradine 7.5","Conc":"7.5 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Ivermectin","Conc":"6 mg","form":"Tab","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Kaolin+Pectin","Conc":"1gm+20 mg / 5ml","form":"Susp","Authority":"Gp","class":"Antidiarrheal Drugs"},{"Name":"Ketoprofen 25","Conc":"25 mg","form":"Tab","Authority":"Gp","class":"Analgesic , Antirheumatic"},{"Name":"Ketoprofen 50","Conc":"50 mg","form":"Tab","Authority":"Gp","class":"Analgesic , Antirheumatic"},{"Name":"Ketoprofen Amp","Conc":"100 mg","form":"Amp","Authority":"Sp","class":"Analgesic , Antirheumatic"},{"Name":"Ketoprofen Supp","Conc":"100 mg","form":"Supp","Authority":"Sp","class":"Analgesic , Antirheumatic"},{"Name":"Ketosteril","Conc":"---","form":"Tab","Authority":"Con لجنة عليا","class":"Miscellaneous"},{"Name":"Ketotifen","Conc":"1 mg","form":"Tab","Authority":"Sp","class":"Anti - Allergic"},{"Name":"Ketotifen Syrup","Conc":"5 mg / 5 ml","form":"Syrup","Authority":"Sp","class":"Anti - Allergic"},{"Name":"Khellin+Atropine+Phenobarbital","Conc":"---","form":"Amp","Authority":"Gp","class":"Effervescent & Antispasmodic"},{"Name":"Labetalol 100 mg","Conc":"100 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Labetalol 200 mg","Conc":"200 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Lacosamide 100","Conc":"100 mg","form":"Tab","Authority":"Con","class":"Anti-Epileptic"},{"Name":"Lacosamide 50","Conc":"50 mg","form":"Tab","Authority":"Con","class":"Anti-Epileptic"},{"Name":"Lacosamide Syrup","Conc":"10 mg / ml","form":"Syrup","Authority":"Con","class":"Anti-Epileptic"},{"Name":"Lactobacillus","Conc":"---","form":"Tab","Authority":"Sp","class":"Antidiarrheal Drugs"},{"Name":"Lactobacillus Cap","Conc":"---","form":"Tab","Authority":"Sp","class":"Antidiarrheal Drugs"},{"Name":"Lactulose","Conc":"---","form":"Syrup","Authority":"Sp","class":"Laxative"},{"Name":"Lamivudine 150","Conc":"150 mg","form":"Tab","Authority":"Con","class":"Antiviral"},{"Name":"Lamotrigine 100","Conc":"100 mg","form":"Tab","Authority":"Con","class":"Anti-Epileptic"},{"Name":"Lamotrigine 25","Conc":"25 mg","form":"Tab","Authority":"Con","class":"Anti-Epileptic"},{"Name":"Lamotrigine 50","Conc":"50 mg","form":"Tab","Authority":"Con","class":"Anti-Epileptic"},{"Name":"Lapatinib Tykerb","Conc":"250 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"L-Asparaginase","Conc":"10,000 I.U","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Laxative From Plant Origin","Conc":"---","form":"Tab","Authority":"Gp","class":"Laxative"},{"Name":"L-Carnitine","Conc":"350mg","form":"Tab","Authority":"Con","class":"Miscellaneous"},{"Name":"L-Carnitine Amp","Conc":"1gm / 5ml","form":"Amp","Authority":"Con","class":"Miscellaneous"},{"Name":"L-Carnitine Syrup","Conc":"300mg/ml","form":"Syrup","Authority":"Con","class":"Miscellaneous"},{"Name":"Leflunamide","Conc":"---","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Lenalidomide 25 Immunomide","Conc":"25 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Lenalidomide 5 Immunomide","Conc":"5 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Lercaindipine 10","Conc":"10 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Levamisole Hcl","Conc":"40 mg","form":"Tab","Authority":"Gp","class":"Anthelmintic"},{"Name":"Levetiracetam 1000","Conc":"1000mg","form":"Tab","Authority":"Con","class":"Anti-Epileptic"},{"Name":"Levetiracetam 500","Conc":"500 mg","form":"Tab","Authority":"Con","class":"Anti-Epileptic"},{"Name":"Levetiracetam Syrup","Conc":"100mg","form":"Syrup","Authority":"Con","class":"Anti-Epileptic"},{"Name":"Levo -Thyroxin 25","Conc":"25 mcg","form":"Tab","Authority":"Sp","class":"Hormones Disorders"},{"Name":"Levo -Thyroxin 50","Conc":"50 mcg","form":"Tab","Authority":"Sp","class":"Hormones Disorders"},{"Name":"Levodopa + Carbidopa","Conc":"250 mg+25 mg","form":"Tab","Authority":"Sp","class":"Anti - Parkinsonial"},{"Name":"Levofloxacin 500","Conc":"500mg","form":"Tab","Authority":"Sp","class":"Antibiotic"},{"Name":"Levofloxacln 750","Conc":"750 mg","form":"Tab","Authority":"Con","class":"Antibiotic"},{"Name":"Levo-Thyroxin 100","Conc":"100 mcg","form":"Tab","Authority":"Sp","class":"Hormones Disorders"},{"Name":"Lidocaine","Conc":"0.02","form":"Tube","Authority":"Con","class":"Anti Haemorrhoidal"},{"Name":"Lidocaine cream","Conc":"0.05","form":"Tube","Authority":"Con","class":"Anti Haemorrhoidal"},{"Name":"Lidocaine+Aminacrine","Conc":"---","form":"Tube","Authority":"Sp","class":"Dental &Buccal Agents"},{"Name":"Linezolid 600 mg","Conc":"600 mg","form":"Tab","Authority":"Con","class":"Antibiotic"},{"Name":"Liposomal Doxorubicin Caelyx","Conc":"20 mg","form":"Vial","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Lisinopril 10","Conc":"10 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Lisinopril 20 mg + Hydrochlorthiazide 12.5 mg","Conc":"20 + 12.5 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Lisinopril 5","Conc":"5 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Lithium Carbonate 400 CR","Conc":"400 mg","form":"Tab","Authority":"Sp","class":"Psycotropic"},{"Name":"Lomustine 10","Conc":"10 mg","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Lomustine 100","Conc":"100 mg","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Lomustine 40","Conc":"40 mg","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Loperamide Hcl","Conc":"2mg","form":"Tab","Authority":"Gp","class":"Antidiarrheal Drugs"},{"Name":"Losartan + Hydrochlorothiazide 100/12.5","Conc":"100mg+12.5mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Losartan + Hydrochlorothiazide 50/12.5","Conc":"50mg+12.5mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Losartan + Hydrochlorothiazlde 100/25","Conc":"100 + 25 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Losartan 100","Conc":"100mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Losartan 50 mg","Conc":"50 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Low Molecular Weight Heparin Enoxparin 20","Conc":"20 mg","form":"Amp","Authority":"Con لجنة عليا","class":"Anti-Coagulant"},{"Name":"Low Molecular Weight Heparin Enoxparin 40","Conc":"40 mg","form":"Amp","Authority":"Con لجنة عليا","class":"Anti-Coagulant"},{"Name":"Low Molecular Weight Heparin Enoxparin 60","Conc":"60 mg","form":"Amp","Authority":"Con لجنة عليا","class":"Anti-Coagulant"},{"Name":"Low Molecular Weight Heparin Enoxparin 80","Conc":"80 mg","form":"Amp","Authority":"Con لجنة عليا","class":"Anti-Coagulant"},{"Name":"Luteinising Hormone Releasing Analogue Lhrh","Conc":"---","form":"Syringe","Authority":"Con","class":"Hormones Disorders"},{"Name":"Magnesium Citrate","Conc":"---","form":"Sachet Eff","Authority":"Sp","class":"Effervescent & Antispasmodic"},{"Name":"Mebendazole","Conc":"100 mg","form":"Tab","Authority":"Gp","class":"Anthelmintic"},{"Name":"Mebendazole Susp","Conc":"100 mg /5ml","form":"Susp","Authority":"Gp","class":"Anthelmintic"},{"Name":"Mebeverine 100","Conc":"100 mg","form":"Tab","Authority":"Sp","class":"Gastro-Intestinal Drugs"},{"Name":"Meclofenoxate Hydrochloride 500","Conc":"500 mg","form":"Tab","Authority":"Sp","class":"Miscellaneous"},{"Name":"Medicate Tulle With Antibiotics","Conc":"---","form":"Tulle","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Megesterol Acetate","Conc":"160 mg","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Megestrol Acetate","Conc":"40 mg","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Meloxicam 15","Conc":"15 mg","form":"Tab","Authority":"Sp","class":"Analgesic , Antirheumatic"},{"Name":"Meloxicam 7.5","Conc":"7.5 mg","form":"Tab","Authority":"Sp","class":"Analgesic , Antirheumatic"},{"Name":"Meloxicam Amp","Conc":"15 mg","form":"Amp","Authority":"Sp","class":"Analgesic , Antirheumatic"},{"Name":"Melphalan","Conc":"2 mg","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Memantine","Conc":"10 mg","form":"Tab","Authority":"Con","class":"Miscellaneous"},{"Name":"Memantine Oral Drop","Conc":"10mg/ml","form":"oral dp","Authority":"Con","class":"Miscellaneous"},{"Name":"Menthol+Menthone+Borneol","Conc":"---","form":"Tab","Authority":"Sp","class":"Gastro-Intestinal Drugs"},{"Name":"Mesalazine 500","Conc":"500 mg","form":"Tab","Authority":"Con","class":"Gastro-Intestinal Drugs"},{"Name":"Mesna","Conc":"400 mg","form":"Amp","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Metformin 1000","Conc":"1000mg","form":"Tab","Authority":"Sp","class":"Anti-Diabetics"},{"Name":"Metformin 500","Conc":"500 mg","form":"Tab","Authority":"Sp","class":"Anti-Diabetics"},{"Name":"Metformin 850","Conc":"850 mg","form":"Tab","Authority":"Sp","class":"Anti-Diabetics"},{"Name":"Metformin XR 1000","Conc":"1000 mg","form":"Tab","Authority":"Sp","class":"Anti-Diabetics"},{"Name":"Metformin XR 500","Conc":"500 mg","form":"Tab","Authority":"Sp","class":"Anti-Diabetics"},{"Name":"Metformine 1000 mg+ Glibenclamide 5 mg","Conc":"1000 + 5 mg","form":"Tab","Authority":"Sp","class":"Anti-Diabetics"},{"Name":"Methotrexate vial 500mg / 20ml","Conc":"500 mg/20 ml","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Methotrexate Tab","Conc":"2.5 mg","form":"Tab","Authority":"Sp","class":"Cytotoxic,Immunosuppressant"},{"Name":"Methotrexate vial 50mg / ml","Conc":"50 mg /ml","form":"Vial","Authority":"Sp","class":"Cytotoxic,Immunosuppressant"},{"Name":"Methoxsalen","Conc":"10 mg","form":"Tab","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Methoxsalen paint","Conc":"---","form":"Paint","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Methyl-Ergometrine Maleate Amp","Conc":"0. 5 mg","form":"Amp","Authority":"Sp","class":"Haemostatic"},{"Name":"Methyl-Ergometrine Maleate Tab","Conc":"0.125 mg","form":"Tab","Authority":"Gp","class":"Haemostatic"},{"Name":"Metoclopramide 20 Supp","Conc":"20 mg","form":"Supp","Authority":"Sp","class":"Gastro-Intestinal Drugs"},{"Name":"Metoclopramide Tab","Conc":"10 mg","form":"Tab","Authority":"Gp","class":"Gastro-Intestinal Drugs"},{"Name":"Metoclopramide Hcl +Vit.B6","Conc":"---","form":"Amp","Authority":"Sp","class":"Gastro-Intestinal Drugs"},{"Name":"Metoclopramide 10 Supp","Conc":"10 mg","form":"Supp","Authority":"Gp","class":"Gastro-Intestinal Drugs"},{"Name":"Metoclopramide Syrup","Conc":"---","form":"Syrup","Authority":"Gp","class":"Gastro-Intestinal Drugs"},{"Name":"Metoprolol 100","Conc":"100mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Metoprolol 25","Conc":"25ng","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Metoprolol 50","Conc":"50mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Metronidazole 250","Conc":"250 mg","form":"Tab","Authority":"Gp","class":"Anti-Amoebic"},{"Name":"Metronidazole 500","Conc":"500 mg","form":"Supp","Authority":"Gp","class":"Anti-Amoebic"},{"Name":"Metronidazole Susp","Conc":"125 mg /5ml","form":"Susp","Authority":"Gp","class":"Anti-Amoebic"},{"Name":"Metronidazole Vag Supp","Conc":"500 mg","form":"Vag.supp","Authority":"Sp","class":"Anti-Amoebic"},{"Name":"Metronidazole+Diloxanide Furoate","Conc":"---","form":"Tab","Authority":"Gp","class":"Anti-Amoebic"},{"Name":"Miconazole Vag","Conc":"0.02","form":"Tube","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Miopan","Conc":"100ml","form":"Syrup","Authority":"Sp","class":"Gastro-Intestinal Drugs"},{"Name":"Mirabegron 25","Conc":"25 mg","form":"Tab","Authority":"Con","class":"Urinary Track Disorders"},{"Name":"Mirabegron 50","Conc":"50 mg","form":"Tab","Authority":"Con","class":"Urinary Track Disorders"},{"Name":"Mistletoe Extract","Conc":"---","form":"Amp","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Mitomycin","Conc":"5 mg","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Mitoxantrone","Conc":"2mg / ml","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Mometasone","Conc":"---","form":"nasal spray","Authority":"Sp","class":"Otorhinolaryngology Agents"},{"Name":"Mometasone cream","Conc":"100 mg","form":"Tube","Authority":"Con","class":"Dermatological Agents"},{"Name":"Mometasone oint","Conc":"100 mg","form":"Oint","Authority":"Con","class":"Dermatological Agents"},{"Name":"Montelukast 10","Conc":"10 mg","form":"Tab","Authority":"Sp","class":"Anti - Allergic"},{"Name":"Montelukast 4","Conc":"4 mg","form":"Sachet","Authority":"Sp","class":"Respiratory Agents"},{"Name":"Montelukast 4 mg Sach","Conc":"4 mg","form":"Sachet","Authority":"Sp","class":"Anti - Allergic"},{"Name":"Montelukast 5","Conc":"5 mg","form":"Tab","Authority":"Sp","class":"Anti - Allergic"},{"Name":"Moxifloxacin + Dexamethasone","Conc":"---","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Moxifloxacin E.D","Conc":"---","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Mycophenolat mofetil 180","Conc":"180 mg","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Mycophenolat mofetil 250","Conc":"250 mg","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Mycophenolat mofetil 360","Conc":"360 mg","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Mycophenolat mofetil 500","Conc":"500 mg","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Naftidrofuryl Acid Oxalate 200 mg","Conc":"200 mg","form":"Tab","Authority":"Con","class":"Anti-Coagulant"},{"Name":"Naphazolin Hcl +Chlorpheniramin Maleate","Conc":"0.5 mg","form":"E.D","Authority":"Gp","class":"Ophthalmic Agents"},{"Name":"Naphazolin Hcl+Zinc Sulphate +Methylene Blue","Conc":"---","form":"E.D","Authority":"Gp","class":"Ophthalmic Agents"},{"Name":"Nasal Decongestant","Conc":"---","form":"N.D","Authority":"Gp","class":"Otorhinolaryngology Agents"},{"Name":"Natalizumab Tysabri","Conc":"20 mg / ml","form":"Vial","Authority":"لجنة MS","class":"Miscellaneous"},{"Name":"Nebivolol + Hct 5/12.5","Conc":"5 + 12.5 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Nebivolol + Hct 5/25","Conc":"5mg+25mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Nebivolol 2.5","Conc":"2.5mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Nebivolol 5","Conc":"5mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Nebivolol 5 mg + Amlodipine 5 mg","Conc":"5 mg + 5 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Neostigmine","Conc":"15 mg","form":"Tab","Authority":"Sp","class":"Muscle Relaxant"},{"Name":"Neostigmine Amp","Conc":"0.5 mg","form":"Amp","Authority":"Sp","class":"Muscle Relaxant"},{"Name":"Neurokinin 1 Receptor Antagonist","Conc":"---","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Niclosamide","Conc":"500 mg","form":"Tab","Authority":"Gp","class":"Anthelmintic"},{"Name":"Nicorandil 10","Conc":"10 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Nicorandil 20","Conc":"20 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Nifedipine Retard 20","Conc":"20 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Nifuroxazide","Conc":"200 mg","form":"Tab","Authority":"Sp","class":"Antidiarrheal Drugs"},{"Name":"Nifuroxazide Susp","Conc":"220 mg / 5 ml","form":"Susp","Authority":"Sp","class":"Antidiarrheal Drugs"},{"Name":"Nilotinib Tasigna","Conc":"200 mg","form":"Tab","Authority":"Con لجنة فرعية","class":"Cytotoxic,Immunosuppressant"},{"Name":"Nintedanib Ofev","Conc":"---","form":"Tab","Authority":"Con لجنة عليا","class":"Respiratory Agents"},{"Name":"Nitrofurantoin","Conc":"100 mg","form":"Tab","Authority":"Gp","class":"Antibiotic"},{"Name":"Non-Steroidal Anti-Inflammatory","Conc":"0.001","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Norethisterone Acetate","Conc":"5 mg /ml","form":"Tab","Authority":"Sp","class":"Hormones Disorders"},{"Name":"Norgestrel +Oestradiol","Conc":"---","form":"Tab","Authority":"Sp","class":"Hormones Disorders"},{"Name":"Nortripyline + Fluphenazine 10/0.5","Conc":"10 mg+0.5 mg","form":"Tab","Authority":"Sp","class":"Psycotropic"},{"Name":"Nystatin","Conc":"100.000 I.U/ml","form":"Susp","Authority":"Sp","class":"Antifungal"},{"Name":"Ocrelizumab Ocrevus","Conc":"30 mg / ml","form":"Vial","Authority":"لجنة MS","class":"Miscellaneous"},{"Name":"Oestriol","Conc":"---","form":"Tab","Authority":"Sp","class":"Hormones Disorders"},{"Name":"Olanzapine 10","Conc":"10 mg","form":"Tab","Authority":"Sp","class":"Psycotropic"},{"Name":"Olmesartan + Hct 20/12.5","Conc":"20+12.5 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Olmesartan +Amlodipine + Hct 20/5/12.5","Conc":"20mg+5mg+12.5mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Olmesartan +Amlodipine + Hct 40/10/25","Conc":"40mg+10mg+25mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Olmesartan +Amlodipine 20/5","Conc":"20mg+5mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Olmesartan 20","Conc":"20mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Olmesartan 40","Conc":"40mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Omalizumab 150 mg Xolair","Conc":"150 mg","form":"Syringe","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Oral Rehydration Salt Formulation","Conc":"---","form":"Sachet","Authority":"Gp","class":"Antidiarrheal Drugs"},{"Name":"Oral Rehydration Salt Formulation +Zinc","Conc":"---","form":"Sachet","Authority":"Gp","class":"Antidiarrheal Drugs"},{"Name":"Oxacarbazipine 300 mg","Conc":"300 mg","form":"Tab","Authority":"Con","class":"Anti-Epileptic"},{"Name":"Oxaliplatin","Conc":"50 mg","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Oxcarbazine Syrup","Conc":"60 mg","form":"Syrup","Authority":"Con","class":"Anti-Epileptic"},{"Name":"Oxybutynin 5","Conc":"5 mg","form":"Tab","Authority":"Sp","class":"Urinary Track Disorders"},{"Name":"Oxybutynin Syrup","Conc":"---","form":"Syrup","Authority":"Sp","class":"Urinary Track Disorders"},{"Name":"Oxymetazoline","Conc":"---","form":"N.D","Authority":"Con","class":"Anti - Allergic"},{"Name":"Oxymetazoline N.D","Conc":"---","form":"N.D","Authority":"Gp","class":"Otorhinolaryngology Agents"},{"Name":"Oxytetracycline +Hydrocortisone E.D","Conc":"---","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Oxytetracycline +Hydrocortisone E.O","Conc":"---","form":"E.O","Authority":"Gp","class":"Ophthalmic Agents"},{"Name":"Paclitaxel","Conc":"300 mg","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Paclitaxel 100","Conc":"100 mg","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Paclitaxel 30","Conc":"30 mg","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Palbociclib 100 Ibrance","Conc":"100 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Palbociclib 125 Ibrance","Conc":"125 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Paliperidone Palmitate 100 mg Invega","Conc":"100 mg","form":"Amp","Authority":"Con لجنة عليا","class":"Psycotropic"},{"Name":"Paliperidone Palmitate 150 mg Invega","Conc":"150 mg","form":"Amp","Authority":"Con لجنة عليا","class":"Psycotropic"},{"Name":"Panitumumab Vectibix","Conc":"---","form":"Vial","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Panthenol Emulgel","Conc":"0.05","form":"Tube","Authority":"Gp","class":"Dermatological Agents"},{"Name":"Pantoprazole 20","Conc":"20 mg","form":"Tab","Authority":"Con","class":"Gastro-Intestinal Drugs"},{"Name":"Paracetamol 1000","Conc":"1 gm","form":"Sachet","Authority":"Sp","class":"Analgesic , Antirheumatic"},{"Name":"Paracetamol 500","Conc":"500 mg","form":"Tab","Authority":"Gp","class":"Analgesic , Antirheumatic"},{"Name":"Paracetamol+ Methionine","Conc":"500 mg","form":"Tab","Authority":"Sp","class":"Analgesic , Antirheumatic"},{"Name":"Pazopanib Votrient","Conc":"200 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Pemetrexed","Conc":"500 mg","form":"Vial","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Penicillin Procaine","Conc":"300.000 I.U","form":"Vial","Authority":"Sp","class":"Antibiotic"},{"Name":"Penicillin Sodium","Conc":"1.000.000 I.U","form":"Vial","Authority":"Sp","class":"Antibiotic"},{"Name":"Pentoxifylline","Conc":"400 mg","form":"Tab","Authority":"Con","class":"Anti-Coagulant"},{"Name":"Perindopril 10 + Amilodipine 10","Conc":"10 + 10 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Perindopril 5 + Amilodipine 5","Conc":"5 + 5 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Pertuzumab Perjeta","Conc":"420 mg / 14 ml","form":"Vial","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Phenazone+Chlorobutanol","Conc":"5%+1%","form":"Ear.d","Authority":"Sp","class":"Otorhinolaryngology Agents"},{"Name":"Phenoxy – Methyl Penicillin Vial","Conc":"400 mg","form":"Vial","Authority":"Sp","class":"Antibiotic"},{"Name":"Phenoxy-Methyl Penicillin Potassium","Conc":"1200.000 I.U","form":"Tab","Authority":"Sp","class":"Antibiotic"},{"Name":"Phenoxy-Methyl Penicillin Sodium","Conc":"1000.000 I.U","form":"Tab","Authority":"Gp","class":"Antibiotic"},{"Name":"Phenylephrine Hcl","Conc":"0.025","form":"E.D","Authority":"Gp","class":"Ophthalmic Agents"},{"Name":"Phenytoin Na 100","Conc":"100 mg","form":"Tab","Authority":"Sp","class":"Anti-Epileptic"},{"Name":"Phenytoin Na 50","Conc":"50 mg","form":"Tab","Authority":"Sp","class":"Anti-Epileptic"},{"Name":"Phenytoin Na Syrup","Conc":"50 mg / 5 ml","form":"Syrup","Authority":"Sp","class":"Anti-Epileptic"},{"Name":"Phytomenadione","Conc":"---","form":"Tab","Authority":"Sp","class":"Haemostatic"},{"Name":"Phytomenadione Vit K 1 Amp","Conc":"2 mg","form":"Amp","Authority":"Sp","class":"Haemostatic"},{"Name":"Phytominadione Vit K 1","Conc":"10 mg","form":"Amp","Authority":"Sp","class":"Haemostatic"},{"Name":"Pilocarpine 1%","Conc":"0.01","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Pilocarpine 2%","Conc":"0.02","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Pilocarpine 3%","Conc":"0.03","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Pilocarpine 4%","Conc":"0.04","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Pimozide","Conc":"4 mg","form":"Tab","Authority":"Sp","class":"Psycotropic"},{"Name":"Piperazine Hydrate+Colchicine+Atropine","Conc":"---","form":"Sachet Eff","Authority":"Gp","class":"Effervescent & Antispasmodic"},{"Name":"Piperazine+Hexamine+Khellin","Conc":"---","form":"Eff. G","Authority":"Gp","class":"Effervescent & Antispasmodic"},{"Name":"Piracetam 400","Conc":"400 mg","form":"Tab","Authority":"Con","class":"Miscellaneous"},{"Name":"Piracetam 800","Conc":"800 mg","form":"Tab","Authority":"Con","class":"Miscellaneous"},{"Name":"Piracetam Syrup","Conc":"1000 mg / 5 ml","form":"Syrup","Authority":"Sp","class":"Miscellaneous"},{"Name":"Pirfenidone","Conc":"---","form":"Tab","Authority":"Con لجنة عليا","class":"Respiratory Agents"},{"Name":"Piroxicam 10","Conc":"10 mg","form":"Tab","Authority":"Sp","class":"Analgesic , Antirheumatic"},{"Name":"Piroxicam 20","Conc":"20 mg","form":"Tab","Authority":"Con","class":"Analgesic , Antirheumatic"},{"Name":"Polyvinylpyrrolidone","Conc":"0.02","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Ponesimod 20 mg Ponvory","Conc":"20 mg","form":"Tab","Authority":"لجنة MS","class":"Miscellaneous"},{"Name":"Ponesimod Initial dose Ponvory","Conc":"---","form":"Tab","Authority":"لجنة MS","class":"Miscellaneous"},{"Name":"Potassium citrate 1080","Conc":"1080 mg","form":"Tab","Authority":"Con","class":"Urinary Track Disorders"},{"Name":"Potassium citrate 1620","Conc":"1620 mg","form":"Tab","Authority":"Con","class":"Urinary Track Disorders"},{"Name":"Povidon Iodine Vag Douche","Conc":"0.1","form":"Vag. Douche","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Povidone Iodine","Conc":"---","form":"Shampoo","Authority":"Con","class":"Dermatological Agents"},{"Name":"Povidone Iodine Mouth wash","Conc":"---","form":"Mouth wash","Authority":"Sp","class":"Dental &Buccal Agents"},{"Name":"Povidone Iodine MW","Conc":"---","form":"Mouth wash","Authority":"Sp","class":"Analgesic , Antirheumatic"},{"Name":"Povidone Iodine shampoo","Conc":"0.075","form":"Shampoo","Authority":"Con","class":"Dermatological Agents"},{"Name":"Pramipexole 0.125","Conc":"0.125 mg","form":"Tab","Authority":"Con","class":"Anti - Parkinsonial"},{"Name":"Pramipexole 0.18","Conc":"0.18 mg","form":"Tab","Authority":"Con","class":"Anti - Parkinsonial"},{"Name":"Pramipexole 0.25","Conc":"0.25 mg","form":"Tab","Authority":"Con","class":"Anti - Parkinsonial"},{"Name":"Pramipexole 0.5","Conc":"0.5 mg","form":"Tab","Authority":"Con","class":"Anti - Parkinsonial"},{"Name":"Pramipexole 0.7","Conc":"0.7 mg","form":"Tab","Authority":"Con","class":"Anti - Parkinsonial"},{"Name":"Pramipexole 1","Conc":"1 mg","form":"Tab","Authority":"Con","class":"Anti - Parkinsonial"},{"Name":"Prednisolone","Conc":"---","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Prednisolone 20","Conc":"20 mg","form":"Tab","Authority":"Con","class":"Anti - Allergic"},{"Name":"Prednisolone 5","Conc":"5 mg","form":"Tab","Authority":"Sp","class":"Anti - Allergic"},{"Name":"Prednisolone E.D","Conc":"---","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Pregabalin 100","Conc":"100 mg","form":"Tab","Authority":"Con","class":"Anti-Epileptic"},{"Name":"Pregabalin 75","Conc":"75 mg","form":"Tab","Authority":"Con","class":"Anti-Epileptic"},{"Name":"Procarbazine Hcl","Conc":"25mg","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Progesterone","Conc":"100 mg","form":"Tab","Authority":"Con","class":"Hormones Disorders"},{"Name":"Progesterone Amp","Conc":"250 mg","form":"Amp","Authority":"Sp","class":"Hormones Disorders"},{"Name":"Propafenone 150","Conc":"150 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Propolis,Chamomile,Zinc Oxide,Purlflled Honey Cream","Conc":"---","form":"Tube","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Propolis,Chamomile,Zn Ox,Honey","Conc":"30gm","form":"Tube","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Propranolol Hcl 10","Conc":"10 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Propranolol Hcl 40","Conc":"40 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Propyl Thiouracil","Conc":"10 mg","form":"Tab","Authority":"Sp","class":"Hormones Disorders"},{"Name":"Prostaglandin Analogue","Conc":"---","form":"E.D","Authority":"Con","class":"Ophthalmic Agents"},{"Name":"Prostaglandin Pgi + Alprostadil","Conc":"20 mcg","form":"Amp","Authority":"Con","class":"Urinary Track Disorders"},{"Name":"Proton Pump Inhibitors 20","Conc":"20 mg","form":"Tab","Authority":"Con","class":"Gastro-Intestinal Drugs"},{"Name":"Proton Pump Inhibitors 40","Conc":"40 mg","form":"Tab","Authority":"Con","class":"Gastro-Intestinal Drugs"},{"Name":"Pyrazinamide","Conc":"500 mg","form":"Tab","Authority":"Sp","class":"Antibiotic"},{"Name":"Pyridostigmine Or Distigmine","Conc":"60 mg","form":"Tab","Authority":"Sp","class":"Muscle Relaxant"},{"Name":"Quetiapine 100","Conc":"100 mg","form":"Tab","Authority":"Sp","class":"Psycotropic"},{"Name":"Quinidine Sulphate","Conc":"250 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Racecadotril 10 mg Sach","Conc":"10 mg","form":"Tab","Authority":"Sp","class":"Antidiarrheal Drugs"},{"Name":"Racecadotril 100 mg","Conc":"100 mg","form":"Tab","Authority":"Sp","class":"Antidiarrheal Drugs"},{"Name":"Racecadotril 30 mg Sach","Conc":"30 mg","form":"Tab","Authority":"Sp","class":"Antidiarrheal Drugs"},{"Name":"Ramipril +Felodipine 5/5","Conc":"5 mg +5 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Ramipril +Hct 2.5/12.5","Conc":"2.5mg + 12.5 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Ramipril +Hct 5/25","Conc":"5mg + 25 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Ramipril 10","Conc":"10 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Ramipril 10 mg + Hydrochlorthiazide 25 mg","Conc":"10 + 25 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Ramipril 2.5","Conc":"2.5 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Ramipril 5","Conc":"5 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Ramucirumab Cyramza","Conc":"---","form":"Vial","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Ranitidine H2 Blocker","Conc":"150 mg","form":"Tab","Authority":"Sp","class":"Gastro-Intestinal Drugs"},{"Name":"Rasagiline","Conc":"1mg","form":"Tab","Authority":"Sp","class":"Anti - Parkinsonial"},{"Name":"Rebamipide","Conc":"100 mg","form":"Sachet","Authority":"Con","class":"Gastro-Intestinal Drugs"},{"Name":"Rebamipide 100 mg","Conc":"100 mg","form":"Tab","Authority":"Con","class":"Gastro-Intestinal Drugs"},{"Name":"Regorafenib","Conc":"40 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Reserpine + Clopamide","Conc":"---","form":"Tab","Authority":"Gp","class":"Cardiovascular"},{"Name":"Reserpine + Clopamide + Dihydroergocristine","Conc":"0.1mg+5mg+ 0.5 mg","form":"Tab","Authority":"Gp","class":"Cardiovascular"},{"Name":"Retinoic Acid","Conc":"0.0005","form":"Tube","Authority":"Con","class":"Dermatological Agents"},{"Name":"Ribavirin","Conc":"200 mg","form":"Tab","Authority":"Con","class":"Hepatic Diseases Agents"},{"Name":"Ribociclib","Conc":"200 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Rifampicin 150","Conc":"150 mg","form":"Tab","Authority":"Sp","class":"Antibiotic"},{"Name":"Rifampicin 2 %","Conc":"100 mg / 5 ml","form":"Susp","Authority":"Sp","class":"Antibiotic"},{"Name":"Rifampicin 300","Conc":"300 mg","form":"Tab","Authority":"Sp","class":"Antibiotic"},{"Name":"Riluzole 50 Rilutek","Conc":"50 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Miscellaneous"},{"Name":"Risperidone 1","Conc":"1 mg","form":"Tab","Authority":"Con","class":"Psycotropic"},{"Name":"Risperidone 2","Conc":"2 mg","form":"Tab","Authority":"Con","class":"Psycotropic"},{"Name":"Risperidone 3","Conc":"3 mg","form":"Tab","Authority":"Con","class":"Psycotropic"},{"Name":"Risperidone Syrup","Conc":"1 mg / ml","form":"Syrup","Authority":"Con","class":"Psycotropic"},{"Name":"Rituximab Mabthera","Conc":"100 mg","form":"Vial","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Rivaroxiban 10","Conc":"10 mg","form":"Tab","Authority":"Con","class":"Anti-Coagulant"},{"Name":"Rivaroxiban 15","Conc":"15 mg","form":"Tab","Authority":"Con","class":"Anti-Coagulant"},{"Name":"Rivaroxiban 2.5","Conc":"2.5 mg","form":"Tab","Authority":"Con","class":"Anti-Coagulant"},{"Name":"Rivaroxiban 20","Conc":"20 mg","form":"Tab","Authority":"Con","class":"Anti-Coagulant"},{"Name":"Romiplostim 250 mcg Nplate","Conc":"250 mcg","form":"Syringe","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Rosuvastatin 10","Conc":"10 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Rosuvastatin 20","Conc":"20 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Rosuvastatin 5","Conc":"5 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Ruxolitinib 15 mg Jakavi","Conc":"15 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Ruxolitinib 20 mg Jakavi","Conc":"20 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Ruxolitinib 5 mg Jakavi","Conc":"5 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Salbutamol + Beclomethasone","Conc":"---","form":"Inh","Authority":"Sp","class":"Respiratory Agents"},{"Name":"Salbutamol 2","Conc":"2 mg","form":"Tab","Authority":"Sp","class":"Respiratory Agents"},{"Name":"Salbutamol 4 CR","Conc":"4 mg CR","form":"Tab","Authority":"Sp","class":"Respiratory Agents"},{"Name":"Salbutamol Inhaler","Conc":"200 Dose","form":"Inh","Authority":"Sp","class":"Respiratory Agents"},{"Name":"Salbutamol Syrup","Conc":"2mg / 5ml","form":"Syrup","Authority":"Sp","class":"Respiratory Agents"},{"Name":"Salicylic Acid+Flumethasone","Conc":"---","form":"Oint","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Salmeterol","Conc":"---","form":"Inh","Authority":"Con","class":"Respiratory Agents"},{"Name":"Salmeterol + Fluticasone Diskus 25/500","Conc":"25 mcg + 500mcg","form":"diskus","Authority":"Con","class":"Respiratory Agents"},{"Name":"Salmeterol + Fluticasone Diskus 50 / 25","Conc":"50 mcg + 25 mcg","form":"Inh","Authority":"Con","class":"Respiratory Agents"},{"Name":"Salmeterol + Fluticasone Diskus 50/250","Conc":"50 mcg + 250mcg","form":"diskus","Authority":"Con","class":"Respiratory Agents"},{"Name":"Salmeterol + Fluticasone Evohaler 25/125","Conc":"25 mcg + 125mcg","form":"Inh","Authority":"Con","class":"Respiratory Agents"},{"Name":"Sandostatin LAR Octreotide","Conc":"30 mg","form":"Syringe","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Secukinumab 150 mg Cosentyx","Conc":"150 mg","form":"Syringe","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Selenium Sulphide","Conc":"---","form":"Lotion","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Serotonin Antagonist","Conc":"---","form":"Amp","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Sertraline 50","Conc":"50 mg","form":"Tab","Authority":"Sp","class":"Anti-Depressant"},{"Name":"Sildenafil 100","Conc":"100mg","form":"Tab","Authority":"Con","class":"Miscellaneous"},{"Name":"Sildenafil 20","Conc":"20mg","form":"Tab","Authority":"Con","class":"Miscellaneous"},{"Name":"Sildenafil 50","Conc":"50mg","form":"Tab","Authority":"Con","class":"Miscellaneous"},{"Name":"Silver Sulfadiazine","Conc":"0.01","form":"Tube","Authority":"Gp","class":"Dermatological Agents"},{"Name":"Silymarin 140","Conc":"140 mg","form":"Tab","Authority":"Con","class":"Hepatic Diseases Agents"},{"Name":"Silymarin 160","Conc":"160 mg","form":"Tab","Authority":"Con","class":"Hepatic Diseases Agents"},{"Name":"Silymarin 70","Conc":"70 mg","form":"Tab","Authority":"Sp","class":"Hepatic Diseases Agents"},{"Name":"Simvastatin + Ezetimibe 10/10","Conc":"10 mg + 10 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Simvastatin + Ezetimibe 20/10","Conc":"20 mg + 10 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Simvastatin + Ezetimibe 40/10","Conc":"40 mg + 10 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Simvastatin 10","Conc":"10 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Simvastatin 20","Conc":"20 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Simvastatin 40","Conc":"40 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Siponimod 2 mg Mayzent","Conc":"2 mg","form":"Tab","Authority":"لجنة MS","class":"Miscellaneous"},{"Name":"Siponimod Initial dose Mayzent","Conc":"0.25 mg","form":"Tab","Authority":"لجنة MS","class":"Miscellaneous"},{"Name":"Sirolimus 1 mg Rapamun","Conc":"1 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Sitagliptin + Metformin 50/500","Conc":"50 mg + 500 mg","form":"Tab","Authority":"Con","class":"Anti-Diabetics"},{"Name":"Sitagliptin + Metformin 50/1000","Conc":"50 mg + 1000 mg","form":"Tab","Authority":"Con","class":"Anti-Diabetics"},{"Name":"Sitagliptin + metformin 50/850","Conc":"50 / 850 mg","form":"Tab","Authority":"Con","class":"Anti-Diabetics"},{"Name":"Sitagliptin 100","Conc":"100 mg","form":"Tab","Authority":"Con","class":"Anti-Diabetics"},{"Name":"Sitagliptin 50","Conc":"50 mg","form":"Tab","Authority":"Con","class":"Anti-Diabetics"},{"Name":"Sitosterol 0.25% Oint","Conc":"0.0025","form":"Tab","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Sod Alginate +Sod Bicarb","Conc":"5g+2.5g","form":"Susp","Authority":"Sp","class":"Gastro-Intestinal Drugs"},{"Name":"Sodium Alginate 5 Gm + Sod Bicarbonate 2.5 Gm","Conc":"5 + 2.5 gm","form":"Susp","Authority":"Sp","class":"Gastro-Intestinal Drugs"},{"Name":"Sodium Chloride + Sod Bicarbonate + Borax Nasal Wash","Conc":"---","form":"powder","Authority":"Con","class":"Otorhinolaryngology Agents"},{"Name":"Sodium Valproate + Valproic Acid 500","Conc":"500 mg","form":"Tab","Authority":"Con","class":"Anti-Epileptic"},{"Name":"Sodium Valproate 200","Conc":"200 mg","form":"Tab","Authority":"Sp","class":"Anti-Epileptic"},{"Name":"Solfinacin 10","Conc":"10 mg","form":"Tab","Authority":"Sp","class":"Urinary Track Disorders"},{"Name":"Solifenacin 5 mg + Mirabegron 50 mg","Conc":"5 mg + 50 mg","form":"Tab","Authority":"Con","class":"Urinary Track Disorders"},{"Name":"Sorafenib Nexvar","Conc":"200 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Sorbitol Powder","Conc":"---","form":"Sachet","Authority":"Sp","class":"Gastro-Intestinal Drugs"},{"Name":"Spiramycin 3 M.I.U","Conc":"3 M.I.U","form":"Tab","Authority":"Con","class":"Antibiotic"},{"Name":"Spiramycin 1.5 M.I.U","Conc":"1.5 M.I.U","form":"Tab","Authority":"Sp","class":"Antibiotic"},{"Name":"Spironolactone 100","Conc":"100 mg","form":"Tab","Authority":"Sp","class":"Diuretics"},{"Name":"Spironolactone 25","Conc":"25 mg","form":"Tab","Authority":"Sp","class":"Diuretics"},{"Name":"Spravato","Conc":"20 mg","form":"nasal spray","Authority":"Con لجنة عليا","class":"Anti-Depressant"},{"Name":"Streptomycin vial","Conc":"1 gm","form":"Vial","Authority":"Sp","class":"Antibiotic"},{"Name":"Sulfaslazine","Conc":"500 mg","form":"Tab","Authority":"Sp","class":"Gastro-Intestinal Drugs"},{"Name":"Sulphacetamide Na 0.1","Conc":"0.1","form":"E.D","Authority":"Gp","class":"Ophthalmic Agents"},{"Name":"Sulphacetamide Na 0.2","Conc":"0.2","form":"E.D","Authority":"Gp","class":"Ophthalmic Agents"},{"Name":"Sulphamethoxazole + Trimethoprim 400 / 80","Conc":"400 mg+80 mg","form":"Tab","Authority":"Gp","class":"Antibiotic"},{"Name":"Sulphamethoxazole + Trimethoprim Susp","Conc":"200 mg+40 mg","form":"Susp","Authority":"Gp","class":"Antibiotic"},{"Name":"Sulpiride 25 mg + Mebvereine 100 mg","Conc":"25 + 100 mg","form":"Tab","Authority":"Con","class":"Gastro-Intestinal Drugs"},{"Name":"Sunitinib 12.5","Conc":"12.5 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Sunitinib 50","Conc":"50 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Suprarenal Cortical Extract+Vit B6","Conc":"---","form":"Amp","Authority":"Gp","class":"Gastro-Intestinal Drugs"},{"Name":"Syrup Containing Alpha Amylase","Conc":"---","form":"Syrup","Authority":"Sp","class":"Analgesic , Antirheumatic"},{"Name":"Tacrolimus 0.5 mg Adoprt","Conc":"0.5 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Tacrolimus 1 mg Pangraf","Conc":"1 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Tadalafil","Conc":"5 mg","form":"Tab","Authority":"Con","class":"Urinary Track Disorders"},{"Name":"Tamoxifen citrate","Conc":"10 mg","form":"Tab","Authority":"Sp","class":"Cytotoxic,Immunosuppressant"},{"Name":"Tamsulosin","Conc":"0.4 mg","form":"Tab","Authority":"Con","class":"Urinary Track Disorders"},{"Name":"Tamsulosin 0.4 mg + Solifenacin 6 mg","Conc":"0.4 mg + 6 mg","form":"Tab","Authority":"Con","class":"Urinary Track Disorders"},{"Name":"Tazarotene","Conc":"0.001","form":"Tube","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Tazarotene 0.1% Gel","Conc":"0.1 mg","form":"Tab","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Temozolamide","Conc":"---","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Terbinafine","Conc":"0.01","form":"Tube","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Terbutaline Sulphate Syrup","Conc":"---","form":"Syrup","Authority":"Sp","class":"Respiratory Agents"},{"Name":"Terbutaline Sulphate Tab","Conc":"2.5 mg","form":"Tab","Authority":"Gp","class":"Respiratory Agents"},{"Name":"Teriflunomide 14 mg Aubagio Pexonamide","Conc":"14 mg","form":"Tab","Authority":"لجنة MS","class":"Miscellaneous"},{"Name":"Teriparatide Forteo","Conc":"20 mcg","form":"Syringe","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Testosteron Enanthate +Testosterone Propionate","Conc":"110 mg+ 250 mg","form":"Amp","Authority":"Sp","class":"Hormones Disorders"},{"Name":"Testosteron Enanthate 250","Conc":"250 mg","form":"Amp","Authority":"Sp","class":"Hormones Disorders"},{"Name":"Tetracosactrin Acetate","Conc":"1 mg /ml","form":"Amp","Authority":"Sp","class":"Hormones Disorders"},{"Name":"Tetracycline","Conc":"0.03","form":"Oint","Authority":"Gp","class":"Dermatological Agents"},{"Name":"Tetracycline + Polymyxin","Conc":"3%+10.000 U","form":"Oint","Authority":"Gp","class":"Dermatological Agents"},{"Name":"Tetracycline +Polymyxin","Conc":"0.01","form":"E.O","Authority":"Gp","class":"Ophthalmic Agents"},{"Name":"Tetrahydrozoline","Conc":"0.0005","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Tetrahydrozoline Hcl +Zinc Sulfate","Conc":"0.0005","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Theophylline Anhydrous Ret","Conc":"300 mg","form":"Tab","Authority":"Sp","class":"Respiratory Agents"},{"Name":"Theophylline Monohydrate","Conc":"400 mg","form":"Tab","Authority":"Sp","class":"Respiratory Agents"},{"Name":"Thiomphenicol","Conc":"250 mg","form":"Tab","Authority":"Sp","class":"Antibiotic"},{"Name":"Ticagrelor 60","Conc":"60 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Ticagrelor 90","Conc":"90 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Tiemonium Methyl Sulphate","Conc":"50 mg","form":"Tab","Authority":"Sp","class":"Gastro-Intestinal Drugs"},{"Name":"Tiemonium Methyl Sulphate Syrup","Conc":"50 mg","form":"Syrup","Authority":"Sp","class":"Gastro-Intestinal Drugs"},{"Name":"Timolol Maleate 0.0025 E.D","Conc":"0.0025","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Timolol Maleate 0.005 E.D","Conc":"0.005","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Timolol Maleate E.O","Conc":"0.01","form":"E.O","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Tlzanldlne 2 mg","Conc":"2 mg","form":"Tab","Authority":"Sp","class":"Muscle Relaxant"},{"Name":"Tlzanldlne 4 mg","Conc":"4 mg","form":"Tab","Authority":"Sp","class":"Muscle Relaxant"},{"Name":"Tobramycin E.D","Conc":"---","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Tobramycin E.O","Conc":"---","form":"E.O","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Tocilizumab 200 mg Actimra","Conc":"200 mg","form":"Vial","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Tocilizumab 400 mg Actimra","Conc":"400 mg","form":"Vial","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Tocilizumab 80 mg Actimra","Conc":"80 mg","form":"Vial","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Tofacitinib 5 mg Xeljanz","Conc":"5 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Topiramate 100","Conc":"100 mg","form":"Tab","Authority":"Con","class":"Anti-Epileptic"},{"Name":"Topiramate 25","Conc":"25 mg","form":"Tab","Authority":"Con","class":"Anti-Epileptic"},{"Name":"Torsemide 20 mg","Conc":"20mg","form":"Tab","Authority":"Sp","class":"Diuretics"},{"Name":"Tranexamic Acid","Conc":"500mg","form":"Tab","Authority":"Sp","class":"Haemostatic"},{"Name":"Tranexamic Acid 500 mg","Conc":"500 mg","form":"Tab","Authority":"Sp","class":"Anti Haemorrhoidal"},{"Name":"Trastuzumab Emtansine Kadcyla","Conc":"---","form":"Vial","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Trastuzumab Herceptin","Conc":"---","form":"Vial","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Travoprost + Timolol E.D","Conc":"---","form":"E.D","Authority":"Con","class":"Ophthalmic Agents"},{"Name":"Trazodone 100","Conc":"100 mg","form":"Tab","Authority":"Sp","class":"Psycotropic"},{"Name":"Trazodone 50","Conc":"50 mg","form":"Tab","Authority":"Sp","class":"Psycotropic"},{"Name":"Triamcinolone Acetate","Conc":"4 mg","form":"Tab","Authority":"Sp","class":"Anti - Allergic"},{"Name":"Triamcinolone Acetate Amp","Conc":"40 mg","form":"Vial","Authority":"Sp","class":"Anti - Allergic"},{"Name":"Trifluoperazine","Conc":"5 mg","form":"Tab","Authority":"Sp","class":"Psycotropic"},{"Name":"Trimebutine 200","Conc":"200 mg","form":"Tab","Authority":"Sp","class":"Gastro-Intestinal Drugs"},{"Name":"Trimetazidine 20","Conc":"20 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Trimetazidine 35 MR","Conc":"35 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Tropicamide 1%","Conc":"0.01","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Tropicamide 5%","Conc":"0.05","form":"E.D","Authority":"Sp","class":"Ophthalmic Agents"},{"Name":"Trypsin + Chymotrypsin","Conc":"---","form":"Tab","Authority":"Sp","class":"Analgesic , Antirheumatic"},{"Name":"Upadacitinib Rinvoq","Conc":"15 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Urea","Conc":"0.1","form":"Tube","Authority":"Sp","class":"Dermatological Agents"},{"Name":"Ursodeoxycholic Acid 250","Conc":"250 mg","form":"Tab","Authority":"Con","class":"Hepatic Diseases Agents"},{"Name":"Ursodeoxycholic Acid 450","Conc":"450mg","form":"Tab","Authority":"Con","class":"Hepatic Diseases Agents"},{"Name":"Ustekinaumab 130 mg Stelara","Conc":"130 mg","form":"Vial","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Ustekinaumab 45 mg Stelara","Conc":"45 mg","form":"Syringe","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Ustekinaumab 90 mg Stelara","Conc":"90 mg","form":"Syringe","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Valproic Acid 150","Conc":"150 mg","form":"Tab","Authority":"Sp","class":"Anti-Epileptic"},{"Name":"Valproic Acid 300","Conc":"300 mg","form":"Tab","Authority":"Sp","class":"Anti-Epileptic"},{"Name":"Valproic Acid Syrup","Conc":"300 ml","form":"Syrup","Authority":"Sp","class":"Anti-Epileptic"},{"Name":"Valsartan + Hydrochlorothiazide 160/12.5","Conc":"160 mg + 12.5 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Valsartan + Sacubitril Entresto 100mg","Conc":"51/49mg","form":"Tab","Authority":"لجنة القلب Con","class":"Cardiovascular"},{"Name":"Valsartan + Sacubitril Entresto 200mg","Conc":"97/103mg","form":"Tab","Authority":"لجنة القلب Con","class":"Cardiovascular"},{"Name":"Valsartan + Sacubitril Entresto 50mg","Conc":"26/24mg","form":"Tab","Authority":"لجنة القلب Con","class":"Cardiovascular"},{"Name":"Valsartan 160","Conc":"160 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Valsartan 160 mg + Hydrochlorthiazide 25 mg","Conc":"160 + 25 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Valsartan 40","Conc":"40 mg","form":"Tab","Authority":"Con","class":"Cardiovascular"},{"Name":"Valsartan 80 mg + Hydrochlorthiazide 12.5 mg","Conc":"80 + 12.5 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Vedolizumab Entyvio","Conc":"300 mg","form":"Vial","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Verapamil Hcl 240","Conc":"240 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Verapamil Hcl 40","Conc":"40 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Verapamil Hcl 80","Conc":"80 mg","form":"Tab","Authority":"Sp","class":"Cardiovascular"},{"Name":"Vildagliptin + metformin 50/1000","Conc":"50 / 1000 mg","form":"Tab","Authority":"Con","class":"Anti-Diabetics"},{"Name":"Vildagliptin + metformin 50/850","Conc":"50 / 850 mg","form":"Tab","Authority":"Con","class":"Anti-Diabetics"},{"Name":"Vildagliptin 50","Conc":"50 mg","form":"Tab","Authority":"Con","class":"Anti-Diabetics"},{"Name":"Vinblastine Sulphate 10","Conc":"10 mg","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Vincamine 30 mg","Conc":"30 mg","form":"Tab","Authority":"Con","class":"Miscellaneous"},{"Name":"Vincristine Sulfate 1","Conc":"1 mg","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Vinorelbine 10","Conc":"10 mg","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Vinorelbine 20","Conc":"20 mg","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Vinorelbine 30","Conc":"30 mg","form":"Tab","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Vinorelbine 50","Conc":"50 mg","form":"Vial","Authority":"Con","class":"Cytotoxic,Immunosuppressant"},{"Name":"Vitamin A","Conc":"50000 I.U","form":"Tab","Authority":"Sp","class":"Vitamins"},{"Name":"Vitamin A+E","Conc":"---","form":"Tab","Authority":"Sp","class":"Vitamins"},{"Name":"Vitamin B Complex Milga Deltavit","Conc":"---","form":"Tab","Authority":"Gp","class":"Vitamins"},{"Name":"Vitamin b1 + B6 + B12 Syrup","Conc":"---","form":"Syrup","Authority":"Sp","class":"Vitamins"},{"Name":"Vitamin B12","Conc":"1000 mcg","form":"Amp","Authority":"Sp","class":"Vitamins"},{"Name":"Vitamin C Ascorbic Acid","Conc":"500 mg","form":"Tab","Authority":"Gp","class":"Vitamins"},{"Name":"Vitamin Contain Zn Salt","Conc":"---","form":"Tab","Authority":"Sp","class":"Vitamins"},{"Name":"Vitamin D + Calcium Syrup","Conc":"---","form":"Syrup","Authority":"Sp","class":"Vitamins"},{"Name":"Vitamin E 100","Conc":"100 mg","form":"Tab","Authority":"Sp","class":"Vitamins"},{"Name":"Vitamin E 400","Conc":"400 mg","form":"Tab","Authority":"Sp","class":"Vitamins"},{"Name":"Voriconazole 200","Conc":"200 mg","form":"Tab","Authority":"Con","class":"Antifungal"},{"Name":"Warfarin 1","Conc":"1 mg","form":"Tab","Authority":"Sp","class":"Anti-Coagulant"},{"Name":"Warfarin 2","Conc":"2 mg","form":"Tab","Authority":"Sp","class":"Anti-Coagulant"},{"Name":"Warfarin 3","Conc":"3 mg","form":"Tab","Authority":"Sp","class":"Anti-Coagulant"},{"Name":"Warfarin 5","Conc":"5 mg","form":"Tab","Authority":"Sp","class":"Anti-Coagulant"},{"Name":"Wax Removal","Conc":"---","form":"Ear.d","Authority":"Sp","class":"Otorhinolaryngology Agents"},{"Name":"Xipamide+Triamterene","Conc":"---","form":"Tab","Authority":"Gp","class":"Diuretics"},{"Name":"Xylometazole + Hydrochloride","Conc":"---","form":"N.D","Authority":"Gp","class":"Otorhinolaryngology Agents"},{"Name":"Xylometazoline","Conc":"---","form":"N.D","Authority":"Con","class":"Anti - Allergic"},{"Name":"Zinc Syrup","Conc":"---","form":"Syrup","Authority":"Gp","class":"Vitamins"},{"Name":"Zoledronic Acid 4 Zometa Oprasta","Conc":"4 mg","form":"Vial","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Zoledronic Acid 5 Zometa Oprasta","Conc":"5 mg","form":"Vial","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Amino acid supplement","Conc":"---","form":"Syrup","Authority":"Con لجنة عليا","class":"Miscellaneous"},{"Name":"Ipratropium bromide Atrovent","Conc":"---","form":"Amp","Authority":"Con","class":"Respiratory Agents"},{"Name":"Budesonide Pulmicort","Conc":"---","form":"Amp","Authority":"Con","class":"Respiratory Agents"},{"Name":"Bosentan 62.5","Conc":"62.5 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cardiovascular"},{"Name":"Bosentan 125","Conc":"125 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cardiovascular"},{"Name":"Abrocitinib 100 mg Cibinqo","Conc":"100 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Dermatological Agents"},{"Name":"Colistin","Conc":"---","form":"Vial","Authority":"Con لجنة عليا","class":"Antibiotic"},{"Name":"Pancrelipase Creon 10000 lipase unit","Conc":"150 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Miscellaneous"},{"Name":"Pancrelipase Creon 25000 lipase unit","Conc":"300 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Miscellaneous"},{"Name":"Daratumumab","Conc":"---","form":"Vial","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Factor VIII","Conc":"---","form":"Vial","Authority":"Con لجنة عليا","class":"Miscellaneous"},{"Name":"Filgrastim Neupogen Vial","Conc":"300 mcg / ml","form":"Vial","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Filgrastim Neupogen Syringe","Conc":"300 mcg / 0.5ml","form":"Syringe","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Immunoglobulin IVIG","Conc":"---","form":"Vial","Authority":"Con لجنة عليا","class":"Miscellaneous"},{"Name":"Sapropterin Kuvan","Conc":"100 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Miscellaneous"},{"Name":"Insulin glargine Lantus Penfill","Conc":"100 I.U / ml","form":"Penfill","Authority":"Con لجنة عليا","class":"Anti-Diabetics"},{"Name":"Insulin glargine Lantus Vial","Conc":"1000 I.U.","form":"Vial","Authority":"Con لجنة عليا","class":"Anti-Diabetics"},{"Name":"Cladribine Mavenclad Tab","Conc":"10 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Miscellaneous"},{"Name":"Cladribine Mavenclad Vial","Conc":"1 mg / 1 ml","form":"Vial","Authority":"Con لجنة عليا","class":"Miscellaneous"},{"Name":"Miglustat Zavesca","Conc":"100 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Miscellaneous"},{"Name":"Desmopressin Minirin Melt 60","Conc":"60 mcg","form":"Tab","Authority":"Con لجنة عليا","class":"Urinary Track Disorders"},{"Name":"Desmopressin Minirin Melt 120","Conc":"120 mcg","form":"Tab","Authority":"Con لجنة عليا","class":"Urinary Track Disorders"},{"Name":"Obinutuzumab","Conc":"25 mg / ml","form":"Vial","Authority":"Con لجنة عليا","class":"Miscellaneous"},{"Name":"Olaparib 100","Conc":"100 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Miscellaneous"},{"Name":"Olaparib 150","Conc":"150 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Miscellaneous"},{"Name":"Desmopressin Omegapress 0.1","Conc":"0.1 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Urinary Track Disorders"},{"Name":"Desmopressin Omegapress 0.2","Conc":"0.2 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Urinary Track Disorders"},{"Name":"Macitentan Opsumit","Conc":"10 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cardiovascular"},{"Name":"Penicillamine","Conc":"250 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Antibiotic"},{"Name":"Potassium chloride KCl","Conc":"---","form":"Amp","Authority":"Con لجنة عليا","class":"Miscellaneous"},{"Name":"Risankizumab Skyrizi","Conc":"150 mg / ml","form":"Penfill","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Sodium bicarbonate","Conc":"---","form":"Amp","Authority":"Con لجنة عليا","class":"Miscellaneous"},{"Name":"Osimertinib Tagrisso 40","Conc":"40 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Osimertinib Tagrisso 80","Conc":"80 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Tigecycline Tygacil","Conc":"50 mg","form":"Vial","Authority":"Con لجنة عليا","class":"Antibiotic"},{"Name":"Venetoclax 10","Conc":"10 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Venetoclax 50","Conc":"50 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Venetoclax 100","Conc":"100 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Abemaciclib 50 mg Verzenio","Conc":"50 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Abemaciclib 100 mgVerzenio","Conc":"100 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Abemaciclib 150 mg Verzenio","Conc":"150 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Abemaciclib 200 mg Verzenio","Conc":"200 mg","form":"Tab","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Ceftazidime / Avibactam Zavicefta","Conc":"2 gm / 500 mg","form":"Vial","Authority":"Con لجنة عليا","class":"Antibiotic"},{"Name":"Goserelin 3.6 mg Zoladex","Conc":"3.6 mg","form":"Syringe","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"},{"Name":"Goserelin 10.8 mg Zoladex","Conc":"10.8 mg","form":"Syringe","Authority":"Con لجنة عليا","class":"Cytotoxic,Immunosuppressant"}];
 function initApp(){
-  const selftestRequested = new URLSearchParams(location.search).get('selftest') === '1';
-  const { records, variantGroups } = buildRecords(RAW_DATA);
-  const index = buildIndex(records, variantGroups);
+  const selftestUrlParams = new URLSearchParams(location.search);
+  const selftestRequested = selftestUrlParams.get('selftest') === '1';
+  const selftestSeedParam = parseInt(selftestUrlParams.get('seed'), 10);
+  const selftestSeed = Number.isFinite(selftestSeedParam) ? selftestSeedParam : 42;
+  const { records } = buildRecords(RAW_DATA);
+  const index = buildIndex(records);
   buildSynStructures(index);
   const siblingIndex = buildSiblingIndex(records);
   const personalization = new Map(loadLocal('personalization_v1', []));
@@ -2721,7 +2933,6 @@ function initApp(){
   const el = id => document.getElementById(id);
   const searchInput = el('searchInput');
   const clearBtn = el('clearBtn');
-  const computeHairline = el('computeHairline');
   const grammarPicker = el('grammarPicker');
   const wordmarkCount = el('wordmarkCount');
   const mobileFilterBtn = el('mobileFilterBtn');
@@ -2731,6 +2942,9 @@ function initApp(){
   const sortPicker = el('sortPicker');
   const exportBtn = el('exportBtn');
   const exportPicker = el('exportPicker');
+  bindExpandedSync(searchInput, grammarPicker);
+  bindExpandedSync(sortSelectBtn, sortPicker);
+  bindExpandedSync(exportBtn, exportPicker);
   const densityCompactBtn = el('densityCompactBtn');
   const densityComfortableBtn = el('densityComfortableBtn');
   const themeToggleBtn = el('themeToggleBtn');
@@ -2744,6 +2958,7 @@ function initApp(){
   const activeQueryTags = el('activeQueryTags');
   const entryChips = el('entryChips');
   const listScroller = el('listScroller');
+  const resultsGrid = el('resultsGrid');
   const listSpacer = el('listSpacer');
   const listViewport = el('listViewport');
   const groupStickyHeader = el('groupStickyHeader');
@@ -2794,6 +3009,7 @@ function initApp(){
   let selectedDocId = null;
   let selectedIds = new Set();
   let selectionAnchor = -1;
+  let shiftRangeIds = new Set();
   let metaOverrideTimer = null;
   let ROW_H = state.density === 'compact' ? 52 : 72;
   const OVERSCAN = 6;
@@ -2805,6 +3021,8 @@ function initApp(){
   let lastResultGeneration = -1;
   let lastSelectionSig = null;
   let lastCursorIndex = -2;
+  let lastResultIdSet = new Set();
+  let lastSearchNearest = null;
 
   wordmarkCount.textContent = records.length.toLocaleString() + ' records';
 
@@ -2823,6 +3041,17 @@ function initApp(){
       '<div class="row-form" role="gridcell"><span class="chip"></span></div>' +
       '<div class="row-authority" role="gridcell"><span class="dot"></span><span class="code"></span></div>' +
       '<div class="row-class" role="gridcell"></div>';
+    row.__els = {
+      name: row.querySelector('.row-name'),
+      strength: row.querySelector('.row-strength'),
+      formChip: row.querySelector('.row-form .chip'),
+      authDot: row.querySelector('.row-authority .dot'),
+      authCode: row.querySelector('.row-authority .code'),
+      cls: row.querySelector('.row-class'),
+      subStrength: row.querySelector('.row-sub-strength'),
+      subForm: row.querySelector('.row-sub-form'),
+      subAuth: row.querySelector('.row-sub-auth')
+    };
     row.addEventListener('click', (e) => {
       if(row.__docId == null) return;
       if(e.target.closest('.variant-chip')){
@@ -2834,8 +3063,15 @@ function initApp(){
       } else if(e.metaKey || e.ctrlKey){
         toggleSelect(row.__docId);
         selectionAnchor = row.__index;
+        shiftRangeIds = new Set();
       } else {
-        selectRow(row.__docId, true);
+        selectRow(row.__docId);
+      }
+    });
+    row.addEventListener('keydown', (e) => {
+      if((e.key === 'Enter' || e.key === ' ') && e.target.closest('.variant-chip')){
+        e.preventDefault();
+        toggleVariantExpansion(row.__variantKey);
       }
     });
     return row;
@@ -2862,34 +3098,50 @@ function initApp(){
     row.__variantKey = (rec.variantSiblings && rec.variantSiblings.length) ? rec.variantKey : null;
     const picked = selectedIds.has(rec.id);
     row.className = 'row row-h-' + state.density + (rec.id === selectedDocId ? ' selected' : '') + (row.__cursorActive ? ' focused' : '') + (picked ? ' picked' : '');
-    row.style.setProperty('--row-rule', AUTH_ROW_COLOR(rec.authTier));
+    const ruleColor = AUTH_ROW_COLOR(rec.authTier);
+    if(row.__lastRule !== ruleColor){
+      row.style.setProperty('--row-rule', ruleColor);
+      row.__lastRule = ruleColor;
+    }
     row.setAttribute('aria-rowindex', String(item.__index + 1));
     row.setAttribute('aria-selected', String(picked));
 
-    const nameEl = row.querySelector('.row-name');
+    const els = row.__els;
     const cacheKey = rec.id + ':' + state.matchGeneration;
     let nameHtml = highlightText(rec.Name, item.matchedTokens, cacheKey);
     if(rec.variantSiblings && rec.variantSiblings.length){
       const expanded = expandedVariantGroups.has(rec.variantKey);
-      nameHtml += ` <span class="variant-chip" role="button" aria-expanded="${expanded}">${rec.variantSiblings.length + 1} variants</span>`;
+      nameHtml += ` <span class="variant-chip" role="button" tabindex="0" aria-expanded="${expanded}">${rec.variantSiblings.length + 1} variants</span>`;
     }
-    nameEl.innerHTML = nameHtml;
+    if(row.__lastNameHtml !== nameHtml){
+      els.name.innerHTML = nameHtml;
+      row.__lastNameHtml = nameHtml;
+    }
+    els.name.title = rec.Name;
 
-    row.querySelector('.row-strength').textContent = rec.Conc;
-    row.querySelector('.row-form .chip').textContent = rec.form;
-    row.querySelector('.row-authority .dot').style.background = AUTH_ROW_COLOR(rec.authTier);
-    row.querySelector('.row-authority .code').textContent = rec.authTier;
-    row.querySelector('.row-class').textContent = rec.classes.join(', ');
-    row.querySelector('.row-class').title = rec.classes.join(', ');
+    els.strength.textContent = rec.Conc;
+    els.formChip.textContent = rec.form;
+    els.authDot.style.background = ruleColor;
+    els.authCode.textContent = rec.authTier;
+    const classesText = rec.classes.join(', ');
+    els.cls.textContent = classesText;
+    els.cls.title = classesText;
 
-    row.querySelector('.row-sub-strength').textContent = rec.Conc;
-    row.querySelector('.row-sub-form').textContent = ' · ' + rec.form;
-    row.querySelector('.row-sub-auth').textContent = ' · ' + rec.authTier;
+    els.subStrength.textContent = rec.Conc;
+    els.subForm.textContent = ' · ' + rec.form;
+    els.subAuth.textContent = ' · ' + rec.authTier;
   }
 
+  const GROUP_HEADER_H = 26;
+  function groupHeaderVisible(){
+    const primaryLevel = state.sortLevels[0];
+    return !!primaryLevel && (primaryLevel.key === 'class' || primaryLevel.key === 'authority') && currentResults.length > 0;
+  }
   function paint(){
     const H = ROW_H;
-    const scrollTop = listScroller.scrollTop;
+    const headerShown = groupHeaderVisible();
+    const headerH = headerShown ? GROUP_HEADER_H : 0;
+    const scrollTop = Math.max(0, listScroller.scrollTop - headerH);
     const start = Math.max(0, Math.floor(scrollTop / H) - OVERSCAN);
     const selectionSig = selectedIds.size + ':' + selectedDocId;
     if(start === lastStart && state.density === lastDensity && resultGeneration === lastResultGeneration && selectionSig === lastSelectionSig && focusedRowIndex === lastCursorIndex){
@@ -2911,8 +3163,9 @@ function initApp(){
       if(row.__cursorActive && item) activeRowId = row.id;
       bindRow(row, item);
     }
-    searchInput.setAttribute('aria-activedescendant', activeRowId);
-    updateGroupStickyHeader(start);
+    if(activeRowId) searchInput.setAttribute('aria-activedescendant', activeRowId);
+    else searchInput.removeAttribute('aria-activedescendant');
+    updateGroupStickyHeader(start, headerShown);
   }
 
   let rafPending = null;
@@ -2922,12 +3175,12 @@ function initApp(){
   }
   listScroller.addEventListener('scroll', schedulePaint, { passive:true });
 
-  function updateGroupStickyHeader(start){
-    const primaryLevel = state.sortLevels[0];
-    if(!primaryLevel || (primaryLevel.key !== 'class' && primaryLevel.key !== 'authority') || !currentResults.length || start >= currentResults.length){
+  function updateGroupStickyHeader(start, headerShown){
+    if(!headerShown || start >= currentResults.length){
       groupStickyHeader.classList.remove('show');
       return;
     }
+    const primaryLevel = state.sortLevels[0];
     const rec = currentResults[Math.min(start, currentResults.length - 1)].rec;
     const label = primaryLevel.key === 'class' ? (rec.classes[0] || '—') : (AUTH_TIERS[rec.authTier] ? AUTH_TIERS[rec.authTier].full : rec.authTier);
     groupStickyHeader.textContent = label;
@@ -2962,7 +3215,7 @@ function initApp(){
     currentResults = applyVariantCollapsing(rawSortedResults);
     resultGeneration++;
     listSpacer.style.height = (currentResults.length * ROW_H) + 'px';
-    listViewport.setAttribute('aria-rowcount', String(currentResults.length));
+    resultsGrid.setAttribute('aria-rowcount', String(currentResults.length));
     lastStart = -1;
     paint();
   }
@@ -3004,7 +3257,7 @@ function initApp(){
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.setAttribute('aria-label', 'Remove ' + t.label);
-      btn.innerHTML = '<svg class="icon"><use href="#i-close"/></svg>';
+      btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>';
       btn.addEventListener('click', () => { t.onRemove(); runUpdate(); });
       tag.appendChild(txt);
       tag.appendChild(btn);
@@ -3014,6 +3267,7 @@ function initApp(){
 
   function renderZeroState(){
     const hasQuery = state.query.trim().length > 0;
+    resultsGrid.classList.toggle('hidden', currentResults.length === 0);
     if(currentResults.length > 0){
       zeroState.classList.remove('show');
       zeroChips.innerHTML = '';
@@ -3031,7 +3285,7 @@ function initApp(){
       zeroBody.textContent = 'Clear a filter to widen the results.';
     }
     if(hasQuery){
-      const nearest = trigramNearest(state.query.trim(), records, 6);
+      const nearest = (lastSearchNearest && lastSearchNearest.length) ? lastSearchNearest.slice(0, 6) : trigramNearest(state.query.trim(), records, 6);
       zeroChips.innerHTML = nearest.map(n => `<button type="button" class="zero-chip" data-chip-name="${escapeHtml(n.rec.Name)}">${escapeHtml(n.rec.Name)}</button>`).join('');
       zeroChips.querySelectorAll('.zero-chip').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -3090,7 +3344,7 @@ function initApp(){
           e.preventDefault();
           searchInput.value = q;
           state.query = q;
-          onSearchChanged(true);
+          onSearchChanged();
         });
         entryChips.appendChild(chip);
       });
@@ -3126,84 +3380,163 @@ function initApp(){
 
   const FACET_SEARCH_THRESHOLD = 6;
 
-  function facetGroupHtml(title, dim, entries, colorFn){
-    const collapsed = state.collapsedGroups.has(dim);
-    const selected = state.facets[dim];
-    const ordered = entries.slice().sort((a, b) => (selected.has(a[0]) ? 0 : 1) - (selected.has(b[0]) ? 0 : 1));
-    const opts = ordered.map(([value, count]) => {
-      const checked = selected.has(value);
-      const dotHtml = colorFn ? `<span class="dot" style="background:${colorFn(value)}"></span>` : '';
-      return `<label class="facet-option${checked ? ' active' : ''}${count === 0 ? ' zero' : ''}" data-lbl="${escapeHtml(normalizeText(value))}" data-pinned="${checked ? '1' : '0'}">
-        <input type="checkbox" data-dim="${dim}" data-value="${escapeHtml(value)}" ${checked ? 'checked' : ''}>
-        ${dotHtml}<span class="lbl">${escapeHtml(value)}</span><span class="n tabular">${count}</span>
-      </label>`;
-    }).join('');
-    const searchHtml = ordered.length > FACET_SEARCH_THRESHOLD
-      ? `<div class="facet-search-wrap"><input type="text" class="facet-search" dir="auto" data-dim="${dim}" placeholder="Filter ${escapeHtml(title.toLowerCase())}…" aria-label="Filter ${escapeHtml(title)} options"></div>`
-      : '';
-    return `<div class="facet-group${collapsed ? ' collapsed' : ''}" data-group="${dim}">
-      <button type="button" class="facet-group-head" data-toggle="${dim}">
-        <span>${title}</span>
-        <svg class="icon"><use href="#i-chevron"/></svg>
-      </button>
-      <div class="facet-group-body">${searchHtml}${opts}</div>
-    </div>`;
+  const facetPanelState = new WeakMap();
+  function getFacetOrder(entries, selected){
+    return entries.slice().sort((a, b) => (selected.has(a[0]) ? 0 : 1) - (selected.has(b[0]) ? 0 : 1));
   }
+  function buildFacetOption(dim, value, colorFn){
+    const label = document.createElement('label');
+    label.className = 'facet-option';
+    label.dataset.lbl = normalizeText(value);
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.dataset.dim = dim;
+    checkbox.dataset.value = value;
+    checkbox.addEventListener('change', () => {
+      toggleFacet(dim, value);
+      runUpdate();
+    });
+    label.appendChild(checkbox);
+    if(colorFn){
+      const dot = document.createElement('span');
+      dot.className = 'dot';
+      dot.style.background = colorFn(value);
+      label.appendChild(dot);
+    }
+    const lbl = document.createElement('span');
+    lbl.className = 'lbl';
+    lbl.textContent = value;
+    label.appendChild(lbl);
+    const countEl = document.createElement('span');
+    countEl.className = 'n tabular';
+    label.appendChild(countEl);
+    return { label, checkbox, countEl };
+  }
+  function updateFacetOption(entry, value, count, selected){
+    const checked = selected.has(value);
+    entry.checkbox.checked = checked;
+    entry.label.classList.toggle('active', checked);
+    entry.label.classList.toggle('zero', count === 0);
+    entry.checkbox.disabled = count === 0 && !checked;
+    entry.label.dataset.pinned = checked ? '1' : '0';
+    if(entry.countEl.textContent !== String(count)) entry.countEl.textContent = String(count);
+  }
+  function buildFacetGroup(container, dim, data, selected, st){
+    const collapsed = state.collapsedGroups.has(dim);
+    const groupEl = document.createElement('div');
+    groupEl.className = 'facet-group' + (collapsed ? ' collapsed' : '');
+    groupEl.dataset.group = dim;
+    const head = document.createElement('button');
+    head.type = 'button';
+    head.className = 'facet-group-head';
+    head.dataset.toggle = dim;
+    head.innerHTML = `<span>${escapeHtml(data.title)}</span><svg class="icon"><use href="#i-chevron"/></svg>`;
+    head.addEventListener('click', () => {
+      const wasCollapsed = state.collapsedGroups.has(dim);
+      if(wasCollapsed) state.collapsedGroups.delete(dim); else state.collapsedGroups.add(dim);
+      groupEl.classList.toggle('collapsed', !wasCollapsed);
+      if(wasCollapsed) renderFacetPanel(container, { reorderDims:[dim] });
+    });
+    groupEl.appendChild(head);
+    const body = document.createElement('div');
+    body.className = 'facet-group-body';
+    groupEl.appendChild(body);
 
-  function renderFacetPanel(container){
+    let searchInput = null;
+    const optionEls = new Map();
+    if(data.entries.length > FACET_SEARCH_THRESHOLD){
+      const wrap = document.createElement('div');
+      wrap.className = 'facet-search-wrap';
+      searchInput = document.createElement('input');
+      searchInput.type = 'text';
+      searchInput.className = 'facet-search';
+      searchInput.dir = 'auto';
+      searchInput.dataset.dim = dim;
+      searchInput.placeholder = 'Filter ' + data.title.toLowerCase() + '…';
+      searchInput.setAttribute('aria-label', 'Filter ' + data.title + ' options');
+      const applyFilter = () => {
+        const q = normalizeText(searchInput.value);
+        optionEls.forEach(entry => {
+          const show = entry.label.dataset.pinned === '1' || !q || entry.label.dataset.lbl.includes(q);
+          entry.label.classList.toggle('opt-hidden', !show);
+        });
+      };
+      searchInput.addEventListener('input', applyFilter);
+      searchInput.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape'){
+          e.stopPropagation();
+          if(searchInput.value){ searchInput.value = ''; applyFilter(); }
+          else searchInput.blur();
+        }
+      });
+      wrap.appendChild(searchInput);
+      body.appendChild(wrap);
+    }
+
+    const order = getFacetOrder(data.entries, selected);
+    order.forEach(([value, count]) => {
+      const entry = buildFacetOption(dim, value, data.colorFn);
+      updateFacetOption(entry, value, count, selected);
+      body.appendChild(entry.label);
+      optionEls.set(value, entry);
+    });
+
+    container.appendChild(groupEl);
+    st.dims[dim] = { groupEl, body, searchInput, optionEls, order: order.map(([v]) => v) };
+  }
+  function updateFacetGroup(dim, data, selected, st, reorder){
+    const dimSt = st.dims[dim];
+    const collapsed = state.collapsedGroups.has(dim);
+    dimSt.groupEl.classList.toggle('collapsed', collapsed);
+    const countMap = new Map(data.entries);
+    if(reorder){
+      const order = getFacetOrder(data.entries, selected).map(([v]) => v);
+      const changed = order.length !== dimSt.order.length || order.some((v, i) => v !== dimSt.order[i]);
+      if(changed){
+        order.forEach(value => {
+          const entry = dimSt.optionEls.get(value);
+          if(entry) dimSt.body.appendChild(entry.label);
+        });
+        dimSt.order = order;
+      }
+    }
+    dimSt.optionEls.forEach((entry, value) => {
+      updateFacetOption(entry, value, countMap.has(value) ? countMap.get(value) : 0, selected);
+    });
+  }
+  function renderFacetPanel(container, opts){
+    opts = opts || {};
     const authRecs = computeFacetCounts(state.query, state.facets, index, records, 'authorities');
     const classRecs = computeFacetCounts(state.query, state.facets, index, records, 'classes');
     const formRecs = computeFacetCounts(state.query, state.facets, index, records, 'forms');
-
     const authCounts = countByAuthority(authRecs);
     const classCounts = countByClass(classRecs);
     const formCounts = countByForm(formRecs);
+    const dimsData = {
+      authorities: { title:'Authority', entries: Object.keys(AUTH_TIERS).map(t => [t, authCounts.get(t) || 0]), colorFn: t => AUTH_ROW_COLOR(t) },
+      classes: { title:'Class', entries: CLASS_ENTRIES_ALL.map(([v]) => [v, classCounts.get(v) || 0]).sort((a,b) => b[1] - a[1]), colorFn: null },
+      forms: { title:'Form', entries: FORM_ENTRIES_ALL.map(([v]) => [v, formCounts.get(v) || 0]).sort((a,b) => b[1] - a[1]), colorFn: null }
+    };
 
-    const authEntries = Object.keys(AUTH_TIERS).map(t => [t, authCounts.get(t) || 0]);
-    const classEntries = CLASS_ENTRIES_ALL.map(([v]) => [v, classCounts.get(v) || 0]).sort((a,b) => b[1] - a[1]);
-    const formEntries = FORM_ENTRIES_ALL.map(([v]) => [v, formCounts.get(v) || 0]).sort((a,b) => b[1] - a[1]);
+    let st = facetPanelState.get(container);
+    const isNew = !st;
+    if(isNew){
+      container.innerHTML = '';
+      st = { query: state.query, dims: {} };
+      facetPanelState.set(container, st);
+    }
+    const queryChanged = !isNew && st.query !== state.query;
 
-    container.innerHTML =
-      facetGroupHtml('Authority', 'authorities', authEntries, t => AUTH_ROW_COLOR(t)) +
-      facetGroupHtml('Class', 'classes', classEntries, null) +
-      facetGroupHtml('Form', 'forms', formEntries, null);
-
-    container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-      cb.addEventListener('change', () => {
-        toggleFacet(cb.dataset.dim, cb.dataset.value);
-        runUpdate();
-      });
+    ['authorities', 'classes', 'forms'].forEach(dim => {
+      if(isNew) buildFacetGroup(container, dim, dimsData[dim], state.facets[dim], st);
+      else updateFacetGroup(dim, dimsData[dim], state.facets[dim], st, queryChanged || (opts.reorderDims && opts.reorderDims.includes(dim)));
     });
-    container.querySelectorAll('[data-toggle]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const dim = btn.dataset.toggle;
-        if(state.collapsedGroups.has(dim)) state.collapsedGroups.delete(dim);
-        else state.collapsedGroups.add(dim);
-        renderFacetPanel(container);
-      });
-    });
-    container.querySelectorAll('.facet-search').forEach(inp => {
-      const applyFilter = () => {
-        const q = normalizeText(inp.value);
-        inp.closest('.facet-group-body').querySelectorAll('.facet-option').forEach(opt => {
-          const show = opt.dataset.pinned === '1' || !q || opt.dataset.lbl.includes(q);
-          opt.classList.toggle('opt-hidden', !show);
-        });
-      };
-      inp.addEventListener('input', applyFilter);
-      inp.addEventListener('keydown', (e) => {
-        if(e.key === 'Escape'){
-          e.stopPropagation();
-          if(inp.value){ inp.value = ''; applyFilter(); }
-          else inp.blur();
-        }
-      });
-    });
+    st.query = state.query;
   }
 
   function renderFacets(){
     renderFacetPanel(facetGroupsEl);
-    if(facetSheet.classList.contains('show')) renderFacetPanel(facetSheetBody);
+    if(facetSheet.classList.contains('show')) renderFacetPanel(facetSheetBody, { reorderDims:['authorities','classes','forms'] });
     const activeCount = state.facets.authorities.size + state.facets.classes.size + state.facets.forms.size;
     mobileFilterBadge.textContent = String(activeCount);
     mobileFilterBadge.classList.toggle('show', activeCount > 0);
@@ -3282,9 +3615,14 @@ function initApp(){
   function extendSelectionTo(targetIndex){
     const anchor = selectionAnchor === -1 ? (focusedRowIndex === -1 ? targetIndex : focusedRowIndex) : selectionAnchor;
     selectionAnchor = anchor;
+    shiftRangeIds.forEach(id => selectedIds.delete(id));
+    shiftRangeIds = new Set();
     const lo = Math.min(anchor, targetIndex), hi = Math.max(anchor, targetIndex);
     for(let i = lo; i <= hi; i++){
-      if(currentResults[i]) selectedIds.add(currentResults[i].rec.id);
+      if(currentResults[i]){
+        selectedIds.add(currentResults[i].rec.id);
+        shiftRangeIds.add(currentResults[i].rec.id);
+      }
     }
     focusedRowIndex = targetIndex;
     lastStart = -1;
@@ -3295,6 +3633,8 @@ function initApp(){
 
   function selectAllFiltered(){
     selectedIds = new Set(currentResults.map(r => r.rec.id));
+    selectionAnchor = -1;
+    shiftRangeIds = new Set();
     lastStart = -1;
     paint();
     renderMeta();
@@ -3304,6 +3644,7 @@ function initApp(){
     if(!selectedIds.size) return;
     selectedIds.clear();
     selectionAnchor = -1;
+    shiftRangeIds = new Set();
     lastStart = -1;
     paint();
     renderMeta();
@@ -3501,16 +3842,19 @@ function initApp(){
 
   exportBtn.addEventListener('click', () => { renderExportMenu(); exportPicker.classList.toggle('show'); });
 
+  const debouncedSavePersonalization = debounce(() => saveLocal('personalization_v1', [...personalization]), 250);
   function recordPersonalizationOpen(id){
     personalization.set(id, (personalization.get(id) || 0) + 1);
-    saveLocal('personalization_v1', [...personalization]);
+    debouncedSavePersonalization();
   }
 
-  function selectRow(docId, fromClick){
+  function selectRow(docId){
     selectedDocId = docId;
     const rec = records[docId];
     recordPersonalizationOpen(rec.id);
     const isMobile = window.innerWidth < 720;
+    const alreadyOpen = isMobile ? detailSheet.classList.contains('show') : detailPanel.classList.contains('show');
+    const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const applyDom = () => {
       if(isMobile){
         detailSheetBody.innerHTML = detailHtml(rec);
@@ -3524,7 +3868,7 @@ function initApp(){
       }
       paint();
     };
-    if(document.startViewTransition) document.startViewTransition(applyDom);
+    if(!alreadyOpen && !reduceMotion && document.startViewTransition) document.startViewTransition(applyDom);
     else applyDom();
   }
 
@@ -3547,28 +3891,38 @@ function initApp(){
     const copyBtn = container.querySelector('[data-action="copy-row"]');
     if(copyBtn) copyBtn.addEventListener('click', () => copyRecordRow(rec));
     container.querySelectorAll('[data-sibling]').forEach(btn => {
-      btn.addEventListener('click', () => selectRow(parseInt(btn.dataset.sibling, 10), true));
+      btn.addEventListener('click', () => selectRow(parseInt(btn.dataset.sibling, 10)));
     });
   }
 
+  const facetSheetTrap = createFocusTrap(facetSheet);
   function openFacetSheet(){
-    renderFacetPanel(facetSheetBody);
+    renderFacetPanel(facetSheetBody, { reorderDims:['authorities','classes','forms'] });
     facetSheet.classList.remove('snap-full');
     facetSheet.classList.add('snap-half');
     facetSheetScrim.classList.add('show');
     facetSheet.classList.add('show');
+    facetSheetTrap.activate();
+    lockBodyScroll();
   }
   function closeFacetSheet(){
     facetSheetScrim.classList.remove('show');
     facetSheet.classList.remove('show');
+    facetSheetTrap.deactivate();
+    unlockBodyScroll();
   }
+  const detailSheetTrap = createFocusTrap(detailSheet);
   function openDetailSheet(){
     detailSheetScrim.classList.add('show');
     detailSheet.classList.add('show');
+    detailSheetTrap.activate();
+    lockBodyScroll();
   }
   function closeDetailSheet(){
     detailSheetScrim.classList.remove('show');
     detailSheet.classList.remove('show');
+    detailSheetTrap.deactivate();
+    unlockBodyScroll();
   }
 
   function wireSheetDrag(sheet, handle, onDismiss){
@@ -3705,7 +4059,7 @@ function initApp(){
           searchInput.value = newBefore + val.slice(pos);
           grammarPicker.classList.remove('show');
           searchInput.focus();
-          onSearchChanged(true);
+          onSearchChanged();
         });
       });
       return;
@@ -3745,43 +4099,58 @@ function initApp(){
         toggleFacet(item.dataset.dim, item.dataset.value);
         searchInput.value = '';
         grammarPicker.classList.remove('show');
-        onSearchChanged(true);
+        onSearchChanged();
         searchInput.focus();
       });
     });
   }
 
-  function triggerHairline(){
-    computeHairline.classList.remove('active');
-    void computeHairline.offsetWidth;
-    computeHairline.classList.add('active');
-  }
+
+  const scheduleDeferredUpdate = (() => {
+    let pendingQ = '';
+    let scheduled = false;
+    const runDeferred = () => {
+      scheduled = false;
+      buildQueryTags();
+      renderFacets();
+      clearBtn.classList.toggle('show', pendingQ.length > 0);
+      writeUrlStateDebounced(state);
+    };
+    return (q) => {
+      pendingQ = q;
+      if(scheduled) return;
+      scheduled = true;
+      requestAnimationFrame(runDeferred);
+    };
+  })();
 
   function runUpdate(){
     const q = state.query.trim();
-    const t0 = performance.now();
-    const { results, relaxation } = runSearch(q, records, index, state.facets, { personalization });
-    const sorted = sortByLevels(results, state.sortLevels, q.length > 0);
-    const elapsed = performance.now() - t0;
+    const { results, relaxation, nearest } = runSearch(q, records, index, state.facets, { personalization });
+    const sorted = sortByLevels(results, state.sortLevels);
     rawSortedResults = sorted;
+    const newIdSet = new Set(rawSortedResults.map(r => r.rec.id));
+    if(!sameIdSet(newIdSet, lastResultIdSet) && (selectedIds.size || selectionAnchor !== -1)){
+      selectedIds = new Set();
+      selectionAnchor = -1;
+      shiftRangeIds = new Set();
+    }
+    lastResultIdSet = newIdSet;
+    lastSearchNearest = nearest;
     currentResults = applyVariantCollapsing(sorted);
     resultGeneration++;
     relaxationMsg = relaxation;
     state.matchGeneration++;
     focusedRowIndex = currentResults.length ? Math.min(focusedRowIndex, currentResults.length - 1) : -1;
-    if(focusedRowIndex < 0 && currentResults.length) focusedRowIndex = 0;
 
     listSpacer.style.height = (currentResults.length * ROW_H) + 'px';
-    listViewport.setAttribute('aria-rowcount', String(currentResults.length));
+    resultsGrid.setAttribute('aria-rowcount', String(currentResults.length));
     lastStart = -1;
     paint();
     renderMeta();
     renderZeroState();
-    buildQueryTags();
-    renderFacets();
-    clearBtn.classList.toggle('show', q.length > 0);
-    writeUrlState(state);
-    if(elapsed > 8) triggerHairline();
+
+    scheduleDeferredUpdate(q);
   }
 
   function onSearchChanged(){
@@ -3799,7 +4168,7 @@ function initApp(){
     saveLocal('lx_recent', recentQueries);
   }
 
-  searchInput.addEventListener('input', () => onSearchChanged(false));
+  searchInput.addEventListener('input', () => onSearchChanged());
   searchInput.addEventListener('focus', renderEntryChips);
   searchInput.addEventListener('blur', () => {
     commitRecentQuery();
@@ -3807,7 +4176,7 @@ function initApp(){
   });
   clearBtn.addEventListener('click', () => {
     searchInput.value = '';
-    onSearchChanged(true);
+    onSearchChanged();
     searchInput.focus();
   });
 
@@ -3822,7 +4191,6 @@ function initApp(){
     state.facets.classes.clear();
     state.facets.forms.clear();
     runUpdate();
-    renderFacetPanel(facetSheetBody);
   });
   facetSheetApply.addEventListener('click', closeFacetSheet);
   facetSheetClose.addEventListener('click', closeFacetSheet);
@@ -3884,6 +4252,8 @@ function initApp(){
   syncSortUI();
 
   function setDensity(d){
+    const headerH = groupHeaderVisible() ? GROUP_HEADER_H : 0;
+    const topIndex = Math.max(0, Math.floor((listScroller.scrollTop - headerH) / ROW_H));
     state.density = d;
     ROW_H = d === 'compact' ? 52 : 72;
     densityCompactBtn.setAttribute('aria-pressed', String(d === 'compact'));
@@ -3893,8 +4263,9 @@ function initApp(){
     saveLocal('lx_density', d);
     lastStart = -1;
     listSpacer.style.height = (currentResults.length * ROW_H) + 'px';
+    listScroller.scrollTop = headerH + topIndex * ROW_H;
     paint();
-    writeUrlState(state);
+    writeUrlStateDebounced(state);
   }
   densityCompactBtn.addEventListener('click', () => setDensity('compact'));
   densityComfortableBtn.addEventListener('click', () => setDensity('comfortable'));
@@ -3909,13 +4280,18 @@ function initApp(){
   }
   themeToggleBtn.addEventListener('click', () => setTheme(state.theme === 'dark' ? 'light' : 'dark'));
 
+  const shortcutsTrap = createFocusTrap(shortcutsModal);
   function openShortcuts(){
     shortcutsScrim.classList.add('show');
     shortcutsModal.classList.add('show');
+    shortcutsTrap.activate();
+    lockBodyScroll();
   }
   function closeShortcuts(){
     shortcutsScrim.classList.remove('show');
     shortcutsModal.classList.remove('show');
+    shortcutsTrap.deactivate();
+    unlockBodyScroll();
   }
   shortcutsBtn.addEventListener('click', openShortcuts);
   shortcutsScrim.addEventListener('click', closeShortcuts);
@@ -3929,12 +4305,24 @@ function initApp(){
     else { lastStart = -1; paint(); }
   }
 
+  function announceRowCursor(){
+    const item = currentResults[focusedRowIndex];
+    if(!item) return;
+    const rec = item.rec;
+    scheduleAnnounce(`Row ${focusedRowIndex + 1} of ${currentResults.length}: ${rec.Name}, ${rec.Conc}, ${rec.form}, ${rec.authTier}`);
+  }
+
   function moveCursor(delta){
     if(!currentResults.length) return;
-    focusedRowIndex = Math.max(0, Math.min(currentResults.length - 1, (focusedRowIndex < 0 ? 0 : focusedRowIndex) + delta));
+    focusedRowIndex = focusedRowIndex < 0 ? 0 : Math.max(0, Math.min(currentResults.length - 1, focusedRowIndex + delta));
     lastStart = -1;
     ensureCursorVisible();
     paint();
+    announceRowCursor();
+  }
+
+  function isInteractiveTarget(target){
+    return !!(target.closest && target.closest('button, a, [role="button"], select, [contenteditable]'));
   }
 
   document.addEventListener('keydown', (e) => {
@@ -3953,7 +4341,7 @@ function initApp(){
       if(e.key === 'Escape'){ e.preventDefault(); grammarPicker.classList.remove('show'); return; }
     }
 
-    if((e.key === '/' || e.code === 'Slash') && !inInput){
+    if((e.key === '/' || e.code === 'Slash') && !e.shiftKey && !inInput){
       e.preventDefault();
       searchInput.focus();
       return;
@@ -3986,16 +4374,17 @@ function initApp(){
       if(facetSheet.classList.contains('show')){ closeFacetSheet(); return; }
       if(detailPanel.classList.contains('show')){ closeDetail(); return; }
       if(inInput){
-        if(searchInput.value){ searchInput.value = ''; onSearchChanged(true); }
+        if(searchInput.value){ searchInput.value = ''; onSearchChanged(); }
         searchInput.blur();
       }
       return;
     }
-    if(e.key === ' ' && !inInput){
+    if(e.key === ' ' && !inInput && !isInteractiveTarget(e.target)){
       e.preventDefault();
       if(focusedRowIndex >= 0 && currentResults[focusedRowIndex]){
         toggleSelect(currentResults[focusedRowIndex].rec.id);
         selectionAnchor = focusedRowIndex;
+        shiftRangeIds = new Set();
       }
       return;
     }
@@ -4005,6 +4394,7 @@ function initApp(){
         extendSelectionTo(Math.min(currentResults.length - 1, (focusedRowIndex < 0 ? 0 : focusedRowIndex) + 1));
       } else {
         selectionAnchor = -1;
+        shiftRangeIds = new Set();
         moveCursor(1);
       }
       return;
@@ -4015,20 +4405,21 @@ function initApp(){
         extendSelectionTo(Math.max(0, (focusedRowIndex < 0 ? 0 : focusedRowIndex) - 1));
       } else {
         selectionAnchor = -1;
+        shiftRangeIds = new Set();
         moveCursor(-1);
       }
       return;
     }
-    if(e.key === 'Enter' && !inInput){
+    if(e.key === 'Enter' && !inInput && !isInteractiveTarget(e.target)){
       if(focusedRowIndex >= 0 && currentResults[focusedRowIndex]){
-        selectRow(currentResults[focusedRowIndex].rec.id, false);
+        selectRow(currentResults[focusedRowIndex].rec.id);
       }
       return;
     }
     if(e.key === 'Enter' && inInput && tag === 'input' && e.target === searchInput){
       commitRecentQuery();
       if(focusedRowIndex >= 0 && currentResults[focusedRowIndex]){
-        selectRow(currentResults[focusedRowIndex].rec.id, false);
+        selectRow(currentResults[focusedRowIndex].rec.id);
       }
       return;
     }
@@ -4044,10 +4435,6 @@ function initApp(){
     }
   });
 
-  listScroller.addEventListener('click', (e) => {
-    if(e.target.closest('.row')) return;
-  });
-
   document.addEventListener('click', (e) => {
     if(!e.target.closest('.cmd-search')) grammarPicker.classList.remove('show');
     if(!e.target.closest('.sort-select-wrap')) sortPicker.classList.remove('show');
@@ -4059,7 +4446,22 @@ function initApp(){
   runUpdate();
 
   if(selftestRequested){
-    runSelfTest({ records, index, exportRows });
+    runSelfTest({
+      records, index, exportRows,
+      seed: selftestSeed,
+      listScroller, listViewport, groupStickyHeader, pool,
+      state, paint,
+      getRowH: () => ROW_H,
+      forcePaint: () => { lastStart = -1; paint(); },
+      getCurrentResults: () => currentResults,
+      extendSelectionTo,
+      getSelectedIds: () => selectedIds,
+      resetSelection: clearSelection,
+      setFocusedRowIndex: (v) => { focusedRowIndex = v; },
+      facetGroupsEl,
+      searchInput, shortcutsModal, closeShortcuts,
+      grammarPicker, sortPicker, sortSelectBtn, exportPicker, exportBtn
+    });
   }
 }
 
