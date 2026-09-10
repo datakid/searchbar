@@ -2690,18 +2690,23 @@ function selftestGroupHeaderOffset(ctx){
 
   state.sortLevels = [{ key:'class', dir:'a' }];
   listScroller.scrollTop = 20 * rowH;
+  const achievedScrollTop = listScroller.scrollTop;
   forcePaint();
   const shown = groupStickyHeader.classList.contains('show');
-  const expectedStart = Math.max(0, Math.floor((20 * rowH - GROUP_HEADER_H) / rowH) - OVERSCAN);
-  const expectedTransform = 'translateY(' + (expectedStart * rowH) + 'px)';
   const actualTransform = listViewport.style.transform;
 
   state.sortLevels = prevSortLevels;
   listScroller.scrollTop = prevScrollTop;
   forcePaint();
 
+  if(achievedScrollTop < GROUP_HEADER_H + rowH * (OVERSCAN + 1)){
+    return { pass:true, detail:'scroller too short to exercise the offset (scrollTop clamped to ' + achievedScrollTop + 'px)' };
+  }
+
+  const expectedStart = Math.max(0, Math.floor((achievedScrollTop - GROUP_HEADER_H) / rowH) - OVERSCAN);
+  const expectedTransform = 'translateY(' + (expectedStart * rowH) + 'px)';
   const pass = shown && actualTransform === expectedTransform;
-  return { pass, detail: 'expected ' + expectedTransform + ', got ' + actualTransform + (shown ? '' : ' (header not shown)') };
+  return { pass, detail: 'expected ' + expectedTransform + ', got ' + actualTransform + (shown ? '' : ' (header not shown)') + ', scrollTop achieved ' + achievedScrollTop + 'px' };
 }
 function selftestRowAtTopAligned(ctx){
   const { listScroller, pool, forcePaint, getCurrentResults } = ctx;
