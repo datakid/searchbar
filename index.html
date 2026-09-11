@@ -2382,6 +2382,8 @@ function buildTruncationClasses(records){
 }
 
 function buildIndexTimed(){
+  const warm = buildRecords(RAW_DATA);
+  buildSynStructures(buildIndex(warm.records));
   const t0 = performance.now();
   const { records } = buildRecords(RAW_DATA);
   const index = buildIndex(records);
@@ -2792,6 +2794,7 @@ async function runSelfTest(ctx){
   stRng = mulberry32(seed);
 
   const suite = buildCorruptionSuite(records, 2000);
+  suite.forEach(s => runSearch(s.query, records, index, facets));
   const latencies = [];
   let hit1 = 0, hit5 = 0, hitVariant1 = 0;
   const byStrategy = new Map();
