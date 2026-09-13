@@ -996,7 +996,10 @@ function strengthKey(conc){
   const unitMatch = s.match(/(mcg|mg|g|miu|iu|%)/);
   const unit = unitMatch ? unitMatch[1] : 'mg';
   const numSection = unitMatch ? s.slice(0, unitMatch.index) : s;
-  const m = numSection.match(/[\d.]+/);
+  const numSectionFixed = (unit === 'iu' || unit === 'miu') && /^\s*\d+\.\d{3}\s*$/.test(numSection)
+    ? numSection.replace(/^(\s*\d+)\.(\d{3}\s*)$/, '$1$2')
+    : numSection;
+  const m = numSectionFixed.match(/[\d.]+/);
   if(!m) return [9, Infinity];
   const val = parseFloat(m[0]);
   if(isNaN(val)) return [9, Infinity];
@@ -1056,6 +1059,13 @@ function buildRecords(raw){
       authTier: auth.tier, authCommittee: auth.committee, classes,
       generic: split.generic, brands: split.brands, correctedFrom, variantKey,
       trigrams: null,
+      nameNorm: normalizeText(split.generic),
+      brandNorm: normalizeText(split.brands.join(' ')),
+      formNorm: normalizeText(formCanon).replace(/\./g,''),
+      authTierLower: auth.tier.toLowerCase(),
+      authorityNorm: normalizeText(authRaw),
+      classesNorm: classes.map(c => normalizeText(c)),
+      phraseHay: normalizeText(name + ' ' + split.brands.join(' ') + ' ' + classes.join(' ')),
       sk: Object.freeze({
         name: name.toLowerCase(), cls: (classes[0] || '').toLowerCase(),
         form: formCanon.toLowerCase(),
@@ -1323,7 +1333,11 @@ function buildSortRank(records, keyFn){
     return a - b;
   });
   const rank = new Int32Array(records.length);
-  idx.forEach((docId, i) => { rank[docId] = i; });
+  idx.forEach((docId, i) => {
+    if(i === 0){ rank[docId] = 0; return; }
+    const prevDocId = idx[i-1];
+    rank[docId] = keys[docId] === keys[prevDocId] ? rank[prevDocId] : i;
+  });
   return { rank, permutation: idx };
 }
 function buildStrengthRank(records){
@@ -1335,7 +1349,12 @@ function buildStrengthRank(records){
     return a-b;
   });
   const rank = new Int32Array(records.length);
-  idx.forEach((docId,i) => { rank[docId]=i; });
+  idx.forEach((docId,i) => {
+    if(i === 0){ rank[docId] = 0; return; }
+    const prevDocId = idx[i-1];
+    const cur = records[docId].sk.strength, prev = records[prevDocId].sk.strength;
+    rank[docId] = (cur[0] === prev[0] && cur[1] === prev[1]) ? rank[prevDocId] : i;
+  });
   return rank;
 }
 
@@ -1473,7 +1492,7 @@ function buildIndex(records){
     nameRank: nameSort.rank, classRank: classSort.rank, formRank: formSort.rank,
     strengthRank, alphaPermutation: nameSort.permutation,
     formWords, authWords, initialismSyn,
-    facetCountCache: { query:null, bitset:null }, resolveCache: new Map()
+    facetCountCache: { query:null, bitset:null }, resolveCache: new Map(), doseResolveCache: new Map()
   };
 }
 const SYN_STOPWORDS = new Set(['drugs','agents','disorders','disease','diseases','drug','agent','and','or','the','of']);
@@ -1540,7 +1559,8 @@ function resolveQueryToken(qtok, index, opts){
   const cached = index.resolveCache.get(cacheKey);
   if(cached !== undefined) return cached;
   const out = [];
-  if(index.termId.has(qtok)) out.push({ tok:qtok, kind:'exact', quality:1 });
+  const hasExact = index.termId.has(qtok);
+  if(hasExact) out.push({ tok:qtok, kind:'exact', quality:1 });
   if(qtok.length > 40){
     index.resolveCache.set(cacheKey, out);
     return out;
@@ -1548,7 +1568,7 @@ function resolveQueryToken(qtok, index, opts){
   if(qtok.length >= 2){
     index.trie.prefixTokens(qtok, 25).forEach(t => { if(t !== qtok) out.push({ tok:t, kind:'prefix', quality:0.9 }); });
   }
-  if(!/^[0-9]/.test(qtok)){
+  if(!hasExact && !/^[0-9]/.test(qtok)){
     const maxDist = forceMaxDist != null ? forceMaxDist : maxFuzzyDistance(qtok.length);
     if(maxDist > 0){
       const prefixMode = isLast && qtok.length >= 3;
@@ -1606,14 +1626,22 @@ function resolveDoseToken(tokens, i, index){
   }
   const dose = parseDose(text);
   if(!dose || !(dose.value > 0)) return null;
-  const docIds = [];
-  const eps = Math.max(0.0005, dose.value * 0.005);
-  for(let docId = 0; docId < index.N; docId++){
-    let val;
-    if(dose.lane === 'mg') val = index.doseValueMg[docId];
-    else if(dose.lane === 'iu') val = index.doseValueIU[docId];
-    else val = index.dosePercent[docId];
-    if(!isNaN(val) && Math.abs(val - dose.value) < eps) docIds.push(docId);
+  const cacheKey = dose.lane + ':' + dose.value;
+  let docIds = index.doseResolveCache.get(cacheKey);
+  if(docIds === undefined){
+    docIds = [];
+    const eps = Math.max(0.0005, dose.value * 0.005);
+    for(let docId = 0; docId < index.N; docId++){
+      let val;
+      if(dose.lane === 'mg') val = index.doseValueMg[docId];
+      else if(dose.lane === 'iu') val = index.doseValueIU[docId];
+      else val = index.dosePercent[docId];
+      if(!isNaN(val) && Math.abs(val - dose.value) < eps) docIds.push(docId);
+    }
+    if(index.doseResolveCache.size >= 512){
+      index.doseResolveCache.delete(index.doseResolveCache.keys().next().value);
+    }
+    index.doseResolveCache.set(cacheKey, docIds);
   }
   return { docIds, consumed };
 }
@@ -1666,8 +1694,9 @@ function scoreCandidatesForTokens(index, resolutions){
         matchedTokens.get(docId).add(m.tok);
       }
     });
+    const rawIdf = idfForRaw(index, res.raw);
     perDocBest.forEach((wtf, docId) => {
-      const contribution = idfForRaw(index, res.raw) * wtf / (K1 + wtf);
+      const contribution = rawIdf * wtf / (K1 + wtf);
       scores.set(docId, (scores.get(docId) || 0) + contribution);
       coverage.set(docId, (coverage.get(docId) || 0) + 1);
       const kinds = perDocKinds.get(docId) || 0;
@@ -1709,8 +1738,8 @@ function lowestIdfIndexOf(resolutions, index){
 function applyImplicitFieldBoost(rec, activeRawTokens, index){
   let boost = 1;
   activeRawTokens.forEach(raw => {
-    if(index.formWords.has(raw) && normalizeText(rec.form).replace(/\./g,'') === raw) boost *= 1.3;
-    if(index.authWords.has(raw) && rec.authTier.toLowerCase() === raw) boost *= 1.3;
+    if(index.formWords.has(raw) && rec.formNorm === raw) boost *= 1.3;
+    if(index.authWords.has(raw) && rec.authTierLower === raw) boost *= 1.3;
   });
   return boost;
 }
@@ -1726,7 +1755,7 @@ function buildKindSummary(mask){
 }
 function applyBoosts(rec, score, resolutionCount, activeRawTokens, qNorm, coverage, kindSummary, index, personalization){
   let s = score;
-  const nameNorm = normalizeText(rec.generic), brandNorm = normalizeText(rec.brands.join(' '));
+  const nameNorm = rec.nameNorm, brandNorm = rec.brandNorm;
   if(qNorm){
     if(nameNorm === qNorm || brandNorm === qNorm) s *= 2.2;
     else if(nameNorm.startsWith(qNorm) || (brandNorm && brandNorm.startsWith(qNorm))) s *= 1.6;
@@ -1820,9 +1849,9 @@ function fieldTokensOf(raw){
 function passesFieldFilters(rec, filters){
   for(const f of filters){
     let hit = false;
-    if(f.field === 'auth') hit = normalizeText(rec.authTier).startsWith(f.value) || normalizeText(rec.Authority).includes(f.value);
-    else if(f.field === 'class') hit = rec.classes.some(c => normalizeText(c).includes(f.value));
-    else if(f.field === 'form') hit = normalizeText(rec.form).replace(/\./g,'').includes(f.value);
+    if(f.field === 'auth') hit = rec.authTierLower.startsWith(f.value) || rec.authorityNorm.includes(f.value);
+    else if(f.field === 'class') hit = rec.classesNorm.some(c => c.includes(f.value));
+    else if(f.field === 'form') hit = rec.formNorm.includes(f.value);
     if(f.negate && hit) return false;
     if(!f.negate && !hit) return false;
   }
@@ -1830,8 +1859,7 @@ function passesFieldFilters(rec, filters){
 }
 function passesPhrases(rec, phrases){
   if(!phrases.length) return true;
-  const hay = normalizeText(rec.Name + ' ' + rec.brands.join(' ') + ' ' + rec.classes.join(' '));
-  return phrases.every(p => hay.includes(p));
+  return phrases.every(p => rec.phraseHay.includes(p));
 }
 function passesFacets(rec, facets){
   if(facets.authorities.size && !facets.authorities.has(rec.authTier)) return false;
@@ -1890,15 +1918,19 @@ function runSearch(query, records, index, facets, opts){
   }
 
   if(attempt.docs.length === 0){
+    let widenedAny = false;
     const widened = workingTokens.map((t,i) => {
       const existing = resolutions[i];
       if(existing && existing.matches.length > 0) return existing;
+      widenedAny = true;
       return { raw: t.raw, matches: resolveQueryToken(t.raw, index, { isLast: i === workingTokens.length-1, forceMaxDist: maxFuzzyDistance(t.raw.length) + 1 }) };
     });
-    const widenedAttempt = computeConjunctive(widened, doseResolutions, index, totalRequired);
-    if(widenedAttempt.docs.length > attempt.docs.length){
-      attempt = widenedAttempt; resolutions = widened;
-      relaxation = relaxation || 'Broadened match tolerance';
+    if(widenedAny){
+      const widenedAttempt = computeConjunctive(widened, doseResolutions, index, totalRequired);
+      if(widenedAttempt.docs.length > attempt.docs.length){
+        attempt = widenedAttempt; resolutions = widened;
+        relaxation = relaxation || 'Broadened match tolerance';
+      }
     }
   }
 
@@ -1930,13 +1962,13 @@ function runSearch(query, records, index, facets, opts){
   results = results.filter(r => passesFieldFilters(r.rec, parsed.fieldFilters) && passesPhrases(r.rec, parsed.phrases) && passesFacets(r.rec, facets));
 
   if(negatedTokens.length){
-    results = results.filter(r => !negatedTokens.some(nt => {
+    const negDocs = new Set();
+    negatedTokens.forEach(nt => {
       const tid = index.termId.get(nt.raw);
-      if(tid === undefined) return false;
-      const start = index.postingsStart[tid], end = index.postingsStart[tid+1];
-      for(let p = start; p < end; p++) if(index.postingsDoc[p] === r.rec.id) return true;
-      return false;
-    }));
+      if(tid === undefined) return;
+      for(let p = index.postingsStart[tid]; p < index.postingsStart[tid+1]; p++) negDocs.add(index.postingsDoc[p]);
+    });
+    if(negDocs.size) results = results.filter(r => !negDocs.has(r.rec.id));
   }
 
   results.sort(tieBreak);
@@ -2467,16 +2499,29 @@ function selftestFacetCounts(records, index){
 }
 
 function selftestSortStability(records, index){
-  const facets = { authorities:new Set(), classes:new Set(), forms:new Set() };
-  const { results } = runSearch('a', records, index, facets);
+  const wrapped = records.map(r => ({ rec: r }));
   const levels = [{ key:'class', dir:'a' }, { key:'name', dir:'a' }];
-  const sorted = sortByLevels(results, levels);
+  const sorted = sortByLevels(wrapped, levels);
+  const byClass = new Map();
+  sorted.forEach(w => {
+    const c = w.rec.sk.cls;
+    if(!byClass.has(c)) byClass.set(c, []);
+    byClass.get(c).push(w.rec.sk.name);
+  });
+  let checkedMultiRecordClass = false;
+  for(const names of byClass.values()){
+    if(names.length < 2) continue;
+    checkedMultiRecordClass = true;
+    for(let i = 1; i < names.length; i++){
+      if(names[i-1] > names[i]) return false;
+    }
+  }
   for(let i = 1; i < sorted.length; i++){
     const prev = sorted[i-1].rec.rank, cur = sorted[i].rec.rank;
     if(prev.class > cur.class) return false;
     if(prev.class === cur.class && prev.name > cur.name) return false;
   }
-  return true;
+  return checkedMultiRecordClass;
 }
 
 function selftestXlsxValid(){
@@ -2651,7 +2696,13 @@ function selftestStrengthKeyTable(){
     ['3 M.I.U', 1, 3000000],
     ['0. 5 mg', 0, 0.5],
     ['0.0005', 0, 0.0005],
-    ['625 mg', 0, 625]
+    ['625 mg', 0, 625],
+    ['600.000 I.U', 1, 600000],
+    ['3000.000 I.U', 1, 3000000],
+    ['1200.000 I.U', 1, 1200000],
+    ['1000.000 I.U', 1, 1000000],
+    ['100.000 I.U/ml', 1, 100000],
+    ['300.000 I.U', 1, 300000]
   ];
   const bad = [];
   table.forEach(([input, cls, val]) => {
@@ -2830,7 +2881,6 @@ function selftestSlashQuestionRouting(ctx){
 }
 
 async function runSelfTest(ctx){
-  const buildMs = measureIndexBuildMs(3);
   let records = ctx && ctx.records;
   let index = ctx && ctx.index;
   if(!records || !index){
@@ -2842,6 +2892,9 @@ async function runSelfTest(ctx){
   const facets = { authorities:new Set(), classes:new Set(), forms:new Set() };
 
   const seed = (ctx && Number.isFinite(ctx.seed)) ? ctx.seed : 42;
+
+  phoneticBucket(index, 'warmup');
+  trigramNearest('warmup', records, 1);
 
   stRng = mulberry32(seed ^ 0x9E3779B9);
   buildCorruptionSuite(records, 250).forEach(s => runSearch(s.query, records, index, facets));
@@ -2912,6 +2965,8 @@ async function runSelfTest(ctx){
     heapDelta = Math.max(b - a, c - b);
     heapLeaking = (b - a) > 1 && (c - b) > 1;
   }
+
+  const buildMs = measureIndexBuildMs(3);
 
   const rows = [
     { name:'recall@1 >= 88%', pass: recall1 >= 0.88, detail:(recall1*100).toFixed(1)+'%' },
@@ -3000,7 +3055,13 @@ function initApp(){
   const index = buildIndex(records);
   buildSynStructures(index);
   const siblingIndex = buildSiblingIndex(records);
-  const personalization = new Map(loadLocal('personalization_v1', []));
+  const personalization = new Map();
+  const savedPersonalization = loadLocal('personalization_v2', []);
+  const byVariantKey = new Map(records.map(r => [r.variantKey, r.id]));
+  savedPersonalization.forEach(([vk, n]) => {
+    const id = byVariantKey.get(vk);
+    if(id !== undefined) personalization.set(id, n);
+  });
   const expandedVariantGroups = new Set();
   const CLASS_ENTRIES_ALL = [...countByClass(records).entries()];
   const FORM_ENTRIES_ALL = [...countByForm(records).entries()];
@@ -3264,6 +3325,7 @@ function initApp(){
 
   function applyVariantCollapsing(results){
     const idsInResults = new Set(results.map(r => r.rec.id));
+    const byId = new Map(results.map(r => [r.rec.id, r]));
     const out = [];
     results.forEach(r => {
       const rec = r.rec;
@@ -3275,7 +3337,7 @@ function initApp(){
       if(rec.variantPrimary && rec.variantSiblings.length && expandedVariantGroups.has(rec.variantKey)){
         rec.variantSiblings.forEach(sibId => {
           if(!idsInResults.has(sibId)) return;
-          const already = results.find(x => x.rec.id === sibId);
+          const already = byId.get(sibId);
           out.push({ rec: records[sibId], score: already ? already.score : r.score, matchedTokens: already ? already.matchedTokens : r.matchedTokens });
         });
       }
@@ -3918,7 +3980,7 @@ function initApp(){
 
   exportBtn.addEventListener('click', () => { renderExportMenu(); exportPicker.classList.toggle('show'); });
 
-  const debouncedSavePersonalization = debounce(() => saveLocal('personalization_v1', [...personalization]), 250);
+  const debouncedSavePersonalization = debounce(() => saveLocal('personalization_v2', [...personalization].map(([id, n]) => [records[id].variantKey, n])), 250);
   function recordPersonalizationOpen(id){
     personalization.set(id, (personalization.get(id) || 0) + 1);
     debouncedSavePersonalization();
@@ -4537,9 +4599,9 @@ function initApp(){
 
   runUpdate();
 
-  if(window.requestIdleCallback){
-    requestIdleCallback(() => { phoneticBucket(index, 'warmup'); trigramNearest('warmup', records, 1); });
-  }
+  const warmLazyStructures = () => { phoneticBucket(index, 'warmup'); trigramNearest('warmup', records, 1); };
+  if(window.requestIdleCallback) requestIdleCallback(warmLazyStructures);
+  else setTimeout(warmLazyStructures, 300);
 
   if(selftestRequested){
     const selftestCtx = {
