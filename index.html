@@ -1062,7 +1062,7 @@ function buildRecords(raw){
       nameNorm: normalizeText(split.generic),
       brandNorm: normalizeText(split.brands.join(' ')),
       formNorm: normalizeText(formCanon).replace(/\./g,''),
-      authTierLower: auth.tier.toLowerCase(),
+      authTierNorm: normalizeText(auth.tier),
       authorityNorm: normalizeText(authRaw),
       classesNorm: classes.map(c => normalizeText(c)),
       phraseHay: normalizeText(name + ' ' + split.brands.join(' ') + ' ' + classes.join(' ')),
@@ -1678,7 +1678,7 @@ function kindBit(kind){
 function scoreCandidatesForTokens(index, resolutions){
   const scores = new Map(), coverage = new Map(), matchedTokens = new Map(), matchKinds = new Map();
   resolutions.forEach((res) => {
-    const perDocBest = new Map(), perDocKinds = new Map();
+    const perDocBest = new Map(), perDocKinds = new Map(), perDocTok = new Map();
     res.matches.forEach(m => {
       const tid = index.termId.get(m.tok);
       if(tid === undefined) return;
@@ -1687,11 +1687,9 @@ function scoreCandidatesForTokens(index, resolutions){
       for(let p = start; p < end; p++){
         const docId = index.postingsDoc[p];
         const wtf = index.postingsWtf[p] * m.quality;
-        const prev = perDocBest.get(docId) || 0;
-        if(wtf > prev) perDocBest.set(docId, wtf);
+        const prev = perDocBest.get(docId);
+        if(prev === undefined || wtf > prev){ perDocBest.set(docId, wtf); perDocTok.set(docId, m.tok); }
         perDocKinds.set(docId, (perDocKinds.get(docId) || 0) | bit);
-        if(!matchedTokens.has(docId)) matchedTokens.set(docId, new Set());
-        matchedTokens.get(docId).add(m.tok);
       }
     });
     const rawIdf = idfForRaw(index, res.raw);
@@ -1699,6 +1697,9 @@ function scoreCandidatesForTokens(index, resolutions){
       const contribution = rawIdf * wtf / (K1 + wtf);
       scores.set(docId, (scores.get(docId) || 0) + contribution);
       coverage.set(docId, (coverage.get(docId) || 0) + 1);
+      let toks = matchedTokens.get(docId);
+      if(toks === undefined){ toks = new Set(); matchedTokens.set(docId, toks); }
+      toks.add(perDocTok.get(docId));
       const kinds = perDocKinds.get(docId) || 0;
       let summary = kinds;
       if(kinds === KIND_PHONETIC) summary |= KIND_PH_ONLY;
@@ -1739,7 +1740,7 @@ function applyImplicitFieldBoost(rec, activeRawTokens, index){
   let boost = 1;
   activeRawTokens.forEach(raw => {
     if(index.formWords.has(raw) && rec.formNorm === raw) boost *= 1.3;
-    if(index.authWords.has(raw) && rec.authTierLower === raw) boost *= 1.3;
+    if(index.authWords.has(raw) && rec.authTierNorm === raw) boost *= 1.3;
   });
   return boost;
 }
@@ -1849,7 +1850,7 @@ function fieldTokensOf(raw){
 function passesFieldFilters(rec, filters){
   for(const f of filters){
     let hit = false;
-    if(f.field === 'auth') hit = rec.authTierLower.startsWith(f.value) || rec.authorityNorm.includes(f.value);
+    if(f.field === 'auth') hit = rec.authTierNorm.startsWith(f.value) || rec.authorityNorm.includes(f.value);
     else if(f.field === 'class') hit = rec.classesNorm.some(c => c.includes(f.value));
     else if(f.field === 'form') hit = rec.formNorm.includes(f.value);
     if(f.negate && hit) return false;
@@ -2897,7 +2898,8 @@ async function runSelfTest(ctx){
   trigramNearest('warmup', records, 1);
 
   stRng = mulberry32(seed ^ 0x9E3779B9);
-  buildCorruptionSuite(records, 250).forEach(s => runSearch(s.query, records, index, facets));
+  buildCorruptionSuite(records, 600).forEach(s => runSearch(s.query, records, index, facets));
+  ['zzzqx wvbn', 'amoxicilin 500 zzzqx', 'atrvsttn'].forEach(q => runSearch(q, records, index, facets));
 
   stRng = mulberry32(seed);
   const suite = buildCorruptionSuite(records, 2000);
@@ -2929,6 +2931,10 @@ async function runSelfTest(ctx){
   latencies.sort((a,b) => a-b);
   const median = latencies[Math.floor(latencies.length * 0.5)];
   const p95 = latencies[Math.floor(latencies.length * 0.95)];
+  const nonzeroLatencies = latencies.filter(v => v > 0);
+  const minLatency = nonzeroLatencies.length ? Math.min(...nonzeroLatencies) : 0;
+  const timerClamped = minLatency >= 0.05 && nonzeroLatencies.length >= 8 &&
+    nonzeroLatencies.every(v => Math.abs(v / minLatency - Math.round(v / minLatency)) < 1e-6);
   const recall1 = hit1 / suite.length, recall5 = hit5 / suite.length;
 
   console.log('Recall by corruption strategy (seed ' + seed + ')');
@@ -2971,7 +2977,7 @@ async function runSelfTest(ctx){
   const rows = [
     { name:'recall@1 >= 88%', pass: recall1 >= 0.88, detail:(recall1*100).toFixed(1)+'%' },
     { name:'recall@5 >= 97.5%', pass: recall5 >= 0.975, detail:(recall5*100).toFixed(1)+'%' },
-    { name:'p95 latency < 4ms', pass: p95 < 4, detail: p95.toFixed(2)+'ms (median '+median.toFixed(2)+'ms)' },
+    { name:'p95 latency < 4ms', pass: p95 < 4, detail: p95.toFixed(2)+'ms (median '+median.toFixed(2)+'ms)' + (timerClamped ? ' (timer resolution '+minLatency.toFixed(2)+'ms — unreliable)' : '') },
     { name:'search startup build < 45ms', pass: buildMs < 45, detail: buildMs.toFixed(1)+'ms (best of 3)' },
     { name:'heap delta / 1000 queries < 1MB', pass: heapDelta === null ? true : !heapLeaking, detail: heapDelta === null ? 'performance.memory unavailable' : heapDelta.toFixed(3)+'MB peak batch delta' + (heapLeaking ? ', growing across batches' : ', not monotonic') },
     { name:'URL state round-trip', pass: selftestUrlRoundTrip() },
@@ -4452,8 +4458,9 @@ function initApp(){
 
   function ensureCursorVisible(){
     if(focusedRowIndex < 0) return;
+    const headerH = groupHeaderVisible() ? GROUP_HEADER_H : 0;
     const top = focusedRowIndex * ROW_H;
-    const bottom = top + ROW_H;
+    const bottom = headerH + (focusedRowIndex + 1) * ROW_H;
     if(top < listScroller.scrollTop) listScroller.scrollTop = top;
     else if(bottom > listScroller.scrollTop + listScroller.clientHeight) listScroller.scrollTop = bottom - listScroller.clientHeight;
     else { lastStart = -1; paint(); }
