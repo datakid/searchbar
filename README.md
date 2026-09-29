@@ -42,4 +42,3 @@ The records are embedded in the page as `RAW_DATA` (fields: Name, Conc, form, Au
 ## Not done yet / next steps
 - Two variants of Acetyl Salicylic Acid are still weak when spelled phonetically.
 - A service worker could make the app work offline.
-- Deploy through the **Publish tab**.
