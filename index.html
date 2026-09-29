@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Lx Search F3</title>
+<title>Lx Search F4</title>
+<link rel="apple-touch-icon" href="images/icon-256.png">
 <link rel="icon" media="(prefers-color-scheme:light)" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5.5 15.82A10.5 10.5 0 1 1 22.02 24.6' fill='none' stroke='%23B4501F' stroke-width='4'/%3E%3Cpath d='M18 26.31A10.5 10.5 0 0 1 6.34 20.1' fill='none' stroke='%23B4501F' stroke-width='4'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%23B4501F'/%3E%3C/svg%3E">
 <link rel="icon" media="(prefers-color-scheme:dark)" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5.5 15.82A10.5 10.5 0 1 1 22.02 24.6' fill='none' stroke='%23E2703A' stroke-width='4'/%3E%3Cpath d='M18 26.31A10.5 10.5 0 0 1 6.34 20.1' fill='none' stroke='%23E2703A' stroke-width='4'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%23E2703A'/%3E%3C/svg%3E">
 <meta name="description" content="Formulary lookup — dispensing authority, strength and class for the insurance formulary.">
@@ -17,7 +18,7 @@
 <noscript><link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Martian+Mono:wght@400..700&display=swap" rel="stylesheet"></noscript>
 <style>
 :root{
-  --radius-lg:6px; --radius-md:4px; --radius-sm:3px;
+  --radius-lg:12px; --radius-md:8px; --radius-sm:6px; --radius-pill:999px;
   --ease:cubic-bezier(.2,.6,.2,1);
   --dur-in:120ms; --dur-out:90ms;
   --hair-w:1px;
@@ -99,16 +100,18 @@ svg.icon{
 .skip-link{position:fixed;top:-40px;left:8px;z-index:400;background:var(--iodine);color:#fff;padding:8px 14px;border-radius:var(--radius-sm);font-size:13px;transition:top var(--dur-in) var(--ease);}
 .skip-link:focus{top:8px;}
 
-#app{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh;}
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;}
+.main-col,.results-grid,.list-scroller{min-height:0;}
 
 .cmdbar{
   position:sticky;top:0;z-index:60;
   height:var(--bar-h);flex-shrink:0;
   display:flex;align-items:center;gap:14px;
-  padding:0 16px 0 max(16px, env(safe-area-inset-left));
+  padding:0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
   background:var(--s1);
   border-bottom:var(--hair-w) solid var(--hair);
 }
+.wordmark .logo{width:22px;height:22px;flex-shrink:0;color:var(--iodine);}
 .wordmark{
   display:flex;align-items:center;gap:9px;flex-shrink:0;
 }
@@ -127,19 +130,23 @@ svg.icon{
 .cmd-search{position:relative;flex:1;min-width:0;max-width:640px;}
 .cmd-search-field{
   position:relative;display:flex;align-items:center;
-  height:36px;border-radius:var(--radius-md);
+  height:40px;border-radius:var(--radius-md);
   background:var(--s2);border:1px solid var(--hair);
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 4%, transparent);
+  transition:border-color var(--dur-in) var(--ease),box-shadow var(--dur-in) var(--ease);
 }
+.cmd-search-field:hover{border-color:var(--hair-2);}
 .cmd-search-field:focus-within{
-  border-color:var(--iodine);
-  box-shadow:0 0 0 3px color-mix(in srgb, var(--iodine) 16%, transparent);
+  border-color:var(--iodine);background:var(--s1);
+  box-shadow:0 0 0 3px color-mix(in srgb, var(--iodine) 18%, transparent);
 }
-.cmd-search-field svg.icon{margin-left:11px;color:var(--ink-3);flex-shrink:0;}
+.cmd-search-field svg.icon{margin-left:12px;color:var(--ink-3);flex-shrink:0;}
 .cmd-search-field:focus-within svg.icon{color:var(--iodine);}
 #searchInput{
-  flex:1;min-width:0;height:100%;padding:0 8px;border:none;background:transparent;
-  font-size:16px;color:var(--ink);
+  flex:1;min-width:0;height:100%;padding:0 10px;border:none;background:transparent;
+  font-size:16px;color:var(--ink);letter-spacing:-.005em;
 }
+#searchInput::-webkit-search-cancel-button{display:none;}
 #searchInput:focus-visible{outline:none;}
 #searchInput::placeholder{color:var(--ink-3);}
 .search-kbd{
@@ -150,9 +157,10 @@ svg.icon{
 .cmd-search:has(#searchInput:not(:placeholder-shown)) .search-kbd{display:none;}
 .search-clear{
   display:none;align-items:center;justify-content:center;position:relative;
-  width:28px;height:28px;margin-right:5px;border-radius:50%;
-  background:transparent;border:none;color:var(--ink-3);flex-shrink:0;
+  width:28px;height:28px;margin-right:6px;border-radius:50%;
+  background:var(--s3);border:none;color:var(--ink-2);flex-shrink:0;
 }
+.search-clear svg.icon{width:12px;height:12px;}
 .search-clear.show{display:flex;}
 .search-clear:hover{color:var(--cinnabar);background:var(--s3);}
 
@@ -187,10 +195,12 @@ svg.icon{
 .density-toggle button.active{color:var(--iodine);background:var(--s3);}
 
 .mobile-filter-btn{
-  display:none;align-items:center;gap:6px;height:34px;padding:0 12px;flex-shrink:0;
+  display:none;align-items:center;justify-content:center;gap:6px;height:40px;padding:0 14px;flex-shrink:0;
   border-radius:var(--radius-md);border:1px solid var(--hair);background:transparent;color:var(--ink-2);
   font-size:12.5px;font-weight:500;position:relative;
 }
+.mobile-filter-btn:hover{border-color:var(--hair-2);color:var(--ink);}
+.mobile-filter-btn:has(.badge.show){border-color:color-mix(in srgb, var(--iodine) 55%, var(--hair));color:var(--ink);}
 .mobile-filter-btn .badge{
   display:none;
   min-width:16px;height:16px;padding:0 4px;border-radius:8px;
@@ -268,7 +278,7 @@ svg.icon{
 .meta-clear:hover{color:var(--cinnabar);}
 .active-query-tags{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
 .qtag{
-  display:flex;align-items:center;gap:5px;padding:3px 4px 3px 9px;border-radius:var(--radius-md);
+  display:flex;align-items:center;gap:5px;padding:3px 4px 3px 10px;border-radius:var(--radius-pill);
   background:var(--s3);border:1px solid var(--hair);font-size:11.5px;color:var(--ink-2);font-variant-numeric:tabular-nums;
 }
 .qtag button{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:transparent;border:none;color:var(--ink-3);}
@@ -342,6 +352,12 @@ svg.icon{
 }
 .row-sub{
   display:none;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11px;color:var(--ink-2);
+  white-space:nowrap;overflow:hidden;
+}
+.row-sub-form::before{content:'·';margin-right:8px;color:var(--ink-3);}
+.row-sub-auth{
+  padding:1px 6px;border-radius:var(--radius-sm);font-size:10.5px;
+  color:var(--row-rule,var(--ink-2));background:color-mix(in srgb, var(--row-rule, var(--ink-3)) 14%, transparent);
 }
 .row-strength{
   width:100px;flex-shrink:0;text-align:right;font-family:var(--font-mono);font-size:12px;color:var(--ink-2);
@@ -353,7 +369,7 @@ svg.icon{
 .row-form .chip{
   display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   font-family:var(--font-mono);font-size:10.5px;color:var(--ink-2);
-  border:1px solid var(--hair);border-radius:var(--radius-sm);padding:2px 7px;
+  background:var(--s2);border:1px solid var(--hair);border-radius:var(--radius-sm);padding:2px 8px;
 }
 .row-authority{width:110px;flex-shrink:0;display:flex;align-items:center;gap:6px;}
 .row-authority .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;background:var(--row-rule,var(--ink-3));}
@@ -381,14 +397,14 @@ svg.icon{
 .entry-chips.show{display:flex;}
 .entry-chips .label{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);margin-right:4px;}
 .entry-chip{
-  padding:5px 11px;border-radius:var(--radius-md);border:1px solid var(--hair);background:var(--s2);
+  padding:6px 12px;border-radius:var(--radius-pill);border:1px solid var(--hair);background:var(--s2);
   font-size:12px;color:var(--ink-2);
 }
 .entry-chip:hover{border-color:var(--iodine);color:var(--ink);}
 
 .zero-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:420px;margin-top:4px;}
 .zero-chip{
-  padding:5px 11px;border-radius:var(--radius-md);border:1px solid var(--hair);background:var(--s2);
+  padding:6px 12px;border-radius:var(--radius-pill);border:1px solid var(--hair);background:var(--s2);
   font-size:12px;color:var(--ink-2);cursor:pointer;
 }
 .zero-chip:hover{border-color:var(--iodine);color:var(--ink);}
@@ -540,6 +556,7 @@ svg.icon{
 }
 .disclaimer svg.icon{width:15px;height:15px;color:var(--iodine);flex-shrink:0;margin-top:1px;}
 .disclaimer p{margin:0;font-size:11.5px;color:var(--ink-3);line-height:1.5;text-wrap:pretty;}
+.cmd-search .grammar-picker .gp-item{cursor:pointer;}
 
 .theme-icon-dark{display:none;}
 .theme-icon-light{display:block;}
@@ -547,22 +564,49 @@ svg.icon{
 :root[data-theme="dark"] .theme-icon-light{display:none;}
 
 @media (max-width:719px){
-  .wordmark .name{display:none;}
+  .cmdbar{
+    height:auto;flex-wrap:wrap;row-gap:10px;column-gap:10px;
+    padding:calc(env(safe-area-inset-top) + 10px) max(12px, env(safe-area-inset-right)) 12px max(12px, env(safe-area-inset-left));
+  }
+  .wordmark{order:1;}
+  .wordmark .name{font-size:15px;}
   .wordmark .count{display:none;}
+  .cmd-controls{order:2;gap:2px;}
+  .cmd-search{order:3;flex:1 1 calc(100% - 64px);max-width:none;}
+  .mobile-filter-btn{order:4;display:flex;width:48px;padding:0;height:46px;border-radius:var(--radius-md);background:var(--s2);}
+  .mobile-filter-btn > span:not(.badge){display:none;}
+  .mobile-filter-btn .badge{position:absolute;top:-5px;right:-5px;}
+  .mobile-filter-btn svg.icon{width:18px;height:18px;}
+  .cmd-search-field{height:46px;border-radius:var(--radius-md);}
+  .cmd-search-field svg.icon{width:18px;height:18px;margin-left:14px;}
+  .search-clear{width:32px;height:32px;margin-right:7px;}
+  #shortcutsBtn{display:none;}
   .sort-select-wrap,.density-toggle{display:none;}
-  .mobile-filter-btn{display:flex;}
+  .sort-select-wrap.export-wrap{display:block;}
+  .icon-btn{width:40px;height:40px;}
   .facet-rail{display:none;}
   .detail-panel{display:none !important;}
-  .cmd-search{max-width:none;}
   #searchInput{font-size:16px;}
   .search-kbd{display:none;}
+  #grammarPicker{right:0;max-width:none;}
+  .grammar-picker .gp-item{min-height:44px;}
+  .results-meta-row{padding:8px 14px;}
+  .entry-chips{padding:12px 14px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;}
+  .entry-chips::-webkit-scrollbar{display:none;}
+  .entry-chip{flex-shrink:0;white-space:nowrap;}
+  .disclaimer{padding:8px 14px calc(8px + env(safe-area-inset-bottom));gap:8px;}
+  .disclaimer p{font-size:10.5px;line-height:1.4;}
   .row{padding:0 14px;}
   .sheet-body .facet-option{min-height:44px;padding:8px 2px;}
   .sheet-body .facet-search{height:40px;font-size:14px;}
   .sheet-footer .btn{min-height:44px;}
 }
 @media (min-width:720px){
-  .sheet-scrim,.bottom-sheet{display:none;}
+  #detailSheet,#detailSheetScrim{display:none;}
+  .bottom-sheet{margin:0 auto;max-width:640px;}
+}
+@media (min-width:1080px){
+  #facetSheet,#facetSheetScrim{display:none;}
 }
 @media (min-width:720px) and (max-width:1079px){
   .facet-rail{display:none;}
@@ -670,7 +714,7 @@ svg.icon{
 
     <header class="cmdbar">
     <div class="wordmark">
-      <span class="mark" aria-hidden="true"></span>
+      <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><circle cx="14" cy="14" r="8.5" fill="none" stroke="currentColor" stroke-width="3.6"/><path d="M20.2 20.2L27 27" stroke="currentColor" stroke-width="3.6"/><circle cx="14" cy="14" r="2.6" fill="currentColor"/></svg>
       <span class="name">Lx Search</span>
       <span class="count tabular" id="wordmarkCount">— records</span>
     </div>
@@ -678,8 +722,8 @@ svg.icon{
     <div class="cmd-search">
       <div class="cmd-search-field" id="searchFieldWrap">
         <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
-        <input id="searchInput" type="text" dir="auto" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search"
-               placeholder="Search name, brand, class, dose…" aria-label="Search medications"
+        <input id="searchInput" type="search" inputmode="search" dir="auto" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search"
+               placeholder="Search drug, brand, class, dose…" aria-label="Search medications"
                role="combobox" aria-expanded="false" aria-controls="listViewport" aria-autocomplete="list">
         <button class="search-clear" id="clearBtn" aria-label="Clear search" type="button">
           <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>
@@ -689,12 +733,13 @@ svg.icon{
       <div class="grammar-picker" id="grammarPicker" role="listbox"></div>
     </div>
 
+    <button class="mobile-filter-btn" id="mobileFilterBtn" type="button" aria-haspopup="dialog" aria-label="Filters">
+      <svg class="icon" aria-hidden="true"><use href="#i-filter"/></svg>
+      <span>Filter</span>
+      <span class="badge" id="mobileFilterBadge">0</span>
+    </button>
+
     <div class="cmd-controls">
-      <button class="mobile-filter-btn" id="mobileFilterBtn" type="button" aria-haspopup="dialog">
-        <svg class="icon" aria-hidden="true"><use href="#i-filter"/></svg>
-        <span>Filter</span>
-        <span class="badge" id="mobileFilterBadge">0</span>
-      </button>
 
       <div class="sort-select-wrap">
         <button class="sort-select" id="sortSelectBtn" type="button" aria-haspopup="listbox" aria-expanded="false">
@@ -874,21 +919,46 @@ function normalizeText(s){
 function splitAlnumBoundary(chunk){
   return chunk.match(/\p{L}+|\p{N}+/gu) || [];
 }
+const CHUNK_RE = /[\p{L}\p{N}]+/gu;
+const HAS_LETTER_RE = /\p{L}/u;
+const HAS_DIGIT_RE = /\p{N}/u;
+const DECIMAL_RE = /(?<![\d.])\d+\.\d+(?![\d.])/g;
+const DOTTED_ABBR_RE = /(?<![a-z0-9.])[a-z]{1,3}(?:\.[a-z]{1,3})+(?![a-z0-9])/g;
 function tokenizeRaw(text){
   const norm = normalizeText(text);
-  const chunks = norm.match(/[\p{L}\p{N}]+/gu) || [];
+  const chunks = norm.match(CHUNK_RE);
   const out = [];
-  for(const chunk of chunks){
-    const isMixed = /\p{L}/u.test(chunk) && /\p{N}/u.test(chunk);
-    if(isMixed){
+  if(!chunks) return out;
+  for(let i = 0; i < chunks.length; i++){
+    const chunk = chunks[i];
+    if(HAS_DIGIT_RE.test(chunk) && HAS_LETTER_RE.test(chunk)){
       const runs = splitAlnumBoundary(chunk);
-      runs.forEach((r, i) => out.push({ tok:r, wordStart: i === 0 }));
+      for(let r = 0; r < runs.length; r++) out.push({ tok:runs[r], wordStart: r === 0 });
       out.push({ tok:chunk, wordStart:true });
     } else {
       out.push({ tok:chunk, wordStart:true });
     }
   }
+  if(norm.indexOf('.') !== -1){
+    const decs = norm.match(DECIMAL_RE);
+    if(decs) for(let i = 0; i < decs.length; i++) out.push({ tok:decs[i], wordStart:true });
+    const abbr = norm.match(DOTTED_ABBR_RE);
+    if(abbr) for(let i = 0; i < abbr.length; i++) out.push({ tok:abbr[i].replace(/\./g, ''), wordStart:true });
+  }
   return out;
+}
+function collapseRepeats(s){ return s.replace(/(.)\1+/g, '$1'); }
+function withinOneEdit(a, b){
+  const la = a.length, lb = b.length;
+  if(la - lb > 1 || lb - la > 1) return false;
+  let i = 0;
+  while(i < la && i < lb && a.charCodeAt(i) === b.charCodeAt(i)) i++;
+  if(i === la && i === lb) return true;
+  if(la === lb){
+    if(a.slice(i + 1) === b.slice(i + 1)) return true;
+    return i + 1 < la && a[i] === b[i + 1] && a[i + 1] === b[i] && a.slice(i + 2) === b.slice(i + 2);
+  }
+  return la > lb ? a.slice(i + 1) === b.slice(i) : a.slice(i) === b.slice(i + 1);
 }
 
 const TYPO_MAP = {
@@ -1124,8 +1194,19 @@ class Trie{
       node = node.children.get(ch);
       if(!node) return [];
     }
+    const max = limit || 50;
     const out = [];
-    this.collectSubtree(node, out, limit || 50);
+    const queue = [node];
+    for(let qi = 0; qi < queue.length; qi++){
+      const n = queue[qi];
+      if(n.tokens){
+        for(let t = 0; t < n.tokens.length; t++){
+          out.push(n.tokens[t]);
+          if(out.length >= max) return out;
+        }
+      }
+      for(const child of n.children.values()) queue.push(child);
+    }
     return out;
   }
 }
@@ -1365,8 +1446,16 @@ function buildIndex(records){
   const fieldLenSum = new Float64Array(NUM_FIELDS);
   const trie = new Trie();
   const expandedCache = new Map();
+  const hyphenLead = new Set();
+  const hre = /(?:^|\s)-\s*([\p{L}\p{N}]+)/gu;
 
   records.forEach(rec => {
+    if(rec.Name.indexOf(' -') !== -1){
+      const nameLow = normalizeText(rec.Name);
+      let hm;
+      hre.lastIndex = 0;
+      while((hm = hre.exec(nameLow))) hyphenLead.add(hm[1]);
+    }
     FIELDS.forEach((field, fi) => {
       const text = fieldText(rec, field);
       let cached = expandedCache.get(text);
@@ -1441,6 +1530,7 @@ function buildIndex(records){
     }
   });
   postingsStart[T] = cursor;
+  const numericTerms = terms.filter(t => /^[0-9][0-9.]*$/.test(t));
   terms.forEach((t, ti) => { idf[ti] = Math.log(1 + (N - dfArr[ti] + 0.5) / (dfArr[ti] + 0.5)); });
 
   const doseValueMg = new Float32Array(N).fill(NaN);
@@ -1491,7 +1581,7 @@ function buildIndex(records){
     authorityValues, classValues, formValues, authorityBitset, classBitset, formBitset,
     nameRank: nameSort.rank, classRank: classSort.rank, formRank: formSort.rank,
     strengthRank, alphaPermutation: nameSort.permutation,
-    formWords, authWords, initialismSyn,
+    formWords, authWords, initialismSyn, hyphenLead, numericTerms, scratch: null,
     facetCountCache: { query:null, bitset:null }, resolveCache: new Map(), doseResolveCache: new Map()
   };
 }
@@ -1565,10 +1655,24 @@ function resolveQueryToken(qtok, index, opts){
     index.resolveCache.set(cacheKey, out);
     return out;
   }
-  if(qtok.length >= 2){
+  if(qtok.length >= 2 || (isLast && !/^[0-9]/.test(qtok))){
     index.trie.prefixTokens(qtok, 25).forEach(t => { if(t !== qtok) out.push({ tok:t, kind:'prefix', quality:0.9 }); });
   }
-  if(!hasExact && !/^[0-9]/.test(qtok)){
+  const numeric = /^[0-9]/.test(qtok);
+  if(!hasExact){
+    for(let i = 0; i < qtok.length - 1; i++){
+      if(qtok[i] !== qtok[i+1]) continue;
+      const cand = qtok.slice(0, i) + qtok.slice(i + 1);
+      if(index.termId.has(cand) && !out.some(o => o.tok === cand)) out.push({ tok:cand, kind:'fuzzy1', quality:0.85 });
+    }
+  }
+  if(numeric && forceMaxDist != null){
+    const nt = index.numericTerms;
+    for(let i = 0; i < nt.length; i++){
+      if(nt[i] !== qtok && withinOneEdit(nt[i], qtok)) out.push({ tok:nt[i], kind:'fuzzy1', quality:0.6 });
+    }
+  }
+  if((!hasExact || forceMaxDist != null) && !numeric){
     const maxDist = forceMaxDist != null ? forceMaxDist : maxFuzzyDistance(qtok.length);
     if(maxDist > 0){
       const prefixMode = isLast && qtok.length >= 3;
@@ -1590,7 +1694,12 @@ function resolveQueryToken(qtok, index, opts){
   return out;
 }
 function trySegmentationRepair(freeTokens, index){
-  const out = freeTokens.slice();
+  const out = [];
+  freeTokens.forEach(t => {
+    if(!t.negate && !index.termId.has(t.raw) && /\p{L}/u.test(t.raw) && /\p{N}/u.test(t.raw) && t.raw.indexOf('.') === -1){
+      splitAlnumBoundary(t.raw).forEach(r => out.push({ raw:r, negate:false, split:true }));
+    } else out.push(t);
+  });
   for(let i = 0; i < out.length - 1; i++){
     const a = out[i], b = out[i+1];
     if(a.negate || b.negate) continue;
@@ -1607,7 +1716,7 @@ function trySegmentationRepair(freeTokens, index){
     for(let p = 3; p <= t.raw.length - 2; p++){
       const left = t.raw.slice(0, p), right = t.raw.slice(p);
       const leftValid = index.termId.has(left) || index.trie.prefixTokens(left, 1).length > 0;
-      const rightValid = index.termId.has(right) || /^[0-9]+$/.test(right);
+      const rightValid = /^[0-9]+$/.test(right) || (right.length >= 4 && index.termId.has(right));
       if(leftValid && rightValid){ splitFound = [left, right]; break; }
     }
     if(splitFound){ final.push({ raw: splitFound[0], negate:false, split:true }); final.push({ raw: splitFound[1], negate:false, split:true }); }
@@ -1626,6 +1735,13 @@ function resolveDoseToken(tokens, i, index){
   }
   const dose = parseDose(text);
   if(!dose || !(dose.value > 0)) return null;
+  const numPart = text.match(/^[\d.]+/)[0];
+  let textIds = null;
+  const numTid = index.termId.get(numPart);
+  if(numTid !== undefined){
+    textIds = [];
+    for(let p = index.postingsStart[numTid]; p < index.postingsStart[numTid+1]; p++) textIds.push(index.postingsDoc[p]);
+  }
   const cacheKey = dose.lane + ':' + dose.value;
   let docIds = index.doseResolveCache.get(cacheKey);
   if(docIds === undefined){
@@ -1643,7 +1759,25 @@ function resolveDoseToken(tokens, i, index){
     }
     index.doseResolveCache.set(cacheKey, docIds);
   }
-  return { docIds, consumed };
+  let extraIds = [];
+  if(textIds){
+    const inLane = new Set(docIds);
+    extraIds = textIds.filter(d => !inLane.has(d));
+  }
+  return { docIds, extraIds, consumed, numPart };
+}
+function numericNeighbourDocs(index, numPart, prefixOnly){
+  const out = new Set();
+  const nt = index.numericTerms;
+  for(let i = 0; i < nt.length; i++){
+    const t = nt[i];
+    if(t === numPart) continue;
+    const hit = prefixOnly ? t.startsWith(numPart) : withinOneEdit(t, numPart);
+    if(!hit) continue;
+    const tid = index.termId.get(t);
+    for(let p = index.postingsStart[tid]; p < index.postingsStart[tid+1]; p++) out.add(index.postingsDoc[p]);
+  }
+  return out;
 }
 function extractDoseResolutions(tokens, index){
   const doseResolutions = [];
@@ -1651,8 +1785,9 @@ function extractDoseResolutions(tokens, index){
   for(let i = 0; i < tokens.length; i++){
     if(consumed[i] || tokens[i].negate) continue;
     const res = resolveDoseToken(tokens, i, index);
-    if(res && res.docIds.length > 0 && res.docIds.length < index.N){
-      doseResolutions.push({ raw: tokens[i].raw, docIds: res.docIds, numTok: tokens[i].raw, unitTok: res.consumed === 2 ? tokens[i+1].raw : null });
+    const total = res ? res.docIds.length + res.extraIds.length : 0;
+    if(res && total > 0 && total < index.N){
+      doseResolutions.push({ raw: tokens[i].raw, numPart: res.numPart, docIds: res.docIds, extraIds: res.extraIds, numTok: tokens[i].raw, unitTok: res.consumed === 2 ? tokens[i+1].raw : null, isLast: i + res.consumed === tokens.length });
       consumed[i] = true;
       if(res.consumed === 2) consumed[i+1] = true;
     }
@@ -1675,38 +1810,58 @@ function kindBit(kind){
   if(kind === 'synonym') return KIND_SYNONYM;
   return 0;
 }
+function getScratch(index){
+  let s = index.scratch;
+  if(!s){
+    s = index.scratch = {
+      best: new Float64Array(index.N), tok: new Int32Array(index.N),
+      kinds: new Uint8Array(index.N), seen: new Uint8Array(index.N), touched: new Int32Array(index.N)
+    };
+  }
+  return s;
+}
 function scoreCandidatesForTokens(index, resolutions){
   const scores = new Map(), coverage = new Map(), matchedTokens = new Map(), matchKinds = new Map();
-  resolutions.forEach((res) => {
-    const perDocBest = new Map(), perDocKinds = new Map(), perDocTok = new Map();
-    res.matches.forEach(m => {
+  const S = getScratch(index);
+  const best = S.best, tokOf = S.tok, kindsOf = S.kinds, seen = S.seen, touched = S.touched;
+  const pDoc = index.postingsDoc, pWtf = index.postingsWtf, pStart = index.postingsStart, terms = index.terms;
+  for(let r = 0; r < resolutions.length; r++){
+    const res = resolutions[r];
+    let nTouched = 0;
+    for(let mi = 0; mi < res.matches.length; mi++){
+      const m = res.matches[mi];
       const tid = index.termId.get(m.tok);
-      if(tid === undefined) return;
-      const start = index.postingsStart[tid], end = index.postingsStart[tid+1];
-      const bit = kindBit(m.kind);
-      for(let p = start; p < end; p++){
-        const docId = index.postingsDoc[p];
-        const wtf = index.postingsWtf[p] * m.quality;
-        const prev = perDocBest.get(docId);
-        if(prev === undefined || wtf > prev){ perDocBest.set(docId, wtf); perDocTok.set(docId, m.tok); }
-        perDocKinds.set(docId, (perDocKinds.get(docId) || 0) | bit);
+      if(tid === undefined) continue;
+      const bit = kindBit(m.kind), q = m.quality;
+      for(let p = pStart[tid], end = pStart[tid+1]; p < end; p++){
+        const docId = pDoc[p];
+        const wtf = pWtf[p] * q;
+        if(!seen[docId]){
+          seen[docId] = 1; touched[nTouched++] = docId;
+          best[docId] = wtf; tokOf[docId] = tid; kindsOf[docId] = bit;
+        } else {
+          if(wtf > best[docId]){ best[docId] = wtf; tokOf[docId] = tid; }
+          kindsOf[docId] |= bit;
+        }
       }
-    });
+    }
     const rawIdf = idfForRaw(index, res.raw);
-    perDocBest.forEach((wtf, docId) => {
-      const contribution = rawIdf * wtf / (K1 + wtf);
-      scores.set(docId, (scores.get(docId) || 0) + contribution);
+    for(let i = 0; i < nTouched; i++){
+      const docId = touched[i];
+      seen[docId] = 0;
+      const wtf = best[docId];
+      scores.set(docId, (scores.get(docId) || 0) + rawIdf * wtf / (K1 + wtf));
       coverage.set(docId, (coverage.get(docId) || 0) + 1);
       let toks = matchedTokens.get(docId);
       if(toks === undefined){ toks = new Set(); matchedTokens.set(docId, toks); }
-      toks.add(perDocTok.get(docId));
-      const kinds = perDocKinds.get(docId) || 0;
+      toks.add(terms[tokOf[docId]]);
+      const kinds = kindsOf[docId];
       let summary = kinds;
       if(kinds === KIND_PHONETIC) summary |= KIND_PH_ONLY;
       if(kinds === KIND_SYNONYM) summary |= KIND_SYN_ONLY;
       matchKinds.set(docId, (matchKinds.get(docId) || 0) | summary);
-    });
-  });
+    }
+  }
   return { scores, coverage, matchedTokens, matchKinds };
 }
 function combineDoseIntoScores(doseResolutions, scores, coverage, matchedTokens){
@@ -1717,6 +1872,33 @@ function combineDoseIntoScores(doseResolutions, scores, coverage, matchedTokens)
       if(!matchedTokens.has(docId)) matchedTokens.set(docId, new Set());
       matchedTokens.get(docId).add(d.numTok);
       if(d.unitTok) matchedTokens.get(docId).add(d.unitTok);
+    });
+    if(d.extraIds) d.extraIds.forEach(docId => {
+      scores.set(docId, (scores.get(docId) || 0) + 1.2);
+      coverage.set(docId, (coverage.get(docId) || 0) + 1);
+      if(!matchedTokens.has(docId)) matchedTokens.set(docId, new Set());
+      matchedTokens.get(docId).add(d.numPart || d.numTok);
+    });
+    if(d.softIds) d.softIds.forEach(docId => {
+      scores.set(docId, (scores.get(docId) || 0) + (d.softScore || 0.6));
+      coverage.set(docId, (coverage.get(docId) || 0) + 1);
+    });
+  });
+}
+function softenDoses(doseResolutions, index, prefixOnly){
+  return doseResolutions.map(d => {
+    const have = new Set(d.docIds);
+    if(d.extraIds) d.extraIds.forEach(x => have.add(x));
+    const soft = [];
+    numericNeighbourDocs(index, d.numPart, prefixOnly).forEach(id => { if(!have.has(id)) soft.push(id); });
+    return Object.assign({}, d, { softIds: soft, softScore: prefixOnly ? 0.9 : 0.5 });
+  });
+}
+function addDoseBonus(attempt, doseResolutions){
+  const inDocs = new Set(attempt.docs);
+  doseResolutions.forEach(d => {
+    d.docIds.concat(d.extraIds || []).forEach(id => {
+      if(inDocs.has(id)) attempt.scores.set(id, (attempt.scores.get(id) || 0) + 1.0);
     });
   });
 }
@@ -1795,6 +1977,9 @@ function trigramJaccard(aGrams, bGrams){
 function recTrigrams(rec){
   return rec.trigrams || (rec.trigrams = charTrigrams(normalizeText(rec.generic + ' ' + rec.brands.join(' '))));
 }
+function nameTrigrams(rec){
+  return rec.nameGrams || (rec.nameGrams = charTrigrams(normalizeText(rec.Name)));
+}
 function trigramNearest(query, records, limit){
   const n = limit || 6;
   const qGrams = charTrigrams(normalizeText(query));
@@ -1816,8 +2001,10 @@ function trigramNearest(query, records, limit){
   }
   return top;
 }
-function parseQuery(raw){
+const QUERY_PART_RE = /[\p{L}\p{N}.%]+/gu;
+function parseQuery(raw, index){
   let s = raw;
+  const hyphenLead = index && index.hyphenLead;
   const phrases = [];
   const fieldFilters = [];
   s = s.replace(/"([^"]*)"/g, (m, p1) => { if(p1.trim()) phrases.push(normalizeText(p1)); return ' '; });
@@ -1829,15 +2016,24 @@ function parseQuery(raw){
   const freeTokensRaw = [];
   words.forEach(w => {
     let negate = false, core = w;
-    if(w.startsWith('-') && w.length > 1){ negate = true; core = w.slice(1); }
-    normalizeText(core).split(/[\s,،;]+|-+/).filter(Boolean).forEach(part => {
-      freeTokensRaw.push({ raw: part, negate });
+    if(w.startsWith('-') && w.length > 1){
+      core = w.slice(1);
+      const lead = normalizeText(core).match(/^[\p{L}\p{N}]+/u);
+      negate = !(hyphenLead && lead && hyphenLead.has(lead[0]));
+    }
+    const parts = normalizeText(core).match(QUERY_PART_RE) || [];
+    parts.forEach(part => {
+      if(part.indexOf('.') === -1){ freeTokensRaw.push({ raw: part, negate }); return; }
+      if(/^\d*\.\d+%?$|^\d+\.\d+[a-z]{1,3}$/.test(part)){ freeTokensRaw.push({ raw: part, negate }); return; }
+      const segs = part.split('.').filter(Boolean);
+      if(segs.length > 1 && segs.every(p => p.length <= 3 && !/\d/.test(p))){ freeTokensRaw.push({ raw: segs.join(''), negate }); return; }
+      segs.forEach(p => freeTokensRaw.push({ raw: p, negate }));
     });
   });
   return {
     phrases, fieldFilters,
     freeTokens: freeTokensRaw.filter(t => t.raw),
-    freeTextRaw: normalizeText(words.filter(w => !w.startsWith('-')).join(' '))
+    freeTextRaw: normalizeText(words.filter(w => !w.startsWith('-') || (hyphenLead && hyphenLead.has(normalizeText(w.slice(1)).replace(/[^\p{L}\p{N}].*$/u, '')))).join(' ').replace(/(^|\s)-/g, '$1'))
   };
 }
 function fieldTokensOf(raw){
@@ -1872,7 +2068,7 @@ function passesFacets(rec, facets){
 function runSearch(query, records, index, facets, opts){
   opts = opts || {};
   const personalization = opts.personalization || null;
-  const parsed = parseQuery(query);
+  const parsed = parseQuery(query, index);
   const hasFree = parsed.freeTokens.length > 0;
 
   if(!hasFree){
@@ -1890,9 +2086,18 @@ function runSearch(query, records, index, facets, opts){
 
   const tokens = trySegmentationRepair(parsed.freeTokens, index);
   const { doseResolutions, remaining } = extractDoseResolutions(tokens, index);
-  const activeTokens = remaining.filter(t => !t.negate);
+  let activeTokens = remaining.filter(t => !t.negate);
   const negatedTokens = remaining.filter(t => t.negate);
+  let tailPrefix = null;
+  if(activeTokens.length + doseResolutions.length >= 2 && activeTokens.length){
+    const last = activeTokens[activeTokens.length - 1].raw;
+    if(last.length <= 3 && /^\p{L}+$/u.test(last) && !/\s$/.test(query)){
+      tailPrefix = last;
+      activeTokens = activeTokens.slice(0, -1);
+    }
+  }
   const activeRawTokens = activeTokens.map(t => t.raw);
+  if(tailPrefix) activeRawTokens.push(tailPrefix);
   const totalActive = activeTokens.length + doseResolutions.length;
 
   if(totalActive === 0) return { results: [], relaxation: null, nearest: null };
@@ -1903,36 +2108,86 @@ function runSearch(query, records, index, facets, opts){
   let totalRequired = workingTokens.length + doseResolutions.length;
   let attempt = computeConjunctive(resolutions, doseResolutions, index, totalRequired);
 
-  if(attempt.docs.length === 0 && workingTokens.length > 1){
-    const dropIdx = lowestIdfIndexOf(resolutions, index);
-    if(dropIdx >= 0){
-      const reducedTokens = workingTokens.filter((t,i) => i !== dropIdx);
-      const reducedResolutions = resolveAllTextual(reducedTokens, index);
-      const reducedTotal = reducedTokens.length + doseResolutions.length;
-      const reducedAttempt = computeConjunctive(reducedResolutions, doseResolutions, index, reducedTotal);
-      if(reducedAttempt.docs.length > attempt.docs.length){
-        attempt = reducedAttempt; resolutions = reducedResolutions;
-        workingTokens = reducedTokens; totalRequired = reducedTotal;
-        relaxation = `Broadened by dropping "${activeTokens[dropIdx].raw}"`;
+  let doses = doseResolutions;
+  if(attempt.docs.length === 0 && doses.length){
+    const tryPrefix = doses.some(d => d.isLast) && !/\s$/.test(query);
+    let soft = softenDoses(doses, index, tryPrefix);
+    let softAttempt = computeConjunctive(resolutions, soft, index, totalRequired);
+    if(!softAttempt.docs.length && tryPrefix){
+      soft = softenDoses(doses, index, false);
+      softAttempt = computeConjunctive(resolutions, soft, index, totalRequired);
+    }
+    if(softAttempt.docs.length){
+      addDoseBonus(softAttempt, doses);
+      attempt = softAttempt; doses = soft;
+      relaxation = 'Closest strengths shown';
+    } else if(workingTokens.length){
+      const textOnly = computeConjunctive(resolutions, [], index, workingTokens.length);
+      if(textOnly.docs.length){
+        attempt = textOnly; doses = []; totalRequired = workingTokens.length;
+        relaxation = 'No exact strength — showing all strengths';
       }
     }
   }
 
-  if(attempt.docs.length === 0){
-    let widenedAny = false;
-    const widened = workingTokens.map((t,i) => {
-      const existing = resolutions[i];
-      if(existing && existing.matches.length > 0) return existing;
-      widenedAny = true;
-      return { raw: t.raw, matches: resolveQueryToken(t.raw, index, { isLast: i === workingTokens.length-1, forceMaxDist: maxFuzzyDistance(t.raw.length) + 1 }) };
+  if(attempt.docs.length === 0 && workingTokens.length > 1){
+    const order = workingTokens.map((t, i) => i).sort((a, b) => {
+      const ea = resolutions[a].matches.length ? 1 : 0, eb = resolutions[b].matches.length ? 1 : 0;
+      if(ea !== eb) return ea - eb;
+      const sa = resolutions[a].raw.length <= 2 ? 0 : 1, sb = resolutions[b].raw.length <= 2 ? 0 : 1;
+      if(sa !== sb) return sa - sb;
+      return idfForRaw(index, resolutions[a].raw) - idfForRaw(index, resolutions[b].raw);
     });
-    if(widenedAny){
-      const widenedAttempt = computeConjunctive(widened, doseResolutions, index, totalRequired);
-      if(widenedAttempt.docs.length > attempt.docs.length){
-        attempt = widenedAttempt; resolutions = widened;
-        relaxation = relaxation || 'Broadened match tolerance';
+    for(let k = 0; k < order.length && k < 3; k++){
+      const dropIdx = order[k];
+      const reducedTokens = workingTokens.filter((t,i) => i !== dropIdx);
+      const reducedResolutions = resolveAllTextual(reducedTokens, index);
+      const reducedTotal = reducedTokens.length + doses.length;
+      if(reducedTotal === 0) continue;
+      const reducedAttempt = computeConjunctive(reducedResolutions, doses, index, reducedTotal);
+      if(reducedAttempt.docs.length > 0){
+        const dropped = workingTokens[dropIdx].raw;
+        attempt = reducedAttempt; resolutions = reducedResolutions;
+        workingTokens = reducedTokens; totalRequired = reducedTotal;
+        relaxation = `Broadened by dropping "${dropped}"`;
+        break;
       }
     }
+  }
+
+  if(attempt.docs.length === 0 && workingTokens.length){
+    const widened = workingTokens.map((t,i) => ({ raw: t.raw, matches: resolveQueryToken(t.raw, index, { isLast: i === workingTokens.length-1, forceMaxDist: maxFuzzyDistance(t.raw.length) + 1 }) }));
+    const widenedAttempt = computeConjunctive(widened, doses, index, workingTokens.length + doses.length);
+    if(widenedAttempt.docs.length > 0){
+      attempt = widenedAttempt; resolutions = widened;
+      relaxation = relaxation || 'Broadened match tolerance';
+    }
+  }
+
+  if(tailPrefix && attempt.docs.length){
+    const tailHits = new Map();
+    const inDocs = new Set(attempt.docs);
+    const cands = index.termId.has(tailPrefix) ? [tailPrefix] : [];
+    index.trie.prefixTokens(tailPrefix, 400).forEach(t => { if(t !== tailPrefix) cands.push(t); });
+    for(const t of cands){
+      const tid = index.termId.get(t);
+      if(tid === undefined) continue;
+      for(let p = index.postingsStart[tid]; p < index.postingsStart[tid+1]; p++){
+        const d = index.postingsDoc[p];
+        if(inDocs.has(d)){
+          const prev = tailHits.get(d);
+          if(prev === undefined || t.length < prev.length) tailHits.set(d, t);
+        }
+      }
+    }
+    if(tailHits.size){
+      attempt.docs = attempt.docs.filter(d => tailHits.has(d));
+      tailHits.forEach((word, docId) => {
+        attempt.scores.set(docId, (attempt.scores.get(docId) || 0) * 1.25 + 0.4 / (1 + word.length - tailPrefix.length));
+        const set = attempt.matchedTokens.get(docId);
+        if(set) set.add(word);
+      });
+    } else relaxation = relaxation || `Ignored "${tailPrefix}"`;
   }
 
   let candidateDocs = attempt.docs;
@@ -1973,6 +2228,18 @@ function runSearch(query, records, index, facets, opts){
   }
 
   results.sort(tieBreak);
+  if(!nearest && results.length > 1 && parsed.freeTextRaw.length >= 4){
+    const qGrams = charTrigrams(parsed.freeTextRaw);
+    const topScore = results[0].score || 1;
+    const K = Math.min(40, results.length);
+    for(let i = 0; i < K; i++){
+      const r = results[i];
+      if(r.score < topScore * 0.5) break;
+      r.score += topScore * 0.3 * trigramJaccard(qGrams, nameTrigrams(r.rec));
+    }
+    const head = results.slice(0, K).sort(tieBreak);
+    for(let i = 0; i < K; i++) results[i] = head[i];
+  }
   return { results, relaxation, nearest };
 }
 
@@ -3070,6 +3337,7 @@ function initApp(){
   });
   const expandedVariantGroups = new Set();
   const CLASS_ENTRIES_ALL = [...countByClass(records).entries()];
+  const TOP_CLASSES = CLASS_ENTRIES_ALL.slice().sort((a,b) => b[1] - a[1]).slice(0, 4);
   const FORM_ENTRIES_ALL = [...countByForm(records).entries()];
 
   const el = id => document.getElementById(id);
@@ -3270,8 +3538,8 @@ function initApp(){
     els.cls.title = classesText;
 
     els.subStrength.textContent = rec.Conc;
-    els.subForm.textContent = ' · ' + rec.form;
-    els.subAuth.textContent = ' · ' + rec.authTier;
+    els.subForm.textContent = rec.form;
+    els.subAuth.textContent = rec.authTier;
   }
 
   const GROUP_HEADER_H = 26;
@@ -3492,8 +3760,7 @@ function initApp(){
         entryChips.appendChild(chip);
       });
     }
-    const classCounts = countByClass(records);
-    const topClasses = [...classCounts.entries()].sort((a,b) => b[1] - a[1]).slice(0, 4);
+    const topClasses = TOP_CLASSES;
     if(topClasses.length){
       any = true;
       const label = document.createElement('span');
@@ -3885,16 +4152,14 @@ function initApp(){
   }
 
   function triggerDownload(blob, filename){
-    const reader = new FileReader();
-    reader.onload = () => {
-      const a = document.createElement('a');
-      a.href = reader.result;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    };
-    reader.readAsDataURL(blob);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
   }
 
   function csvField(v){
@@ -3943,7 +4208,7 @@ function initApp(){
     wrap.className = 'print-table';
     wrap.id = 'printTable';
     const head = '<div class="print-caption">' +
-      '<p class="print-mark"><span class="print-dot"></span>Lx Search F3 — ' + currentResults.length + ' of ' + records.length + ' medications</p>' +
+      '<p class="print-mark"><span class="print-dot"></span>Lx Search F4 — ' + currentResults.length + ' of ' + records.length + ' medications</p>' +
       '<p>' + escapeHtml(buildPrintCaption().join(' · ')) + '</p>' +
       '</div>';
     const bodyRows = exportRows().map(row => '<tr>' + row.map(v => `<td>${escapeHtml(v)}</td>`).join('') + '</tr>').join('');
@@ -4431,7 +4696,10 @@ function initApp(){
 
   function setTheme(t){
     state.theme = t;
-    const apply = () => document.documentElement.setAttribute('data-theme', t);
+    const apply = () => {
+      document.documentElement.setAttribute('data-theme', t);
+      document.querySelectorAll('meta[name="theme-color"]').forEach(m => { m.removeAttribute('media'); m.setAttribute('content', t === 'dark' ? '#0d0f12' : '#f7f7f5'); });
+    };
     if(document.startViewTransition) document.startViewTransition(apply);
     else apply();
     saveLocal('lx_theme', t);
@@ -4489,6 +4757,8 @@ function initApp(){
   document.addEventListener('keydown', (e) => {
     const tag = (e.target.tagName || '').toLowerCase();
     const inInput = tag === 'input' || tag === 'textarea';
+    if(inInput && e.target !== searchInput && e.key !== 'Escape') return;
+    if((shortcutsModal.classList.contains('show') || facetSheet.classList.contains('show') || detailSheet.classList.contains('show')) && e.key !== 'Escape') return;
 
     if(grammarPicker.classList.contains('show')){
       if(e.key === 'ArrowDown'){ e.preventDefault(); gpHighlight(Math.min(gpIndex + 1, gpItemEls().length - 1)); return; }
@@ -4529,10 +4799,11 @@ function initApp(){
       return;
     }
     if(e.key === 'Escape'){
-      if(selectedIds.size){ clearSelection(); return; }
       if(shortcutsModal.classList.contains('show')){ closeShortcuts(); return; }
       if(detailSheet.classList.contains('show')){ closeDetail(); return; }
       if(facetSheet.classList.contains('show')){ closeFacetSheet(); return; }
+      if(sortPicker.classList.contains('show') || exportPicker.classList.contains('show')){ sortPicker.classList.remove('show'); exportPicker.classList.remove('show'); return; }
+      if(selectedIds.size){ clearSelection(); return; }
       if(detailPanel.classList.contains('show')){ closeDetail(); return; }
       if(inInput){
         if(searchInput.value){ searchInput.value = ''; onSearchChanged(); }
